@@ -95,7 +95,6 @@ impl<'a> Lexer<'a> {
                 self.current_token.clear();
 
                 // starting dfa checking
-                let character = character;
                 match character {
                     // sperator
                     ' '|'\r'|'\t' => { self.next(); },
@@ -154,7 +153,7 @@ impl<'a> Lexer<'a> {
                         self.next();
                     },
                     // Invalid token
-                    _ => panic!("Invalid token character {} at {}", character, self.current_pos),
+                    _ => panic!("Invalid character {} at {}", character, self.current_pos),
                 }
             } else { // if no more tokens than return what has been found
                 return self.tokens.clone();
@@ -240,7 +239,7 @@ impl<'a> Lexer<'a> {
         while let Some(current_char) = self.peek() {
             let current_char = *current_char;
 
-            if "()[]{};".contains(current_char) || FILLER.contains(&current_char) {
+            if "()[]{};,".contains(current_char) || FILLER.contains(&current_char) {
                 self.tokens.push(Token::new(TokenType::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zeros
                 return;
             }
@@ -303,6 +302,7 @@ impl<'a> Lexer<'a> {
                 self.current_token.push(character); 
             } else {
                 self.token_user_defined(token_pos);
+                return;
             }
         }
 
@@ -324,6 +324,7 @@ impl<'a> Lexer<'a> {
                 self.current_token.push(character); 
             } else {
                 self.token_user_defined(token_pos);
+                return;
             }
         }
 
@@ -341,6 +342,7 @@ impl<'a> Lexer<'a> {
             }
         } else {
             self.tokens.push(Token::new(token_type, token_pos));
+            return;
         }
     }
 

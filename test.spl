@@ -1,8 +1,11 @@
 proc main {
     num mynumber := 20;
     string var "SHORTSTRING";
+    
+    strin7;
 
     add(mynumber, -7);
+    add(42, "42");
 
-    hatl();
+    halt();
 }
