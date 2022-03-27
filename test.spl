@@ -1,0 +1,8 @@
+proc main {
+    num mynumber := 20;
+    string var "SHORTSTRING";
+
+    add(mynumber, -7);
+
+    hatl();
+}
