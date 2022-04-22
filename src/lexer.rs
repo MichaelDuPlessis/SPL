@@ -1,86 +1,8 @@
 use core::fmt;
-use std::{str::Chars, iter::Peekable, process::exit, ops::Mul};
+use std::{str::Chars, iter::Peekable, process::exit};
+use crate::grammer::Nonterminal;
 
 const FILLER: [char; 4] = ['\n', ' ', '\r', '\t']; // holds all chars that can be ignored
-
-// types of tokens
-
-#[derive(Clone, Debug)]
-pub enum Nonterminal {
-	LParentheses, // (
-	RParentheses, // )
-	LBrace, // {
-	RBrace, // }
-	LBracket, // [
-	RBracket, // ]
-	Semicolon, // ;
-    Comma, // ,
-    Main, // main
-    Halt, // halt
-    Proc, // proc
-    Return, // return
-    Assign, // :=
-    If, // if
-    Else, // else
-    Then, // then
-    Do, // do
-    Until, // until
-    While, // while
-    Output, // output
-    Call, // call
-    True, // true
-    False, // false
-    // --------------------| unary ops
-    Input, // input
-    Not, // not
-    // --------------------| Binary ops
-    And, // and
-    Or, // or
-    Equal, // eq
-    Larger, // larger
-    Add, // add
-    Sub, // sub
-    Mult, // mult
-    // --------------------|
-    Array, // arr
-    Num, // num --------|
-    Boolean, // bool-------| --- types
-    String, // string --|
-    Number(isize), // numbers
-    UserDefined(String), // userDefinedNames
-    ShortString(String), // ShortStrings
-}
-
-impl Nonterminal {
-    pub fn grammer(self) -> Grammer {
-        Grammer::Nonterminal(self)
-    }
-
-    fn basic_token(token: char, currnet_pos: Pos) -> Self {
-        match token {
-            '(' => Self::LParentheses,
-            ')' => Self::RParentheses,
-            '[' => Self::LBracket,
-            ']' => Self::RBracket,
-            '{' => Self::LBrace,
-            '}' => Self::RBrace,
-            ',' => Self::Comma,
-            ';' => Self::Semicolon,
-            _ => {
-                println!("Internal error: non-basic token at {}", currnet_pos);
-                exit(1);
-            },
-        }
-    }
-}
-
-impl Mul<usize> for Nonterminal {
-    type Output = usize;
-
-    fn mul(self, rhs: usize) -> Self::Output {
-        self as usize * rhs
-    }
-}
 
 // Lexer for the language
 pub struct Lexer<'a> {
@@ -138,7 +60,7 @@ impl<'a> Lexer<'a> {
                     // while
                     'w' => self.token("while", Nonterminal::While, self.current_pos),
                     // output/or
-                    'o' => self.token_double(("output", Nonterminal::Output), ("or", Nonterminal::Or), self.current_pos),
+                    'o' => self.token_double(("output", Nonterminal::Out), ("or", Nonterminal::Or), self.current_pos),
                     // call
                     'c' => self.token("call", Nonterminal::Call, self.current_pos),
                     // false
@@ -189,7 +111,7 @@ impl<'a> Lexer<'a> {
                 exit(1);
             }
 
-            self.tokens.push(Token::new(Nonterminal::Assign, token_pos));
+            self.tokens.push(Token::new(Nonterminal::Assignment, token_pos));
         } else {
             println!("End of file reached before token could be completed");
             exit(1);
@@ -437,14 +359,14 @@ impl Token {
 
 // struct reprenting position of a token
 #[derive(Clone, Copy, Debug)]
-struct Pos {
+pub struct Pos {
     row: usize,
     col: usize,
 }
 
 impl Pos {
     // create new Pos
-    fn new(row: usize, col: usize) -> Self {
+    pub fn new(row: usize, col: usize) -> Self {
         Self {
             row,
             col,
@@ -452,12 +374,12 @@ impl Pos {
     }
 
     // increases col
-    fn next_col(&mut self) {
+    pub fn next_col(&mut self) {
         self.col += 1;
     }
 
     // increases row and sets col to 0
-    fn next_row(&mut self) {
+    pub fn next_row(&mut self) {
         self.row += 1;
         self.col = 1;
     }
