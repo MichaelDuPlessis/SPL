@@ -1,13 +1,12 @@
-#![allow(dead_code)]
-
-use core::{panic, fmt};
-use std::{str::Chars, iter::Peekable};
+use core::fmt;
+use std::{str::Chars, iter::Peekable, process::exit};
 
 const FILLER: [char; 4] = ['\n', ' ', '\r', '\t']; // holds all chars that can be ignored
 
 // types of tokens
+
 #[derive(Clone, Debug)]
-enum TokenType {
+pub enum Nonterminal {
 	LParentheses, // (
 	RParentheses, // )
 	LBrace, // {
@@ -52,8 +51,8 @@ enum TokenType {
     ShortString(String), // ShortStrings
 }
 
-impl TokenType {
-    fn basic_token(token: char) -> Self {
+impl Nonterminal {
+    fn basic_token(token: char, currnet_pos: Pos) -> Self {
         match token {
             '(' => Self::LParentheses,
             ')' => Self::RParentheses,
@@ -63,7 +62,10 @@ impl TokenType {
             '}' => Self::RBrace,
             ',' => Self::Comma,
             ';' => Self::Semicolon,
-            _ => panic!("Internal error: non-basic token"),
+            _ => {
+                println!("Internal error: non-basic token at {}", currnet_pos);
+                exit(1);
+            },
         }
     }
 }
@@ -104,41 +106,41 @@ impl<'a> Lexer<'a> {
                         self.current_pos.next_row();
                     },
                     // main/mult
-                    'm' => self.token_double(("main", TokenType::Main), ("mult", TokenType::Mult), self.current_pos),
+                    'm' => self.token_double(("main", Nonterminal::Main), ("mult", Nonterminal::Mult), self.current_pos),
                     // halt
-                    'h' => self.token("halt", TokenType::Halt, self.current_pos),
+                    'h' => self.token("halt", Nonterminal::Halt, self.current_pos),
                     // if/input
-                    'i' => self.token_double(("if", TokenType::If), ("input", TokenType::Input), self.current_pos),
+                    'i' => self.token_double(("if", Nonterminal::If), ("input", Nonterminal::Input), self.current_pos),
                     // else/equal
-                    'e' => self.token_double(("else", TokenType::Else), ("eq", TokenType::Equal), self.current_pos),
+                    'e' => self.token_double(("else", Nonterminal::Else), ("eq", Nonterminal::Equal), self.current_pos),
                     // then/true
-                    't' => self.token_double(("then", TokenType::Then), ("true", TokenType::True), self.current_pos),
+                    't' => self.token_double(("then", Nonterminal::Then), ("true", Nonterminal::True), self.current_pos),
                     // return
-                    'r' => self.token("return", TokenType::Return, self.current_pos),
+                    'r' => self.token("return", Nonterminal::Return, self.current_pos),
                     // proc
-                    'p' => self.token("proc", TokenType::Proc, self.current_pos),
+                    'p' => self.token("proc", Nonterminal::Proc, self.current_pos),
                     // do
-                    'd' => self.token("do", TokenType::Do, self.current_pos),
+                    'd' => self.token("do", Nonterminal::Do, self.current_pos),
                     // until
-                    'u' => self.token("until", TokenType::Until, self.current_pos),
+                    'u' => self.token("until", Nonterminal::Until, self.current_pos),
                     // while
-                    'w' => self.token("while", TokenType::While, self.current_pos),
+                    'w' => self.token("while", Nonterminal::While, self.current_pos),
                     // output/or
-                    'o' => self.token_double(("output", TokenType::Output), ("or", TokenType::Or), self.current_pos),
+                    'o' => self.token_double(("output", Nonterminal::Output), ("or", Nonterminal::Or), self.current_pos),
                     // call
-                    'c' => self.token("call", TokenType::Call, self.current_pos),
+                    'c' => self.token("call", Nonterminal::Call, self.current_pos),
                     // false
-                    'f' => self.token("false", TokenType::False, self.current_pos),
+                    'f' => self.token("false", Nonterminal::False, self.current_pos),
                     // not/num
-                    'n' => self.token_double(("not", TokenType::Not), ("num", TokenType::Num), self.current_pos),
+                    'n' => self.token_double(("not", Nonterminal::Not), ("num", Nonterminal::Num), self.current_pos),
                     // and
                     'a' => self.token_and(self.current_pos),
                     // larger
-                    'l' => self.token("larger", TokenType::Larger, self.current_pos),
+                    'l' => self.token("larger", Nonterminal::Larger, self.current_pos),
                     // sub/string
-                    's' => self.token_double(("sub", TokenType::Sub), ("string", TokenType::String), self.current_pos),
+                    's' => self.token_double(("sub", Nonterminal::Sub), ("string", Nonterminal::String), self.current_pos),
                     // bool
-                    'b' => self.token("bool", TokenType::Boolean, self.current_pos),
+                    'b' => self.token("bool", Nonterminal::Boolean, self.current_pos),
                     // user defined
                     'g'|'j'|'k'|'q'|'v'|'x'|'y'|'z' => self.token_user_defined(self.current_pos),
                     // number
@@ -149,11 +151,14 @@ impl<'a> Lexer<'a> {
                     ':' => self.token_assignment(self.current_pos),
                     // basic token
                     '('|')'|'['|']'|'{'|'}'|','|';' => {
-                        self.tokens.push(Token::new(TokenType::basic_token(character), self.current_pos));
+                        self.tokens.push(Token::new(Nonterminal::basic_token(character, self.current_pos), self.current_pos));
                         self.next();
                     },
                     // Invalid token
-                    _ => panic!("Invalid character {} at {}", character, self.current_pos),
+                    _ => {
+                        println!("Invalid character {} at {}", character, self.current_pos);
+                        exit(1);
+                    },
                 }
             } else { // if no more tokens than return what has been found
                 return self.tokens.clone();
@@ -168,12 +173,14 @@ impl<'a> Lexer<'a> {
 
         if let Some(current_char) = self.next() {
             if current_char != '=' {
-                panic!("Invalid character {} at {}", current_char, self.current_pos);
+                println!("Invalid character {} at {}", current_char, self.current_pos);
+                exit(1);
             }
 
-            self.tokens.push(Token::new(TokenType::Assign, token_pos));
+            self.tokens.push(Token::new(Nonterminal::Assign, token_pos));
         } else {
-            panic!("End of file reached before token could be completed");
+            println!("End of file reached before token could be completed");
+            exit(1);
         }
     }
 
@@ -187,23 +194,26 @@ impl<'a> Lexer<'a> {
 
         while let Some(current_char) = self.next() {
             if current_char == '\"' {
-                self.tokens.push(Token::new(TokenType::ShortString(self.current_token.clone()), token_pos));
+                self.tokens.push(Token::new(Nonterminal::ShortString(self.current_token.clone()), token_pos));
                 return;
             }
 
             if length >= 15 {
-                panic!("Max length of short string exceeded");
+                println!("Max length of short string exceeded at {}", self.current_pos);
+                exit(1);
             }
 
             if valid_chars.contains(&current_char) {
                 length += 1;
                 self.current_token.push(current_char);
             } else {
-                panic!("Invalid character {} at {}", current_char, self.current_pos);
+                println!("Invalid character {} at {}", current_char, self.current_pos);
+                exit(1);
             }
         }
 
-        panic!("Short string started here {} but never closed", token_pos);
+        println!("Short string started here {} but never closed", token_pos);
+        exit(1);
     }
 
     // checking if number
@@ -215,10 +225,11 @@ impl<'a> Lexer<'a> {
             if let Some(next_char) = self.peek() {
                 let next_char = *next_char;
                 if !FILLER.contains(&next_char) {
-                    panic!("Invalid token {} at {}", next_char, self.current_pos);
+                    println!("Invalid token {} at {}", next_char, self.current_pos);
+                    exit(1);
                 }
             }
-            self.tokens.push(Token::new(TokenType::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zero
+            self.tokens.push(Token::new(Nonterminal::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zero
             return;
         }
 
@@ -226,13 +237,17 @@ impl<'a> Lexer<'a> {
             match self.next() {
                 Some(current_char) => {
                     if !('1'..'9').contains(&current_char) {
-                        panic!("Invalid symbol {} afer - at {}", current_char, token_pos)
+                        println!("Invalid symbol {} afer - at {}", current_char, token_pos);
+                        exit(1);
                     }
 
                     
                     self.current_token.push(current_char);
                 },
-                None => panic!("Missing number afer - at {}", token_pos),
+                None => {
+                    println!("Missing number afer - at {}", token_pos);
+                    exit(1);
+                },
             }
         }
 
@@ -240,20 +255,21 @@ impl<'a> Lexer<'a> {
             let current_char = *current_char;
 
             if "()[]{};,".contains(current_char) || FILLER.contains(&current_char) {
-                self.tokens.push(Token::new(TokenType::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zeros
+                self.tokens.push(Token::new(Nonterminal::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zeros
                 return;
             }
 
             if ('0'..'9').contains(&current_char) {
                 self.current_token.push(current_char); // can unwrap cause we know its just zeros
             } else {
-                panic!("Invalid symbol {} after - at {}", current_char, token_pos);
+                println!("Invalid symbol {} after - at {}", current_char, token_pos);
+                exit(1);
             }
 
             self.next();
         }
 
-        self.tokens.push(Token::new(TokenType::Number(self.current_token.parse().unwrap()), token_pos));
+        self.tokens.push(Token::new(Nonterminal::Number(self.current_token.parse().unwrap()), token_pos));
     }
 
     // to check and
@@ -263,7 +279,7 @@ impl<'a> Lexer<'a> {
 
         if let Some(current_char) = self.peek() {
             if *current_char != 'n' {
-                self.token_double(("add", TokenType::Add), ("arr", TokenType::Array), token_pos);
+                self.token_double(("add", Nonterminal::Add), ("arr", Nonterminal::Array), token_pos);
                 return;
             } else {
                 let character = self.next().unwrap();
@@ -273,6 +289,7 @@ impl<'a> Lexer<'a> {
                     if *current_char == 'd' {
                         let character = self.next().unwrap(); // can unwrap because know there will be a next
                         self.current_token.push(character); 
+                        self.tokens.push(Token::new(Nonterminal::And, token_pos))
                     } else {
                         self.token_user_defined(token_pos);
                     }
@@ -283,12 +300,10 @@ impl<'a> Lexer<'a> {
         } else {
             self.token_user_defined(token_pos);
         }
-
-        // self.check_user_defined(TokenType::And, token_pos);
     }
 
     // check if first token is found otherwise search for second
-    fn token_double(&mut self, first: (&str, TokenType), second: (&str, TokenType), token_pos: Pos) {
+    fn token_double(&mut self, first: (&str, Nonterminal), second: (&str, Nonterminal), token_pos: Pos) {
         // first check if token can be formed else go to user defeined
         for c in first.0[self.current_token.len()..].chars() {
             if let Some(current_char) = self.peek() {
@@ -310,7 +325,7 @@ impl<'a> Lexer<'a> {
     }  
 
     // method to check if token is main
-    fn token(&mut self, token_string: &str, token_type: TokenType, token_pos: Pos) {
+    fn token(&mut self, token_string: &str, token_type: Nonterminal, token_pos: Pos) {
         // first check if token can be formed else go to user defeined
         for c in token_string.chars() {
             if let Some(current_char) = self.peek() {
@@ -332,7 +347,7 @@ impl<'a> Lexer<'a> {
     }
 
     // check if user defined variable
-    fn check_user_defined(&mut self, token_type: TokenType, token_pos: Pos) {
+    fn check_user_defined(&mut self, token_type: Nonterminal, token_pos: Pos) {
         // check if any valid user defined characters follow token if so make it user defined
         if let Some(current_char) = self.peek() {
             if ('a'..'z').contains(current_char) || ('0'..'9').contains(current_char) {
@@ -359,7 +374,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        self.tokens.push(Token::new(TokenType::UserDefined(self.current_token.clone()), token_pos))
+        self.tokens.push(Token::new(Nonterminal::UserDefined(self.current_token.clone()), token_pos))
     }
 
     // wrapper around iterators next
@@ -375,15 +390,17 @@ impl<'a> Lexer<'a> {
 }
 
 // a token of the language
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Token {
-    token: TokenType,
+    token: Nonterminal,
     pos: Pos,
 }
 
+#[allow(dead_code)]
 impl Token {
     // creates a new token
-    fn new(token: TokenType, pos: Pos) -> Self {
+    fn new(token: Nonterminal, pos: Pos) -> Self {
         Self {
             token,
             pos,

@@ -1,6 +1,7 @@
 use std::{fs, time::Instant};
 
 mod lexer;
+mod parser;
 
 fn main() {
     let start = Instant::now();
