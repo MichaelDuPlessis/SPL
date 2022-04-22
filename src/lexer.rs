@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{str::Chars, iter::Peekable, process::exit};
+use std::{str::Chars, iter::Peekable, process::exit, ops::Mul};
 
 const FILLER: [char; 4] = ['\n', ' ', '\r', '\t']; // holds all chars that can be ignored
 
@@ -52,6 +52,10 @@ pub enum Nonterminal {
 }
 
 impl Nonterminal {
+    pub fn grammer(self) -> Grammer {
+        Grammer::Nonterminal(self)
+    }
+
     fn basic_token(token: char, currnet_pos: Pos) -> Self {
         match token {
             '(' => Self::LParentheses,
@@ -67,6 +71,14 @@ impl Nonterminal {
                 exit(1);
             },
         }
+    }
+}
+
+impl Mul<usize> for Nonterminal {
+    type Output = usize;
+
+    fn mul(self, rhs: usize) -> Self::Output {
+        self as usize * rhs
     }
 }
 

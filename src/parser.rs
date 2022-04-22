@@ -1,6 +1,10 @@
+use std::ops::Mul;
 use crate::lexer::{Token, Nonterminal};
 
+#[allow(dead_code)]
+
 // all nonterminals of the grammer
+#[derive(Clone, Copy)]
 enum Terminal {
     SPLProgrPrime,
     SPLProgr,
@@ -27,18 +31,42 @@ enum Terminal {
     TYP,
 }
 
+impl Terminal {
+    fn grammer(self) -> Grammer {
+        Grammer::Terminal(self)
+    }
+}
+
+impl Mul<usize> for Terminal {
+    type Output = usize;
+
+    fn mul(self, rhs: usize) -> Self::Output {
+        self as usize * rhs
+    }
+}
+
+#[allow(dead_code)]
 // Since a grammer symbol may be either one
-enum Grammer {
+#[derive(Clone)]
+pub enum Grammer {
     Terminal(Terminal),
     Nonterminal(Nonterminal),
 }
 
+#[allow(dead_code)]
 struct Parser {
     tokens: Vec<Token>,
 }
 
+#[allow(dead_code)]
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
+        const ROWS: usize = 22;
+        const COLS: usize = 39;
+        let mut table = [(); ROWS*COLS].map(|_| Option::<Rhs>::default());
+
+        table[Terminal::SPLProgrPrime*ROWS + Nonterminal::Main*COLS] = Some(Rhs::new(vec![Terminal::ProcDefs, Nonterminal::main, Nonterminal::LBrace, Terminal::Algorithm, Nonterminal::Halt, Nonterminal::Semicolon, Terminal::VarDecl, Nonterminal::RBrace]));
+
         Self {
             tokens,
         }
@@ -47,92 +75,18 @@ impl Parser {
     pub fn parse() {
 
     }
+}
 
-    fn spl_progr_rime() {
+#[allow(dead_code)]
+struct Rhs {
+    rhs: Vec<Grammer>,
+}
 
-    }
-
-    fn spl_progr() {
-
-    }
-
-    fn spl_progr_prime() {
-
-    }
-
-    fn proc_defs() {
-
-    }
-
-    fn pd() {
-
-    }
-
-    fn algorithm() {
-
-    }
-
-    fn instr() {
-
-    }
-
-    fn assign() {
-
-    }
-
-    fn branch() {
-
-    }
-
-    fn alternat() {
-
-    }
-
-    fn spl_loop() {
-
-    }
-
-    fn lhs() {
-
-    }
-
-    fn expr() {
-
-    }
-
-    fn var_field() {
-
-    }
-
-    fn field() {
-
-    }
-
-    fn f_type() {
-
-    }
-
-    fn spl_const() {
-
-    }
-
-    fn un_op() {
-
-    }
-
-    fn bin_op() {
-
-    }
-
-    fn var_decl() {
-
-    }
-
-    fn dec() {
-
-    }
-
-    fn typ() {
-
+#[allow(dead_code)]
+impl Rhs {
+    fn new(rhs: Vec<Grammer>) -> Self {
+        Self {
+            rhs,
+        }
     }
 }
