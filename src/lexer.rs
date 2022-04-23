@@ -1,13 +1,12 @@
-use core::fmt;
-use std::{str::Chars, iter::Peekable, process::exit};
-use crate::grammer::Nonterminal;
+use std::{str::Chars, iter::Peekable, process::exit, mem};
+use crate::{grammer::{Terminal}, token::*};
 
 const FILLER: [char; 4] = ['\n', ' ', '\r', '\t']; // holds all chars that can be ignored
 
 // Lexer for the language
 pub struct Lexer<'a> {
     source: Peekable<Chars<'a>>, // to allow us to look ahead
-    tokens: Vec<Token>,
+    tokens: TokenList,
     current_pos: Pos,
     current_token: String,
 }
@@ -23,7 +22,7 @@ impl<'a> Lexer<'a> {
     }
 
     // method to created tokens
-    pub fn tokenize(&mut self) -> Vec<Token> {
+    pub fn tokenize(&mut self) -> TokenList {
         // loop until error or until complete and tokens are returned
         loop {
             if let Some(character) = self.peek() { // still chars to check
@@ -40,41 +39,41 @@ impl<'a> Lexer<'a> {
                         self.current_pos.next_row();
                     },
                     // main/mult
-                    'm' => self.token_double(("main", Nonterminal::Main), ("mult", Nonterminal::Mult), self.current_pos),
+                    'm' => self.token_double(("main", Terminal::Main), ("mult", Terminal::Mult), self.current_pos),
                     // halt
-                    'h' => self.token("halt", Nonterminal::Halt, self.current_pos),
+                    'h' => self.token("halt", Terminal::Halt, self.current_pos),
                     // if/input
-                    'i' => self.token_double(("if", Nonterminal::If), ("input", Nonterminal::Input), self.current_pos),
+                    'i' => self.token_double(("if", Terminal::If), ("input", Terminal::Input), self.current_pos),
                     // else/equal
-                    'e' => self.token_double(("else", Nonterminal::Else), ("eq", Nonterminal::Equal), self.current_pos),
+                    'e' => self.token_double(("else", Terminal::Else), ("eq", Terminal::Equal), self.current_pos),
                     // then/true
-                    't' => self.token_double(("then", Nonterminal::Then), ("true", Nonterminal::True), self.current_pos),
+                    't' => self.token_double(("then", Terminal::Then), ("true", Terminal::True), self.current_pos),
                     // return
-                    'r' => self.token("return", Nonterminal::Return, self.current_pos),
+                    'r' => self.token("return", Terminal::Return, self.current_pos),
                     // proc
-                    'p' => self.token("proc", Nonterminal::Proc, self.current_pos),
+                    'p' => self.token("proc", Terminal::Proc, self.current_pos),
                     // do
-                    'd' => self.token("do", Nonterminal::Do, self.current_pos),
+                    'd' => self.token("do", Terminal::Do, self.current_pos),
                     // until
-                    'u' => self.token("until", Nonterminal::Until, self.current_pos),
+                    'u' => self.token("until", Terminal::Until, self.current_pos),
                     // while
-                    'w' => self.token("while", Nonterminal::While, self.current_pos),
+                    'w' => self.token("while", Terminal::While, self.current_pos),
                     // output/or
-                    'o' => self.token_double(("output", Nonterminal::Out), ("or", Nonterminal::Or), self.current_pos),
+                    'o' => self.token_double(("output", Terminal::Out), ("or", Terminal::Or), self.current_pos),
                     // call
-                    'c' => self.token("call", Nonterminal::Call, self.current_pos),
+                    'c' => self.token("call", Terminal::Call, self.current_pos),
                     // false
-                    'f' => self.token("false", Nonterminal::False, self.current_pos),
+                    'f' => self.token("false", Terminal::False, self.current_pos),
                     // not/num
-                    'n' => self.token_double(("not", Nonterminal::Not), ("num", Nonterminal::Num), self.current_pos),
+                    'n' => self.token_double(("not", Terminal::Not), ("num", Terminal::Num), self.current_pos),
                     // and
                     'a' => self.token_and(self.current_pos),
                     // larger
-                    'l' => self.token("larger", Nonterminal::Larger, self.current_pos),
+                    'l' => self.token("larger", Terminal::Larger, self.current_pos),
                     // sub/string
-                    's' => self.token_double(("sub", Nonterminal::Sub), ("string", Nonterminal::String), self.current_pos),
+                    's' => self.token_double(("sub", Terminal::Sub), ("string", Terminal::String), self.current_pos),
                     // bool
-                    'b' => self.token("bool", Nonterminal::Boolean, self.current_pos),
+                    'b' => self.token("bool", Terminal::Boolean, self.current_pos),
                     // user defined
                     'g'|'j'|'k'|'q'|'v'|'x'|'y'|'z' => self.token_user_defined(self.current_pos),
                     // number
@@ -85,7 +84,7 @@ impl<'a> Lexer<'a> {
                     ':' => self.token_assignment(self.current_pos),
                     // basic token
                     '('|')'|'['|']'|'{'|'}'|','|';' => {
-                        self.tokens.push(Token::new(Nonterminal::basic_token(character, self.current_pos), self.current_pos));
+                        self.tokens.push(StructureToken::new_box(Terminal::basic_token(character, self.current_pos), self.current_pos));
                         self.next();
                     },
                     // Invalid token
@@ -95,7 +94,9 @@ impl<'a> Lexer<'a> {
                     },
                 }
             } else { // if no more tokens than return what has been found
-                return self.tokens.clone();
+                let mut temp = Vec::new();
+                mem::swap(&mut temp, &mut self.tokens);
+                return temp;
             }
         }
     }
@@ -111,7 +112,7 @@ impl<'a> Lexer<'a> {
                 exit(1);
             }
 
-            self.tokens.push(Token::new(Nonterminal::Assignment, token_pos));
+            self.tokens.push(StructureToken::new_box(Terminal::Assignment, token_pos));
         } else {
             println!("End of file reached before token could be completed");
             exit(1);
@@ -128,7 +129,7 @@ impl<'a> Lexer<'a> {
 
         while let Some(current_char) = self.next() {
             if current_char == '\"' {
-                self.tokens.push(Token::new(Nonterminal::ShortString(self.current_token.clone()), token_pos));
+                self.tokens.push(StringToken::new_box(Terminal::ShortString, self.current_token.clone(), token_pos));
                 return;
             }
 
@@ -163,7 +164,7 @@ impl<'a> Lexer<'a> {
                     exit(1);
                 }
             }
-            self.tokens.push(Token::new(Nonterminal::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zero
+            self.tokens.push(NumToken::new_box(Terminal::Number, self.current_token.parse().unwrap(), token_pos)); // can unwrap cause we know its just zero
             return;
         }
 
@@ -189,7 +190,7 @@ impl<'a> Lexer<'a> {
             let current_char = *current_char;
 
             if "()[]{};,".contains(current_char) || FILLER.contains(&current_char) {
-                self.tokens.push(Token::new(Nonterminal::Number(self.current_token.parse().unwrap()), token_pos)); // can unwrap cause we know its just zeros
+                self.tokens.push(NumToken::new_box(Terminal::Number, self.current_token.parse().unwrap(), token_pos)); // can unwrap cause we know its just zeros
                 return;
             }
 
@@ -203,7 +204,7 @@ impl<'a> Lexer<'a> {
             self.next();
         }
 
-        self.tokens.push(Token::new(Nonterminal::Number(self.current_token.parse().unwrap()), token_pos));
+        self.tokens.push(NumToken::new_box(Terminal::Number, self.current_token.parse().unwrap(), token_pos));
     }
 
     // to check and
@@ -213,7 +214,7 @@ impl<'a> Lexer<'a> {
 
         if let Some(current_char) = self.peek() {
             if *current_char != 'n' {
-                self.token_double(("add", Nonterminal::Add), ("arr", Nonterminal::Array), token_pos);
+                self.token_double(("add", Terminal::Add), ("arr", Terminal::Array), token_pos);
                 return;
             } else {
                 let character = self.next().unwrap();
@@ -223,7 +224,7 @@ impl<'a> Lexer<'a> {
                     if *current_char == 'd' {
                         let character = self.next().unwrap(); // can unwrap because know there will be a next
                         self.current_token.push(character); 
-                        self.tokens.push(Token::new(Nonterminal::And, token_pos))
+                        self.tokens.push(StructureToken::new_box(Terminal::And, token_pos))
                     } else {
                         self.token_user_defined(token_pos);
                     }
@@ -237,7 +238,7 @@ impl<'a> Lexer<'a> {
     }
 
     // check if first token is found otherwise search for second
-    fn token_double(&mut self, first: (&str, Nonterminal), second: (&str, Nonterminal), token_pos: Pos) {
+    fn token_double(&mut self, first: (&str, Terminal), second: (&str, Terminal), token_pos: Pos) {
         // first check if token can be formed else go to user defeined
         for c in first.0[self.current_token.len()..].chars() {
             if let Some(current_char) = self.peek() {
@@ -259,7 +260,7 @@ impl<'a> Lexer<'a> {
     }  
 
     // method to check if token is main
-    fn token(&mut self, token_string: &str, token_type: Nonterminal, token_pos: Pos) {
+    fn token(&mut self, token_string: &str, token_type: Terminal, token_pos: Pos) {
         // first check if token can be formed else go to user defeined
         for c in token_string.chars() {
             if let Some(current_char) = self.peek() {
@@ -281,16 +282,16 @@ impl<'a> Lexer<'a> {
     }
 
     // check if user defined variable
-    fn check_user_defined(&mut self, token_type: Nonterminal, token_pos: Pos) {
+    fn check_user_defined(&mut self, token_type: Terminal, token_pos: Pos) {
         // check if any valid user defined characters follow token if so make it user defined
         if let Some(current_char) = self.peek() {
             if ('a'..'z').contains(current_char) || ('0'..'9').contains(current_char) {
                 self.token_user_defined(token_pos)
             } else {
-                self.tokens.push(Token::new(token_type, token_pos));
+                self.tokens.push(StructureToken::new_box(token_type, token_pos));
             }
         } else {
-            self.tokens.push(Token::new(token_type, token_pos));
+            self.tokens.push(StructureToken::new_box(token_type, token_pos));
             return;
         }
     }
@@ -308,7 +309,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        self.tokens.push(Token::new(Nonterminal::UserDefined(self.current_token.clone()), token_pos))
+        self.tokens.push(StringToken::new_box(Terminal::UserDefined, self.current_token.clone(), token_pos))
     }
 
     // wrapper around iterators next
@@ -324,69 +325,35 @@ impl<'a> Lexer<'a> {
 }
 
 // a token of the language
-#[allow(dead_code)]
-#[derive(Clone, Debug)]
-pub struct Token {
-    token: Nonterminal,
-    pos: Pos,
-}
+// #[allow(dead_code)]
+// #[derive(Clone, Debug)]
+// pub struct Token {
+//     token: Terminal,
+//     pos: Pos,
+// }
 
-#[allow(dead_code)]
-impl Token {
-    // creates a new token
-    fn new(token: Nonterminal, pos: Pos) -> Self {
-        Self {
-            token,
-            pos,
-        }
-    }
+// #[allow(dead_code)]
+// impl Token {
+//     // creates a new token
+//     fn new(token: Terminal, pos: Pos) -> Self {
+//         Self {
+//             token,
+//             pos,
+//         }
+//     }
 
-    // gets tokens row
-    fn row(&self) -> usize {
-        self.pos.row
-    }
+    // // gets tokens row
+    // fn row(&self) -> usize {
+    //     self.pos.row
+    // }
 
-    // gets tokens col
-    fn col(&self) -> usize {
-        self.pos.col
-    }
+    // // gets tokens col
+    // fn col(&self) -> usize {
+    //     self.pos.col
+    // }
 
-    // gets tokens pos object
-    fn pos(&self) -> &Pos {
-        &self.pos
-    }
-}
-
-// struct reprenting position of a token
-#[derive(Clone, Copy, Debug)]
-pub struct Pos {
-    row: usize,
-    col: usize,
-}
-
-impl Pos {
-    // create new Pos
-    pub fn new(row: usize, col: usize) -> Self {
-        Self {
-            row,
-            col,
-        }
-    }
-
-    // increases col
-    pub fn next_col(&mut self) {
-        self.col += 1;
-    }
-
-    // increases row and sets col to 0
-    pub fn next_row(&mut self) {
-        self.row += 1;
-        self.col = 1;
-    }
-}
-
-impl fmt::Display for Pos {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Ln {}, Col {}", self.row, self.col)
-    }
-}
+    // // gets tokens pos object
+    // fn pos(&self) -> &Pos {
+    //     &self.pos
+    // }
+// }
