@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, Debug};
 use crate::grammer::Terminal;
 
 pub type TokenList = Vec<Box<dyn Token>>;
@@ -8,18 +8,17 @@ pub trait Token: fmt::Debug {
 
     fn col(&self) -> usize;
 
-    fn pos(&self) -> &Pos;
+    fn pos(&self) -> Pos;
 
     fn token(&self) -> Terminal;
 
-    fn value(&self) -> Option<Value> {
+    fn num_value(&self) -> Option<isize> {
         None
     }
-}
 
-pub union Value<'a> {
-    pub num: isize,
-    pub text: &'a str,
+    fn str_value(&self) -> Option<String> {
+        None
+    }
 }
 
 #[derive(Debug)]
@@ -53,8 +52,8 @@ impl Token for StructureToken {
     }
 
     // gets tokens pos object
-    fn pos(&self) -> &Pos {
-        &self.pos
+    fn pos(&self) -> Pos {
+        self.pos
     }
 
     fn token(&self) -> Terminal {
@@ -95,16 +94,16 @@ impl Token for NumToken {
     }
 
     // gets tokens pos object
-    fn pos(&self) -> &Pos {
-        &self.pos
+    fn pos(&self) -> Pos {
+        self.pos
     }
 
     fn token(&self) -> Terminal {
         self.token
     }
 
-    fn value(&self) -> Option<Value> {
-        Some(Value { num: self.value })
+    fn num_value(&self) -> Option<isize> {
+        Some(self.value)
     }
 }
 
@@ -141,16 +140,16 @@ impl Token for StringToken {
     }
 
     // gets tokens pos object
-    fn pos(&self) -> &Pos {
-        &self.pos
+    fn pos(&self) -> Pos {
+        self.pos
     }
 
     fn token(&self) -> Terminal {
         self.token
     }
 
-    fn value(&self) -> Option<Value> {
-        Some(Value { text: &self.value })
+    fn str_value(&self) -> Option<String> {
+        Some(self.value.clone())
     }
 }
 

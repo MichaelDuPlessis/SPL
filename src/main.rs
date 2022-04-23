@@ -15,7 +15,8 @@ fn main() {
     // println!("{:?}", tokens);
 
     let parser = parser::Parser::new(tokens);
-    parser.parse();
+    let node = parser.parse();
+    parser::Parser::create_xml(node);
 
     println!("{:?}", start.elapsed());
 }

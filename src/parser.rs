@@ -1,4 +1,4 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{rc::Rc, cell::{RefCell}, fs::File, io::Write, mem};
 
 use crate::{grammer::*, token::{TokenList, StructureToken, Pos}, stack};
 const ROWS: usize = 21;
@@ -133,38 +133,56 @@ impl Parser {
         }
     }
 
-    pub fn parse(&self) {
+    // actual parsing
+    pub fn parse(&self) -> Node {
+        let mut id = 0;
+
         let mut stack = stack::Stack::from(
             vec![Grammer::from(NonTerminal::SPLProgr), Grammer::from(Terminal::Dollar)]
             .into_iter()
-            .map(|g| Rc::new(RefCell::new(Node::new(g))))
+            .map(|g| {
+                let x = Rc::new(RefCell::new(Node::new(g, id)));
+                id += 1;
+                x
+            })
             .collect::<Vec<Rc<RefCell<Node>>>>()
         );
 
-        let mut head = Rc::new(RefCell::new(Node::new(Grammer::from(Terminal::Dollar))));
+        let mut head = Rc::new(RefCell::new(Node::new(Grammer::from(Terminal::Dollar), 0)));
         let mut first = true;
 
         let mut input = 0usize;
 
-        while !stack.is_empty() {
-            // println!("input: {}", input);
-            // println!("{:?}", stack);
+        let mut last_node = Rc::new(RefCell::new(Node::new(Grammer::from(Terminal::Dollar), 0)));
 
-            let top = stack.peek().borrow().symbol;
+        while !stack.is_empty() {
+            let top = RefCell::borrow(stack.peek()).symbol;
+
             if let Grammer::Terminal(t) = top {
                 if t == self.tokens[input].token() {
+                    // adding data to non terminal nodes
+                    for n in &last_node.borrow_mut().children {
+                        let sym = RefCell::borrow(n).symbol;
+                        if sym == top {
+                            n.borrow_mut().pos = Some(self.tokens[input].pos());
+                            n.borrow_mut().num_value = self.tokens[input].num_value();
+                            n.borrow_mut().str_value = self.tokens[input].str_value();
+                            break;
+                        }
+                    }
+
                     input += 1;
                     stack.pop();
                 } else {
                     panic!("Invalid Program");
                 }
             } else if let Grammer::NonTerminal(t) = top {
-                // println!("stack_pos {}, {:?}", self.tokens[input].token() + 0,  t*1);
                 if self.table[self.tokens[input].token() + t*ROWS].is_none() {
                     panic!("Invalid Program");
                 }
 
                 let terminal = Rc::clone(&stack.pop());
+                last_node = Rc::clone(&terminal);
                 
                 if first {
                     head = Rc::clone(&terminal);
@@ -173,48 +191,82 @@ impl Parser {
 
                 let mut rhs: Vec<Rc<RefCell<Node>>> = self.table[self.tokens[input].token() + t*ROWS].as_ref().unwrap().clone() // now that it is not none
                 .into_iter()
-                .map(|g| Rc::new(RefCell::new(Node::new(g))))
+                .map(|g| {
+                    let x = Rc::new(RefCell::new(Node::new(g, id)));
+                    id += 1;
+                    x
+                })
                 .collect();
 
                 terminal.borrow_mut().add_children(&rhs);
 
                 rhs.append(&mut stack.to_vec());
                 stack = stack::Stack::from(rhs);
-            } else {
-                panic!("How did it get here");
             }
         }
 
-        print_tree(head, 0);
+        // create new head to return
+        let mut node = Node::new(RefCell::borrow(&head).symbol, RefCell::borrow(&head).id);
+        node.pos = RefCell::borrow(&head).pos;
+        node.num_value = RefCell::borrow(&head).num_value;
+        node.str_value = RefCell::borrow(&head).str_value.clone();
+        mem::swap(&mut node.children, &mut RefCell::borrow_mut(&head).children);
+
+        node
+    }
+
+    pub fn create_xml(node: Node) {
+        let mut file = File::create("./parse.xml").unwrap();
+        let mut to_write = String::new();
+
+        Self::write_to_xml(Rc::new(RefCell::new(node)), &mut to_write, 0);
+
+        file.write_all(to_write.as_bytes()).unwrap();
+    }
+
+    fn write_to_xml(node: Rc<RefCell<Node>>, to_write: &mut String, level: usize) {
+        let mut tabs = String::new();
+        for _ in 0..level {
+            tabs.push('\t');
+        }
+
+        let sym = RefCell::borrow(&*node);
+
+        if let Some(num) = sym.num_value {
+            to_write.push_str(&format!("{}<{} id={} value={}>\n", tabs, sym.symbol, sym.id, num));
+        } else if let Some(string) = &sym.str_value {
+            to_write.push_str(&format!("{}<{} id={} value={}>\n", tabs, sym.symbol, sym.id, string));
+        } else {
+            to_write.push_str(&format!("{}<{} id={}>\n", tabs, sym.symbol, sym.id));
+        }
+
+        for c in &sym.children {
+            Self::write_to_xml(Rc::clone(&c), to_write, level + 1);
+        }
+
+        to_write.push_str(&format!("{}</{}>\n", tabs, sym.symbol));
     }
 }
 
-fn print_tree(head: Rc<RefCell<Node>>, level: usize) {
-    let mut tabs = String::new();
-    for _ in 0..level {
-        tabs.push('\t');
-    }
-
-    println!("{}Symbol: {:?}", tabs, RefCell::borrow(&*head).symbol);
-    println!("{}{:?}-Children-{:?}", tabs, RefCell::borrow(&*head).symbol, RefCell::borrow(&*head).symbol);
-    for c in &head.borrow().children {
-        print_tree(Rc::clone(c), level + 1);
-    }
-    println!("{}{:?}-End-{:?}", tabs, RefCell::borrow(&*head).symbol, RefCell::borrow(&*head).symbol);
-}
-
-
-#[derive(Debug, Clone)]
-struct Node {
+#[derive(Debug)]
+pub struct Node {
+    id: usize,
     symbol: Grammer,
-    children: Vec<Rc<RefCell<Node>>>
+    children: Vec<Rc<RefCell<Node>>>,
+    pos: Option<Pos>,
+    num_value: Option<isize>,
+    str_value: Option<String>,
 }
 
 impl Node {
-    fn new(symbol: Grammer) -> Self {
+    fn new(symbol: Grammer, id: usize) -> Self {
         Self {
+            id,
             symbol,
             children: Vec::new(),
+            pos: None,
+            num_value: None,
+            str_value: None,
         }
     } 
     

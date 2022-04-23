@@ -1,0 +1,32 @@
+<SPLProgr id=0>
+	<ProcDefs id=2>
+	</ProcDefs>
+	<main id=3>
+	</main>
+	<{ id=4>
+	</{>
+	<Algorithm id=5>
+	</Algorithm>
+	<halt id=6>
+	</halt>
+	<; id=7>
+	</;>
+	<VarDecl id=8>
+		<Dec id=10>
+			<TYP id=13>
+				<num id=15>
+				</num>
+			</TYP>
+			<Var id=14>
+				<userDefinedName id=16 value=main2>
+				</userDefinedName>
+			</Var>
+		</Dec>
+		<; id=11>
+		</;>
+		<VarDecl id=12>
+		</VarDecl>
+	</VarDecl>
+	<} id=9>
+	</}>
+</SPLProgr>

@@ -1,4 +1,4 @@
 main {
     halt;
-    num m;
+    num main2;
 }
