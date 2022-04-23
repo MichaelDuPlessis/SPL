@@ -2,6 +2,7 @@ pub struct Stack<T> {
     vec: Vec<T>,
 }
 
+#[allow(dead_code)]
 impl<T> Stack<T> {
     pub fn new() -> Self {
         Self {
@@ -21,8 +22,8 @@ impl<T> Stack<T> {
         self.vec.remove(0)
     }
 
-    pub fn peek(&self) -> T where T: Copy {
-        self.vec[0]
+    pub fn peek(&self) -> &T {
+        &self.vec[0]
     }
 
     pub fn is_empty(&self) -> bool {

@@ -12,7 +12,7 @@ fn main() {
     let file = fs::read_to_string("./test.spl").unwrap();
     let mut lexer = lexer::Lexer::new(&file);
     let tokens = lexer.tokenize();
-    println!("{:?}", tokens);
+    // println!("{:?}", tokens);
 
     let parser = parser::Parser::new(tokens);
     parser.parse();

@@ -1,3 +1,5 @@
+use std::{rc::Rc, cell::RefCell};
+
 use crate::{grammer::*, token::{TokenList, StructureToken, Pos}, stack};
 const ROWS: usize = 21;
 const COLS: usize = 40;
@@ -132,32 +134,93 @@ impl Parser {
     }
 
     pub fn parse(&self) {
-        let mut stack = stack::Stack::from(vec![Grammer::from(NonTerminal::SPLProgr), Grammer::from(Terminal::Dollar)]);
+        let mut stack = stack::Stack::from(
+            vec![Grammer::from(NonTerminal::SPLProgr), Grammer::from(Terminal::Dollar)]
+            .into_iter()
+            .map(|g| Rc::new(RefCell::new(Node::new(g))))
+            .collect::<Vec<Rc<RefCell<Node>>>>()
+        );
+
+        let mut head = Rc::new(RefCell::new(Node::new(Grammer::from(Terminal::Dollar))));
+        let mut first = true;
+
         let mut input = 0usize;
 
         while !stack.is_empty() {
-            println!("input: {}", input);
-            println!("{:?}", stack);
-            if let Grammer::Terminal(t) = stack.peek() {
+            // println!("input: {}", input);
+            // println!("{:?}", stack);
+
+            let top = stack.peek().borrow().symbol;
+            if let Grammer::Terminal(t) = top {
                 if t == self.tokens[input].token() {
                     input += 1;
                     stack.pop();
                 } else {
                     panic!("Invalid Program");
                 }
-            } else if let Grammer::NonTerminal(t) = stack.peek() {
+            } else if let Grammer::NonTerminal(t) = top {
                 // println!("stack_pos {}, {:?}", self.tokens[input].token() + 0,  t*1);
                 if self.table[self.tokens[input].token() + t*ROWS].is_none() {
                     panic!("Invalid Program");
                 }
 
-                let mut rhs = self.table[self.tokens[input].token() + t*ROWS].as_ref().unwrap().clone(); // now that it is not none
-                stack.pop();
+                let terminal = Rc::clone(&stack.pop());
+                
+                if first {
+                    head = Rc::clone(&terminal);
+                    first = false;
+                }
+
+                let mut rhs: Vec<Rc<RefCell<Node>>> = self.table[self.tokens[input].token() + t*ROWS].as_ref().unwrap().clone() // now that it is not none
+                .into_iter()
+                .map(|g| Rc::new(RefCell::new(Node::new(g))))
+                .collect();
+
+                terminal.borrow_mut().add_children(&rhs);
+
                 rhs.append(&mut stack.to_vec());
                 stack = stack::Stack::from(rhs);
             } else {
                 panic!("How did it get here");
             }
+        }
+
+        print_tree(head, 0);
+    }
+}
+
+fn print_tree(head: Rc<RefCell<Node>>, level: usize) {
+    let mut tabs = String::new();
+    for _ in 0..level {
+        tabs.push('\t');
+    }
+
+    println!("{}Symbol: {:?}", tabs, RefCell::borrow(&*head).symbol);
+    println!("{}{:?}-Children-{:?}", tabs, RefCell::borrow(&*head).symbol, RefCell::borrow(&*head).symbol);
+    for c in &head.borrow().children {
+        print_tree(Rc::clone(c), level + 1);
+    }
+    println!("{}{:?}-End-{:?}", tabs, RefCell::borrow(&*head).symbol, RefCell::borrow(&*head).symbol);
+}
+
+
+#[derive(Debug, Clone)]
+struct Node {
+    symbol: Grammer,
+    children: Vec<Rc<RefCell<Node>>>
+}
+
+impl Node {
+    fn new(symbol: Grammer) -> Self {
+        Self {
+            symbol,
+            children: Vec::new(),
+        }
+    } 
+    
+    fn add_children(&mut self, children: &Vec<Rc<RefCell<Node>>>) {
+        for c in children {
+            self.children.push(Rc::clone(c));
         }
     }
 }
