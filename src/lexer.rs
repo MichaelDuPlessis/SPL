@@ -323,37 +323,3 @@ impl<'a> Lexer<'a> {
         self.source.peek()
     }
 }
-
-// a token of the language
-// #[allow(dead_code)]
-// #[derive(Clone, Debug)]
-// pub struct Token {
-//     token: Terminal,
-//     pos: Pos,
-// }
-
-// #[allow(dead_code)]
-// impl Token {
-//     // creates a new token
-//     fn new(token: Terminal, pos: Pos) -> Self {
-//         Self {
-//             token,
-//             pos,
-//         }
-//     }
-
-    // // gets tokens row
-    // fn row(&self) -> usize {
-    //     self.pos.row
-    // }
-
-    // // gets tokens col
-    // fn col(&self) -> usize {
-    //     self.pos.col
-    // }
-
-    // // gets tokens pos object
-    // fn pos(&self) -> &Pos {
-    //     &self.pos
-    // }
-// }

@@ -1,4 +1,5 @@
 main {
+    michael := add(7, mult(12, -2));
     halt;
-    num main2;
+    num michael;
 }

@@ -15,9 +15,6 @@ impl Parser {
     pub fn new(mut tokens: TokenList) -> Self {
         let mut table = [(); ROWS*COLS].map(|_| Option::<Vec<Grammer>>::default());
 
-        // table[8 + NonTerminal::SPLProgrPrime*ROWS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Dollar)]);
-        // table[10 + NonTerminal::SPLProgrPrime*ROWS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Dollar)]);
-        
         table[8 + NonTerminal::SPLProgr*ROWS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Main), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Halt), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
         table[10 + NonTerminal::SPLProgr*ROWS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Main), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Halt), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
         
@@ -48,6 +45,8 @@ impl Parser {
         table[19 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
         table[20 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::PCall)]);
         table[37 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
+
+
         
         table[37 + NonTerminal::Assign*ROWS] = Some(vec![Grammer::from(NonTerminal::LHS), Grammer::from(Terminal::Assignment), Grammer::from(NonTerminal::Expr)]);
         
@@ -122,8 +121,7 @@ impl Parser {
         
         table[33 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::Num)]);
         table[34 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::Boolean)]);
-        table[35 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::String)]);
-        
+        table[35 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::String)]);        
 
         tokens.push(StructureToken::new_box(Terminal::Dollar, Pos::new(0, 0)));
 
@@ -135,19 +133,17 @@ impl Parser {
 
     // actual parsing
     pub fn parse(&self) -> Node {
-        let mut id = 0;
-
         let mut stack = stack::Stack::from(
             vec![Grammer::from(NonTerminal::SPLProgr), Grammer::from(Terminal::Dollar)]
             .into_iter()
             .map(|g| {
-                let x = Rc::new(RefCell::new(Node::new(g, id)));
-                id += 1;
-                x
+                Rc::new(RefCell::new(Node::new(g, 0)))
             })
             .collect::<Vec<Rc<RefCell<Node>>>>()
         );
 
+        let mut id = 0;
+        
         let mut head = Rc::new(RefCell::new(Node::new(Grammer::from(Terminal::Dollar), 0)));
         let mut first = true;
 
@@ -157,6 +153,8 @@ impl Parser {
 
         while !stack.is_empty() {
             let top = RefCell::borrow(stack.peek()).symbol;
+            // println!("{:?}", stack);
+            // println!("{:?}", input);
 
             if let Grammer::Terminal(t) = top {
                 if t == self.tokens[input].token() {
@@ -177,6 +175,8 @@ impl Parser {
                     panic!("Invalid Program");
                 }
             } else if let Grammer::NonTerminal(t) = top {
+                // println!("{:?}, {:?}", self.tokens[input].token()*1, t*1);
+                // println!("{:?}", self.table[self.tokens[input].token() + t*ROWS]);
                 if self.table[self.tokens[input].token() + t*ROWS].is_none() {
                     panic!("Invalid Program");
                 }
@@ -192,9 +192,8 @@ impl Parser {
                 let mut rhs: Vec<Rc<RefCell<Node>>> = self.table[self.tokens[input].token() + t*ROWS].as_ref().unwrap().clone() // now that it is not none
                 .into_iter()
                 .map(|g| {
-                    let x = Rc::new(RefCell::new(Node::new(g, id)));
                     id += 1;
-                    x
+                    Rc::new(RefCell::new(Node::new(g, id)))
                 })
                 .collect();
 
