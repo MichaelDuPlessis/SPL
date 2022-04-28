@@ -1,5 +1,20 @@
-main {
-    michael := add(7, mult(12, -2));
+main x
+    michael := add(1, mult(7, -2));
+
+    if (add(1, 1)) then {
+        while (false) do {
+            do {
+
+            } until (and(not(false), eq(7, 7)));
+        };
+    } else {
+        if (true) then {
+            michael := 20;
+            michal[20] := sub(24, 42);
+        };
+    };
+
     halt;
+
     num michael;
 }

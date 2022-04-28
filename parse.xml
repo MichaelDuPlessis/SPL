@@ -1,18 +1,183 @@
-<SPLProgr id=0>
-	<ProcDefs id=1>
+<SPLProgr id="0">
+	<ProcDefs id="1">
 	</ProcDefs>
-	<main id=2>
-	</main>
-	<{ id=3>
-	</{>
-	<Algorithm id=4>
+	<Algorithm id="4">
+		<Instr id="9">
+			<Assign id="12">
+				<LHS id="13">
+					<userDefinedName id="16" value="michael"/>
+					<VarField id="17">
+					</VarField>
+				</LHS>
+				<Expr id="15">
+					<BinOp id="18">
+						<Expr id="21">
+							<Const id="25">
+								<string id="26" value="1"/>
+							</Const>
+						</Expr>
+						<Expr id="23">
+							<BinOp id="27">
+								<Expr id="30">
+									<Const id="34">
+										<string id="35" value="7"/>
+									</Const>
+								</Expr>
+								<Expr id="32">
+									<Const id="36">
+										<string id="37" value="-2"/>
+									</Const>
+								</Expr>
+							</BinOp>
+						</Expr>
+					</BinOp>
+				</Expr>
+			</Assign>
+		</Instr>
+		<Algorithm id="11">
+			<Instr id="38">
+				<Branch id="41">
+					<Expr id="44">
+						<BinOp id="51">
+							<Expr id="54">
+								<Const id="58">
+									<string id="59" value="1"/>
+								</Const>
+							</Expr>
+							<Expr id="56">
+								<Const id="60">
+									<string id="61" value="1"/>
+								</Const>
+							</Expr>
+						</BinOp>
+					</Expr>
+					<Algorithm id="48">
+						<Instr id="62">
+							<Loop id="65">
+								<Expr id="68">
+									<Const id="74">
+									</Const>
+								</Expr>
+								<Algorithm id="72">
+									<Instr id="76">
+										<Loop id="79">
+											<Algorithm id="82">
+											</Algorithm>
+											<Expr id="86">
+												<BinOp id="88">
+													<Expr id="91">
+														<UnOp id="95">
+															<Expr id="98">
+																<Const id="100">
+																</Const>
+															</Expr>
+														</UnOp>
+													</Expr>
+													<Expr id="93">
+														<BinOp id="102">
+															<Expr id="105">
+																<Const id="109">
+																	<string id="110" value="7"/>
+																</Const>
+															</Expr>
+															<Expr id="107">
+																<Const id="111">
+																	<string id="112" value="7"/>
+																</Const>
+															</Expr>
+														</BinOp>
+													</Expr>
+												</BinOp>
+											</Expr>
+										</Loop>
+									</Instr>
+									<Algorithm id="78">
+									</Algorithm>
+								</Algorithm>
+							</Loop>
+						</Instr>
+						<Algorithm id="64">
+						</Algorithm>
+					</Algorithm>
+					<Alternat id="50">
+						<Algorithm id="115">
+							<Instr id="117">
+								<Branch id="120">
+									<Expr id="123">
+										<Const id="130">
+										</Const>
+									</Expr>
+									<Algorithm id="127">
+										<Instr id="132">
+											<Assign id="135">
+												<LHS id="136">
+													<userDefinedName id="139" value="michael"/>
+													<VarField id="140">
+													</VarField>
+												</LHS>
+												<Expr id="138">
+													<Const id="141">
+														<string id="142" value="20"/>
+													</Const>
+												</Expr>
+											</Assign>
+										</Instr>
+										<Algorithm id="134">
+											<Instr id="143">
+												<Assign id="146">
+													<LHS id="147">
+														<userDefinedName id="150" value="michal"/>
+														<VarField id="151">
+															<FType id="153">
+																<Const id="154">
+																	<string id="156" value="20"/>
+																</Const>
+															</FType>
+														</VarField>
+													</LHS>
+													<Expr id="149">
+														<BinOp id="157">
+															<Expr id="160">
+																<Const id="164">
+																	<string id="165" value="24"/>
+																</Const>
+															</Expr>
+															<Expr id="162">
+																<Const id="166">
+																	<string id="167" value="42"/>
+																</Const>
+															</Expr>
+														</BinOp>
+													</Expr>
+												</Assign>
+											</Instr>
+											<Algorithm id="145">
+											</Algorithm>
+										</Algorithm>
+									</Algorithm>
+									<Alternat id="129">
+									</Alternat>
+								</Branch>
+							</Instr>
+							<Algorithm id="119">
+							</Algorithm>
+						</Algorithm>
+					</Alternat>
+				</Branch>
+			</Instr>
+			<Algorithm id="40">
+			</Algorithm>
+		</Algorithm>
 	</Algorithm>
-	<halt id=5>
-	</halt>
-	<; id=6>
-	</;>
-	<VarDecl id=7>
+	<VarDecl id="7">
+		<Dec id="168">
+			<TYP id="171">
+			</TYP>
+			<Var id="172">
+				<userDefinedName id="174" value="michael"/>
+			</Var>
+		</Dec>
+		<VarDecl id="170">
+		</VarDecl>
 	</VarDecl>
-	<} id=8>
-	</}>
 </SPLProgr>

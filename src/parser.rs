@@ -1,7 +1,7 @@
-use std::{rc::Rc, cell::{RefCell}, fs::File, io::Write, mem};
+use std::{rc::Rc, cell::{RefCell}, fs::File, io::Write, mem, process::exit};
 
 use crate::{grammer::*, token::{TokenList, StructureToken, Pos}, stack};
-const ROWS: usize = 21;
+const ROWS: usize = 22;
 const COLS: usize = 40;
 
 #[allow(dead_code)]
@@ -15,113 +15,111 @@ impl Parser {
     pub fn new(mut tokens: TokenList) -> Self {
         let mut table = [(); ROWS*COLS].map(|_| Option::<Vec<Grammer>>::default());
 
-        table[8 + NonTerminal::SPLProgr*ROWS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Main), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Halt), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
-        table[10 + NonTerminal::SPLProgr*ROWS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Main), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Halt), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
+        table[Terminal::Main + NonTerminal::SPLProgr*COLS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Main), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Halt), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
+        table[Terminal::Proc + NonTerminal::SPLProgr*COLS] = Some(vec![Grammer::from(NonTerminal::ProcDefs), Grammer::from(Terminal::Main), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Halt), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
         
-        table[8 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
-        table[10 + NonTerminal::ProcDefs*ROWS] = Some(vec![Grammer::from(NonTerminal::PD), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::ProcDefs)]);
-        table[11 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
-        table[13 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
-        table[16 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
-        table[18 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
-        table[19 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
-        table[21 + NonTerminal::ProcDefs*ROWS] = Some(vec![]);
+        table[Terminal::Main + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::Proc + NonTerminal::ProcDefs*COLS] = Some(vec![Grammer::from(NonTerminal::PD), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::ProcDefs)]);
+        table[Terminal::Return + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::If + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::Do + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::While + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::Out + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::True + NonTerminal::ProcDefs*COLS] = Some(vec![]);
         
-        table[10 + NonTerminal::PD*ROWS] = Some(vec![Grammer::from(Terminal::Proc), Grammer::from(Terminal::UserDefined), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::ProcDefs), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Return), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
+        table[Terminal::Proc + NonTerminal::PD*COLS] = Some(vec![Grammer::from(Terminal::Proc), Grammer::from(Terminal::UserDefined), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::ProcDefs), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Return), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
         
-        table[3 + NonTerminal::Algorithm*ROWS] = Some(vec![]);
-        table[9 + NonTerminal::Algorithm*ROWS] = Some(vec![]);
-        table[11 + NonTerminal::Algorithm*ROWS] = Some(vec![]);
-        table[13 + NonTerminal::Algorithm*ROWS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
-        table[16 + NonTerminal::Algorithm*ROWS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
-        table[18 + NonTerminal::Algorithm*ROWS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
-        table[19 + NonTerminal::Algorithm*ROWS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
-        table[20 + NonTerminal::Algorithm*ROWS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
-        table[37 + NonTerminal::Algorithm*ROWS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
+        table[Terminal::RBrace + NonTerminal::Algorithm*COLS] = Some(vec![]);
+        table[Terminal::Halt + NonTerminal::Algorithm*COLS] = Some(vec![]);
+        table[Terminal::Return + NonTerminal::Algorithm*COLS] = Some(vec![]);
+        table[Terminal::If + NonTerminal::Algorithm*COLS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
+        table[Terminal::Do + NonTerminal::Algorithm*COLS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
+        table[Terminal::While + NonTerminal::Algorithm*COLS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
+        table[Terminal::Out + NonTerminal::Algorithm*COLS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
+        table[Terminal::Call + NonTerminal::Algorithm*COLS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
+        table[Terminal::UserDefined + NonTerminal::Algorithm*COLS] = Some(vec![Grammer::from(NonTerminal::Instr), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::Algorithm)]);
         
-        table[13 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Branch)]);
-        table[16 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Loop)]);
-        table[18 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Loop)]);
-        table[19 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
-        table[20 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::PCall)]);
-        table[37 + NonTerminal::Instr*ROWS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
+        table[Terminal::If + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::Branch)]);
+        table[Terminal::Do + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::Loop)]);
+        table[Terminal::While + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::Loop)]);
+        table[Terminal::Out + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
+        table[Terminal::Call + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::PCall)]);
+        table[Terminal::UserDefined + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
+        
+        table[Terminal::UserDefined + NonTerminal::Assign*COLS] = Some(vec![Grammer::from(NonTerminal::LHS), Grammer::from(Terminal::Assignment), Grammer::from(NonTerminal::Expr)]);
+        
+        table[Terminal::If + NonTerminal::Branch*COLS] = Some(vec![Grammer::from(Terminal::If), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses), Grammer::from(Terminal::Then), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace), Grammer::from(NonTerminal::Alternat)]);
 
+        table[Terminal::Semicolon + NonTerminal::Alternat*COLS] = Some(vec![]);
+        table[Terminal::Else + NonTerminal::Alternat*COLS] = Some(vec![Grammer::from(Terminal::Else), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace)]);
+        
+        table[Terminal::Do + NonTerminal::Loop*COLS] = Some(vec![Grammer::from(Terminal::Do), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace), Grammer::from(Terminal::Until), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::While + NonTerminal::Loop*COLS] = Some(vec![Grammer::from(Terminal::While), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses), Grammer::from(Terminal::Do), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace)]);
+        
+        table[Terminal::UserDefined + NonTerminal::LHS*COLS] = Some(vec![Grammer::from(Terminal::UserDefined), Grammer::from(NonTerminal::VarField)]);
+        table[Terminal::Out + NonTerminal::LHS*COLS] = Some(vec![Grammer::from(Terminal::Out)]);
 
+        table[Terminal::True + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::Const)]);
+        table[Terminal::False + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::Const)]);
+        table[Terminal::Input + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::UnOp)]);
+        table[Terminal::Not + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::UnOp)]);
+        table[Terminal::And + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Or + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Equal + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Larger + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Add + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Sub + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Mult + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
+        table[Terminal::Number + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::Const)]);
+        table[Terminal::UserDefined + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(Terminal::UserDefined), Grammer::from(NonTerminal::VarField)]);
+        table[Terminal::ShortString + NonTerminal::Expr*COLS] = Some(vec![Grammer::from(NonTerminal::Const)]);
         
-        table[37 + NonTerminal::Assign*ROWS] = Some(vec![Grammer::from(NonTerminal::LHS), Grammer::from(Terminal::Assignment), Grammer::from(NonTerminal::Expr)]);
+        table[Terminal::RParentheses + NonTerminal::VarField*COLS] = Some(vec![]);
+        table[Terminal::LBracket + NonTerminal::VarField*COLS] = Some(vec![Grammer::from(Terminal::LBracket), Grammer::from(NonTerminal::FType)]);
+        table[Terminal::Semicolon + NonTerminal::VarField*COLS] = Some(vec![]);
+        table[Terminal::Comma + NonTerminal::VarField*COLS] = Some(vec![]);
+        table[Terminal::Assignment + NonTerminal::VarField*COLS] = Some(vec![]);
         
-        table[13 + NonTerminal::Branch*ROWS] = Some(vec![Grammer::from(Terminal::If), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses), Grammer::from(Terminal::Then), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Alternat)]);
-
-        table[6 + NonTerminal::Alternat*ROWS] = Some(vec![]);
-        table[14 + NonTerminal::Alternat*ROWS] = Some(vec![Grammer::from(Terminal::Else), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace)]);
+        table[Terminal::Call + NonTerminal::PCall*COLS] = Some(vec![Grammer::from(Terminal::Call), Grammer::from(Terminal::UserDefined)]);
         
-        table[16 + NonTerminal::Loop*ROWS] = Some(vec![Grammer::from(Terminal::Do), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace), Grammer::from(Terminal::Until), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[16 + NonTerminal::Loop*ROWS] = Some(vec![Grammer::from(Terminal::While), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses), Grammer::from(Terminal::Do), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace)]);
+        table[Terminal::UserDefined + NonTerminal::Var*COLS] = Some(vec![Grammer::from(Terminal::UserDefined)]);
         
-        table[37 + NonTerminal::LHS*ROWS] = Some(vec![Grammer::from(Terminal::UserDefined), Grammer::from(NonTerminal::VarField)]);
-        table[37 + NonTerminal::LHS*ROWS] = Some(vec![Grammer::from(Terminal::Out)]);
-
-        table[21 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::Const)]);
-        table[22 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::Const)]);
-        table[23 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::UnOp)]);
-        table[24 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::UnOp)]);
-        table[25 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[26 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[27 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[28 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[29 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[30 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[31 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::BinOp)]);
-        table[36 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::Const)]);
-        table[37 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(Terminal::UserDefined), Grammer::from(NonTerminal::VarField)]);
-        table[38 + NonTerminal::Expr*ROWS] = Some(vec![Grammer::from(NonTerminal::Const)]);
+        table[Terminal::True + NonTerminal::FType*COLS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
+        table[Terminal::False + NonTerminal::FType*COLS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
+        table[Terminal::Number + NonTerminal::FType*COLS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
+        table[Terminal::UserDefined + NonTerminal::FType*COLS] = Some(vec![Grammer::from(NonTerminal::Var), Grammer::from(Terminal::RBracket)]);
+        table[Terminal::ShortString + NonTerminal::FType*COLS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
         
-        table[1 + NonTerminal::VarField*ROWS] = Some(vec![]);
-        table[4 + NonTerminal::VarField*ROWS] = Some(vec![Grammer::from(Terminal::LBracket), Grammer::from(NonTerminal::FType)]);
-        table[6 + NonTerminal::VarField*ROWS] = Some(vec![]);
-        table[7 + NonTerminal::VarField*ROWS] = Some(vec![]);
-        table[14 + NonTerminal::VarField*ROWS] = Some(vec![]);
+        table[Terminal::True + NonTerminal::Const*COLS] = Some(vec![Grammer::from(Terminal::True)]);
+        table[Terminal::False + NonTerminal::Const*COLS] = Some(vec![Grammer::from(Terminal::False)]);
+        table[Terminal::Number + NonTerminal::Const*COLS] = Some(vec![Grammer::from(Terminal::Number)]);
+        table[Terminal::ShortString + NonTerminal::Const*COLS] = Some(vec![Grammer::from(Terminal::ShortString)]);
         
-        table[20 + NonTerminal::PCall*ROWS] = Some(vec![Grammer::from(Terminal::Call), Grammer::from(Terminal::UserDefined)]);
+        table[Terminal::Input + NonTerminal::UnOp*COLS] = Some(vec![Grammer::from(Terminal::Input), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Var), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Not + NonTerminal::UnOp*COLS] = Some(vec![Grammer::from(Terminal::Not), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
         
-        table[37 + NonTerminal::Var*ROWS] = Some(vec![Grammer::from(Terminal::UserDefined)]);
+        table[Terminal::And + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::And), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Or + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::Or), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Equal + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::Equal), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Larger + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::Larger), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Add + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::Add), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Sub + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::Sub), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
+        table[Terminal::Mult + NonTerminal::BinOp*COLS] = Some(vec![Grammer::from(Terminal::Mult), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
         
-        table[21 + NonTerminal::FType*ROWS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
-        table[22 + NonTerminal::FType*ROWS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
-        table[36 + NonTerminal::FType*ROWS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
-        table[37 + NonTerminal::FType*ROWS] = Some(vec![Grammer::from(NonTerminal::Var), Grammer::from(Terminal::RBracket)]);
-        table[38 + NonTerminal::FType*ROWS] = Some(vec![Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket)]);
+        table[Terminal::RBrace + NonTerminal::VarDecl*COLS] = Some(vec![]);
+        table[Terminal::Array + NonTerminal::VarDecl*COLS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
+        table[Terminal::Num + NonTerminal::VarDecl*COLS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
+        table[Terminal::Boolean + NonTerminal::VarDecl*COLS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
+        table[Terminal::String + NonTerminal::VarDecl*COLS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
         
-        table[21 + NonTerminal::Const*ROWS] = Some(vec![Grammer::from(Terminal::True)]);
-        table[22 + NonTerminal::Const*ROWS] = Some(vec![Grammer::from(Terminal::False)]);
-        table[36 + NonTerminal::Const*ROWS] = Some(vec![Grammer::from(Terminal::Number)]);
-        table[38 + NonTerminal::Const*ROWS] = Some(vec![Grammer::from(Terminal::ShortString)]);
+        table[Terminal::Array + NonTerminal::Dec*COLS] = Some(vec![Grammer::from(Terminal::Array), Grammer::from(NonTerminal::TYP), Grammer::from(Terminal::LBracket), Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket), Grammer::from(NonTerminal::Var)]);
+        table[Terminal::Num + NonTerminal::Dec*COLS] = Some(vec![Grammer::from(NonTerminal::TYP), Grammer::from(NonTerminal::Var)]);
+        table[Terminal::Boolean + NonTerminal::Dec*COLS] = Some(vec![Grammer::from(NonTerminal::TYP), Grammer::from(NonTerminal::Var)]);
+        table[Terminal::String + NonTerminal::Dec*COLS] = Some(vec![Grammer::from(NonTerminal::TYP), Grammer::from(NonTerminal::Var)]);
         
-        table[23 + NonTerminal::UnOp*ROWS] = Some(vec![Grammer::from(Terminal::Input), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Var), Grammer::from(Terminal::RParentheses)]);
-        table[24 + NonTerminal::UnOp*ROWS] = Some(vec![Grammer::from(Terminal::Not), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        
-        table[25 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::And), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[26 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::Or), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[27 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::Equal), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[28 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::Larger), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[29 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::Add), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[30 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::Sub), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        table[31 + NonTerminal::BinOp*ROWS] = Some(vec![Grammer::from(Terminal::Mult), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::Comma), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses)]);
-        
-        table[3 + NonTerminal::VarDecl*ROWS] = Some(vec![]);
-        table[32 + NonTerminal::VarDecl*ROWS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
-        table[33 + NonTerminal::VarDecl*ROWS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
-        table[34 + NonTerminal::VarDecl*ROWS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
-        table[35 + NonTerminal::VarDecl*ROWS] = Some(vec![Grammer::from(NonTerminal::Dec), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl)]);
-        
-        table[32 + NonTerminal::Dec*ROWS] = Some(vec![Grammer::from(Terminal::Array), Grammer::from(NonTerminal::TYP), Grammer::from(Terminal::LBracket), Grammer::from(NonTerminal::Const), Grammer::from(Terminal::RBracket), Grammer::from(NonTerminal::Var)]);
-        table[33 + NonTerminal::Dec*ROWS] = Some(vec![Grammer::from(NonTerminal::TYP), Grammer::from(NonTerminal::Var)]);
-        table[34 + NonTerminal::Dec*ROWS] = Some(vec![Grammer::from(NonTerminal::TYP), Grammer::from(NonTerminal::Var)]);
-        table[35 + NonTerminal::Dec*ROWS] = Some(vec![Grammer::from(NonTerminal::TYP), Grammer::from(NonTerminal::Var)]);
-        
-        table[33 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::Num)]);
-        table[34 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::Boolean)]);
-        table[35 + NonTerminal::TYP*ROWS] = Some(vec![Grammer::from(Terminal::String)]);        
+        table[Terminal::Num + NonTerminal::TYP*COLS] = Some(vec![Grammer::from(Terminal::Num)]);
+        table[Terminal::Boolean + NonTerminal::TYP*COLS] = Some(vec![Grammer::from(Terminal::Boolean)]);
+        table[Terminal::String + NonTerminal::TYP*COLS] = Some(vec![Grammer::from(Terminal::String)]);        
 
         tokens.push(StructureToken::new_box(Terminal::Dollar, Pos::new(0, 0)));
 
@@ -154,7 +152,7 @@ impl Parser {
         while !stack.is_empty() {
             let top = RefCell::borrow(stack.peek()).symbol;
             // println!("{:?}", stack);
-            // println!("{:?}", input);
+            // println!("{:?}", self.tokens[input].token());
 
             if let Grammer::Terminal(t) = top {
                 if t == self.tokens[input].token() {
@@ -172,12 +170,11 @@ impl Parser {
                     input += 1;
                     stack.pop();
                 } else {
-                    panic!("Invalid Program");
+                    println!("Expected {} but found {} on Ln {}, Col {}", t, if let Some(val) = self.tokens[input].str_value() { val } else { self.tokens[input].token().to_string() }, self.tokens[input].row(), self.tokens[input].col());
+                    exit(1);
                 }
             } else if let Grammer::NonTerminal(t) = top {
-                // println!("{:?}, {:?}", self.tokens[input].token()*1, t*1);
-                // println!("{:?}", self.table[self.tokens[input].token() + t*ROWS]);
-                if self.table[self.tokens[input].token() + t*ROWS].is_none() {
+                if self.table[self.tokens[input].token() + t*COLS].is_none() {
                     panic!("Invalid Program");
                 }
 
@@ -189,7 +186,7 @@ impl Parser {
                     first = false;
                 }
 
-                let mut rhs: Vec<Rc<RefCell<Node>>> = self.table[self.tokens[input].token() + t*ROWS].as_ref().unwrap().clone() // now that it is not none
+                let mut rhs: Vec<Rc<RefCell<Node>>> = self.table[self.tokens[input].token() + t*COLS].as_ref().unwrap().clone() // now that it is not none
                 .into_iter()
                 .map(|g| {
                     id += 1;
@@ -231,19 +228,21 @@ impl Parser {
 
         let sym = RefCell::borrow(&*node);
 
-        if let Some(num) = sym.num_value {
-            to_write.push_str(&format!("{}<{} id={} value={}>\n", tabs, sym.symbol, sym.id, num));
-        } else if let Some(string) = &sym.str_value {
-            to_write.push_str(&format!("{}<{} id={} value={}>\n", tabs, sym.symbol, sym.id, string));
+        if let Grammer::Terminal(_) = sym.symbol {
+            if let Some(num) = sym.num_value {
+                to_write.push_str(&format!("{}<{} id=\"{}\" value=\"{}\"/>\n", tabs, sym.symbol, sym.id, num));
+            } else if let Some(string) = &sym.str_value {
+                to_write.push_str(&format!("{}<{} id=\"{}\" value=\"{}\"/>\n", tabs, sym.symbol, sym.id, string));
+            }
         } else {
-            to_write.push_str(&format!("{}<{} id={}>\n", tabs, sym.symbol, sym.id));
+            to_write.push_str(&format!("{}<{} id=\"{}\">\n", tabs, sym.symbol, sym.id));
+    
+            for c in &sym.children {
+                Self::write_to_xml(Rc::clone(&c), to_write, level + 1);
+            }
+    
+            to_write.push_str(&format!("{}</{}>\n", tabs, sym.symbol));
         }
-
-        for c in &sym.children {
-            Self::write_to_xml(Rc::clone(&c), to_write, level + 1);
-        }
-
-        to_write.push_str(&format!("{}</{}>\n", tabs, sym.symbol));
     }
 }
 
