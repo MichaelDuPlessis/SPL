@@ -1,0 +1,32 @@
+proc start { 
+variable [int] := -5;
+variable [int]:=5;
+variable[ccc] := "HI ALEX";
+variable[ccc] := input(tmep);
+variable[ccc] := not(false);
+variable[ccc] := and(true,true);
+variable[cdc] := or(false,true);
+variable[cdc] := eq(false,true);
+variable[cdc] := add(false,true);
+variable[cdc] := sub(false,true);
+variable[cdc] := mult(false,true);
+variable[cdc] := mult(mult(false,true),add(true,false));
+variable[cdc] := add(mult(false,true),add(true,false));
+variable[cdc] := sub(mult(false,true),add(true,false));
+variable[cdc] := eq(mult(false,true),add(true,false));
+variable[cdc] := or(mult(false,true),add(true,false));
+variable[cdc] := and(mult(false,true),add(true,false));
+variable[qw] := not(and(mult(false,true),add(true,false)));
+output :=true; 
+if(false)then{}
+else
+{};
+while(true)do{};
+
+call johncc;
+do{variable[cdc] := sub(false,true);} until(true);
+
+return;   
+
+},main
+{halt;}

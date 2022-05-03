@@ -26,6 +26,7 @@ impl Parser {
         table[Terminal::While + NonTerminal::ProcDefs*COLS] = Some(vec![]);
         table[Terminal::Out + NonTerminal::ProcDefs*COLS] = Some(vec![]);
         table[Terminal::True + NonTerminal::ProcDefs*COLS] = Some(vec![]);
+        table[Terminal::UserDefined + NonTerminal::ProcDefs*COLS] = Some(vec![]);
         
         table[Terminal::Proc + NonTerminal::PD*COLS] = Some(vec![Grammer::from(Terminal::Proc), Grammer::from(Terminal::UserDefined), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::ProcDefs), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::Return), Grammer::from(Terminal::Semicolon), Grammer::from(NonTerminal::VarDecl), Grammer::from(Terminal::RBrace)]);
         
@@ -47,6 +48,7 @@ impl Parser {
         table[Terminal::UserDefined + NonTerminal::Instr*COLS] = Some(vec![Grammer::from(NonTerminal::Assign)]);
         
         table[Terminal::UserDefined + NonTerminal::Assign*COLS] = Some(vec![Grammer::from(NonTerminal::LHS), Grammer::from(Terminal::Assignment), Grammer::from(NonTerminal::Expr)]);
+        table[Terminal::Out + NonTerminal::Assign*COLS] = Some(vec![Grammer::from(NonTerminal::LHS), Grammer::from(Terminal::Assignment), Grammer::from(NonTerminal::Expr)]);
         
         table[Terminal::If + NonTerminal::Branch*COLS] = Some(vec![Grammer::from(Terminal::If), Grammer::from(Terminal::LParentheses), Grammer::from(NonTerminal::Expr), Grammer::from(Terminal::RParentheses), Grammer::from(Terminal::Then), Grammer::from(Terminal::LBrace), Grammer::from(NonTerminal::Algorithm), Grammer::from(Terminal::RBrace), Grammer::from(NonTerminal::Alternat)]);
 
@@ -174,6 +176,7 @@ impl Parser {
                     exit(1);
                 }
             } else if let Grammer::NonTerminal(t) = top {
+                println!("{} : {}", self.tokens[input].token(), t);
                 if self.table[self.tokens[input].token() + t*COLS].is_none() {
                     panic!("Invalid Program");
                 }
