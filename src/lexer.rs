@@ -84,7 +84,7 @@ impl<'a> Lexer<'a> {
                     ':' => self.token_assignment(self.current_pos),
                     // basic token
                     '('|')'|'['|']'|'{'|'}'|','|';' => {
-                        self.tokens.push(StructureToken::new_box(Terminal::basic_token(character, self.current_pos), self.current_pos));
+                        self.tokens.push(Token::new_struct_token(Terminal::basic_token(character, self.current_pos), self.current_pos));
                         self.next();
                     },
                     // Invalid token
@@ -112,7 +112,7 @@ impl<'a> Lexer<'a> {
                 exit(1);
             }
 
-            self.tokens.push(StructureToken::new_box(Terminal::Assignment, token_pos));
+            self.tokens.push(Token::new_struct_token(Terminal::Assignment, token_pos));
         } else {
             println!("End of file reached before token could be completed");
             exit(1);
@@ -129,7 +129,7 @@ impl<'a> Lexer<'a> {
 
         while let Some(current_char) = self.next() {
             if current_char == '\"' {
-                self.tokens.push(StringToken::new_box(Terminal::ShortString, self.current_token.clone(), token_pos));
+                self.tokens.push(Token::new_str_token(Terminal::ShortString, token_pos, self.current_token.clone()));
                 return;
             }
 
@@ -164,7 +164,7 @@ impl<'a> Lexer<'a> {
                     exit(1);
                 }
             }
-            self.tokens.push(NumToken::new_box(Terminal::Number, self.current_token.parse().unwrap(), token_pos)); // can unwrap cause we know its just zero
+            self.tokens.push(Token::new_num_token(Terminal::Number, token_pos, self.current_token.parse().unwrap())); // can unwrap cause we know its just zero
             return;
         }
 
@@ -190,7 +190,7 @@ impl<'a> Lexer<'a> {
             let current_char = *current_char;
 
             if "()[]{};,".contains(current_char) || FILLER.contains(&current_char) {
-                self.tokens.push(NumToken::new_box(Terminal::Number, self.current_token.parse().unwrap(), token_pos)); // can unwrap cause we know its just zeros
+                self.tokens.push(Token::new_num_token(Terminal::Number, token_pos, self.current_token.parse().unwrap())); // can unwrap cause we know its just zeros
                 return;
             }
 
@@ -204,7 +204,7 @@ impl<'a> Lexer<'a> {
             self.next();
         }
 
-        self.tokens.push(NumToken::new_box(Terminal::Number, self.current_token.parse().unwrap(), token_pos));
+        self.tokens.push(Token::new_num_token(Terminal::Number, token_pos, self.current_token.parse().unwrap()));
     }
 
     // to check and
@@ -224,7 +224,7 @@ impl<'a> Lexer<'a> {
                     if *current_char == 'd' {
                         let character = self.next().unwrap(); // can unwrap because know there will be a next
                         self.current_token.push(character); 
-                        self.tokens.push(StructureToken::new_box(Terminal::And, token_pos))
+                        self.tokens.push(Token::new_struct_token(Terminal::And, token_pos))
                     } else {
                         self.token_user_defined(token_pos);
                     }
@@ -288,10 +288,10 @@ impl<'a> Lexer<'a> {
             if ('a'..'z').contains(current_char) || ('0'..'9').contains(current_char) {
                 self.token_user_defined(token_pos)
             } else {
-                self.tokens.push(StructureToken::new_box(token_type, token_pos));
+                self.tokens.push(Token::new_struct_token(token_type, token_pos));
             }
         } else {
-            self.tokens.push(StructureToken::new_box(token_type, token_pos));
+            self.tokens.push(Token::new_struct_token(token_type, token_pos));
             return;
         }
     }
@@ -309,7 +309,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        self.tokens.push(StringToken::new_box(Terminal::UserDefined, self.current_token.clone(), token_pos))
+        self.tokens.push(Token::new_str_token(Terminal::UserDefined, token_pos, self.current_token.clone()))
     }
 
     // wrapper around iterators next

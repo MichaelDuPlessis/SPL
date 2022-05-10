@@ -8,8 +8,14 @@ mod stack;
 
 fn main() {
     let start = Instant::now();
+
+    println!("{}", std::env::args().next().unwrap());
     
-    let file = fs::read_to_string("./input.spl").unwrap();
+    let file = match fs::read_to_string("./input.spl") {
+        Ok(f) => f,
+        Err(e) => panic!("{}", e),
+    };
+
     let mut lexer = lexer::Lexer::new(&file);
     let tokens = lexer.tokenize();
     // println!("{:?}", tokens);

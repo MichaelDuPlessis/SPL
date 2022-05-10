@@ -1,6 +1,6 @@
 use std::{rc::Rc, cell::{RefCell}, fs::File, io::Write, mem, process::exit};
 
-use crate::{grammer::*, token::{TokenList, StructureToken, Pos}, stack};
+use crate::{grammer::*, token::{TokenList, Token, Pos}, stack};
 const ROWS: usize = 22;
 const COLS: usize = 40;
 
@@ -123,7 +123,7 @@ impl Parser {
         table[Terminal::Boolean + NonTerminal::TYP*COLS] = Some(vec![Grammer::from(Terminal::Boolean)]);
         table[Terminal::String + NonTerminal::TYP*COLS] = Some(vec![Grammer::from(Terminal::String)]);        
 
-        tokens.push(StructureToken::new_box(Terminal::Dollar, Pos::new(0, 0)));
+        tokens.push(Token::new_struct_token(Terminal::Dollar, Pos::new(0, 0)));
 
         Self {
             tokens,
@@ -176,9 +176,10 @@ impl Parser {
                     exit(1);
                 }
             } else if let Grammer::NonTerminal(t) = top {
-                println!("{} : {}", self.tokens[input].token(), t);
+                // println!("{} : {}", self.tokens[input].token(), t);
                 if self.table[self.tokens[input].token() + t*COLS].is_none() {
-                    panic!("Invalid Program");
+                    println!("Error: {} cannot follow {}", self.tokens[input].token(), self.tokens[input-1].token());
+                    exit(1);
                 }
 
                 let terminal = Rc::clone(&stack.pop());

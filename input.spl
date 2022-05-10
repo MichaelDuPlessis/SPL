@@ -1,4 +1,9 @@
 proc start { 
+    proc testing {
+        return
+        ;
+    },
+
 variable [int] := -5;
 variable [int]:=5;
 variable[ccc] := "HI ALEX";
@@ -29,4 +34,6 @@ do{variable[cdc] := sub(false,true);} until(true);
 return;   
 
 },main
-{halt;}
+{
+    
+    halt;}
