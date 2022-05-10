@@ -237,6 +237,8 @@ impl Parser {
                 to_write.push_str(&format!("{}<{} id=\"{}\" value=\"{}\"/>\n", tabs, sym.symbol, sym.id, num));
             } else if let Some(string) = &sym.str_value {
                 to_write.push_str(&format!("{}<{} id=\"{}\" value=\"{}\"/>\n", tabs, sym.symbol, sym.id, string));
+            } else {
+                to_write.push_str(&format!("{}<{} id=\"{}\"/>\n", tabs, sym.symbol, sym.id))
             }
         } else {
             to_write.push_str(&format!("{}<{} id=\"{}\">\n", tabs, sym.symbol, sym.id));
