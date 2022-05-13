@@ -1,6 +1,6 @@
-use std::{rc::Rc, cell::{RefCell}, fs::File, io::Write, mem, process::exit};
+use std::{rc::Rc, cell::RefCell, fs::File, io::Write, mem, process::exit};
 
-use crate::{grammer::*, token::{TokenList, Token, Pos}, stack};
+use crate::{grammer::*, token::{TokenList, Token, Pos, Node}, stack};
 const ROWS: usize = 22;
 const COLS: usize = 40;
 
@@ -248,35 +248,6 @@ impl Parser {
             }
     
             to_write.push_str(&format!("{}</{}>\n", tabs, sym.symbol));
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct Node {
-    id: usize,
-    symbol: Grammer,
-    children: Vec<Rc<RefCell<Node>>>,
-    pos: Option<Pos>,
-    num_value: Option<isize>,
-    str_value: Option<String>,
-}
-
-impl Node {
-    fn new(symbol: Grammer, id: usize) -> Self {
-        Self {
-            id,
-            symbol,
-            children: Vec::new(),
-            pos: None,
-            num_value: None,
-            str_value: None,
-        }
-    } 
-    
-    fn add_children(&mut self, children: &Vec<Rc<RefCell<Node>>>) {
-        for c in children {
-            self.children.push(Rc::clone(c));
         }
     }
 }

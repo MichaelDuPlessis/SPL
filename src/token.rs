@@ -1,5 +1,5 @@
-use std::fmt::{self, Debug};
-use crate::grammer::Terminal;
+use std::{fmt::{self, Debug}, cell::RefCell, rc::Rc};
+use crate::grammer::{Terminal, Grammer};
 
 pub type TokenList = Vec<Token>;
 
@@ -63,156 +63,6 @@ impl Token {
     }
 }
 
-// pub trait Token: fmt::Debug {
-    // fn row(&self) -> usize;
-
-    // fn col(&self) -> usize;
-
-    // fn pos(&self) -> Pos;
-
-    // fn token(&self) -> Terminal;
-
-    // fn num_value(&self) -> Option<isize> {
-    //     None
-    // }
-
-    // fn str_value(&self) -> Option<String> {
-    //     None
-    // }
-// }
-
-// #[derive(Debug)]
-// pub struct StructureToken {
-//     token: Terminal,
-//     pos: Pos,
-// }
-
-// impl StructureToken {
-    // pub fn new(token: Terminal, pos: Pos) -> Self {
-    //     Self {
-    //         token,
-    //         pos,
-    //     }
-    // }
-
-//     pub fn new_box(token: Terminal, pos: Pos) -> Box<dyn Token> {
-//         Box::new(Self::new(token, pos))
-//     }
-// }
-
-// impl Token for StructureToken {
-//     // gets tokens row
-//     fn row(&self) -> usize {
-//         self.pos.row
-//     }
-
-//     // gets tokens col
-//     fn col(&self) -> usize {
-//         self.pos.col
-//     }
-
-//     // gets tokens pos object
-//     fn pos(&self) -> Pos {
-//         self.pos
-//     }
-
-//     fn token(&self) -> Terminal {
-//         self.token
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct NumToken {
-    // token: Terminal,
-    // value: isize,
-    // pos: Pos,
-// }
-
-// impl NumToken {
-//     pub fn new(token: Terminal, value: isize, pos: Pos) -> Self {
-//         Self {
-//             token,
-//             value,
-//             pos,
-//         }
-//     }
-
-//     pub fn new_box(token: Terminal, value: isize, pos: Pos) -> Box<dyn Token> {
-//         Box::new(Self::new(token, value, pos))
-//     }
-// }
-
-// impl Token for NumToken {
-//     // gets tokens row
-//     fn row(&self) -> usize {
-//         self.pos.row
-//     }
-
-//     // gets tokens col
-//     fn col(&self) -> usize {
-//         self.pos.col
-//     }
-
-//     // gets tokens pos object
-//     fn pos(&self) -> Pos {
-//         self.pos
-//     }
-
-//     fn token(&self) -> Terminal {
-//         self.token
-//     }
-
-//     fn num_value(&self) -> Option<isize> {
-//         Some(self.value)
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct StringToken {
-//     token: Terminal,
-//     value: String,
-//     pos: Pos,
-// }
-
-// impl StringToken {
-//     pub fn new(token: Terminal, value: String, pos: Pos) -> Self {
-//         Self {
-//             token,
-//             value,
-//             pos,
-//         }
-//     }
-
-//     pub fn new_box(token: Terminal, value: String, pos: Pos) -> Box<dyn Token> {
-//         Box::new(Self::new(token, value, pos))
-//     }
-// }
-
-// impl Token for StringToken {
-//     // gets tokens row
-//     fn row(&self) -> usize {
-//         self.pos.row
-//     }
-
-//     // gets tokens col
-//     fn col(&self) -> usize {
-//         self.pos.col
-//     }
-
-//     // gets tokens pos object
-//     fn pos(&self) -> Pos {
-//         self.pos
-//     }
-
-//     fn token(&self) -> Terminal {
-//         self.token
-//     }
-
-//     fn str_value(&self) -> Option<String> {
-//         Some(self.value.clone())
-//     }
-// }
-
 // struct reprenting position of a token
 #[derive(Clone, Copy, Debug)]
 pub struct Pos {
@@ -244,5 +94,35 @@ impl Pos {
 impl fmt::Display for Pos {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Ln {}, Col {}", self.row, self.col)
+    }
+}
+
+// node used to build tree
+#[derive(Debug)]
+pub struct Node {
+    pub id: usize,
+    pub symbol: Grammer,
+    pub children: Vec<Rc<RefCell<Node>>>,
+    pub pos: Option<Pos>,
+    pub num_value: Option<isize>,
+    pub str_value: Option<String>,
+}
+
+impl Node {
+    pub fn new(symbol: Grammer, id: usize) -> Self {
+        Self {
+            id,
+            symbol,
+            children: Vec::new(),
+            pos: None,
+            num_value: None,
+            str_value: None,
+        }
+    } 
+    
+    pub fn add_children(&mut self, children: &Vec<Rc<RefCell<Node>>>) {
+        for c in children {
+            self.children.push(Rc::clone(c));
+        }
     }
 }
