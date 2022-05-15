@@ -98,6 +98,8 @@ impl fmt::Display for Pos {
 }
 
 // node used to build tree
+pub type LNode = Rc<RefCell<Node>>;
+
 #[derive(Debug)]
 pub struct Node {
     pub id: usize,
@@ -106,6 +108,7 @@ pub struct Node {
     pub pos: Option<Pos>,
     pub num_value: Option<isize>,
     pub str_value: Option<String>,
+    pub data_type: Option<Terminal>,
 }
 
 impl Node {
@@ -117,6 +120,7 @@ impl Node {
             pos: None,
             num_value: None,
             str_value: None,
+            data_type: None,
         }
     } 
     

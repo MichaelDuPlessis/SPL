@@ -1,59 +1,49 @@
-use std::{collections::LinkedList, cell::RefCell, rc::Rc, borrow::Borrow};
-use crate::{token::Node, stack::Stack, grammer::{Grammer, Terminal, NonTerminal}};
+use std::{cell::RefCell, rc::Rc, collections::HashMap};
+use crate::token::LNode;
 
 pub struct ScopeAnalysis {
-    head: Rc<RefCell<Node>>,
-    ftable: ScopeNode,
-    scope: usize,
+    head: LNode,
+    scope: ScopeNode,
+    current_id: usize,
 }
 
 impl ScopeAnalysis {
-    pub fn new(head: Rc<RefCell<Node>>) -> Self {
+    pub fn new(head: LNode) -> Self {
         Self {
             head,
-            ftable: Rc::new(RefCell::new(Default::default())),
-            scope: 0,
+            scope: Rc::new(RefCell::new(Default::default())),
+            current_id: 0,
         }
     }
 
-    pub fn analysis(&mut self) {
-        self.scope(Rc::clone(&self.head));
+    pub fn scope(&mut self) {
+
     }
 
-    fn scope(&mut self, current: Rc<RefCell<Node>>) {
-        let mut bindf = false;
-        let mut bindv = false;
-
-        for c in &RefCell::borrow(&current).children {
-            if bindf {
-                bindf = false;
-                RefCell::borrow_mut(&self.ftable)
-                .children.push(
-                    Scope::new_node(
-                        self.scope,
-                        RefCell::borrow_mut(c).str_value.take().unwrap(),
-                        Rc::clone(&self.ftable))
-                );
-            } else if bindv {
-            } else {
-                match RefCell::borrow(c).symbol {
-                    Grammer::Terminal(t) => {
-                        if t == Terminal::Proc {
-                            bindf = true;
-                            self.next_scope();
-                        }
-                    },
-                    Grammer::NonTerminal(_) => (),
-                }
-            }
-
-        }
-
-        println!("{:?}", self.ftable);
+    fn analysis(&self, mut node: LNode) {
+        let x = Rc::get_mut(&mut node);
     }
 
-    fn next_scope(&mut self) {
-        self.scope += 1;
+    fn enter(&mut self, scope: &ScopeNode) {
+        let child = Rc::clone(scope);
+        self.scope = child;
+    }
+
+    fn exit(&mut self) {
+        let parent = Rc::clone(&self.scope.borrow().parent.as_ref().unwrap());
+        self.scope = parent;
+    }
+
+    fn bind(&self, name: String, node: &LNode) {
+        self.scope.borrow_mut().bind(name, Rc::clone(node));
+    }
+
+    fn lookup(&self, name: &str) -> Option<LNode> {
+        self.scope.borrow().lookup(name)
+    }
+
+    fn new_id(&mut self) {
+        self.current_id += 1;
     }
 }
 
@@ -61,26 +51,22 @@ type ScopeNode = Rc<RefCell<Scope>>;
 
 #[derive(Debug)]
 struct Scope {
-    scope_id: usize,
-    name: String,
+    scope_id:usize,
+    vtable: HashMap<String, LNode>,
     parent: Option<ScopeNode>,
     children: Vec<ScopeNode>,
 }
 
 impl Scope {
-    fn new(scope_id: usize, name: String, parent: ScopeNode) -> Self {
-        let parent = Some(parent);
-
-        Self {
-            scope_id,
-            name,
-            parent,
-            children: Vec::new()
-        }
+    fn bind(&mut self, name: String, node: LNode) {
+        self.vtable.insert(name, node);
     }
 
-    fn new_node(scope_id: usize, name: String, parent: ScopeNode) -> ScopeNode {
-        Rc::new(RefCell::new(Scope::new(scope_id, name, parent)))
+    fn lookup(&self, name: &str) -> Option<LNode> {
+        match self.vtable.get(name) {
+            Some(n) => Some(Rc::clone(n)),
+            None => None,
+        }
     }
 }
 
@@ -88,9 +74,9 @@ impl Default for Scope {
     fn default() -> Self {
         Self {
             scope_id: 0,
-            name: String::new(),
+            vtable: HashMap::new(),
             parent: None,
-            children: Vec::new()
+            children: Vec::new(),
         }
     }
 }

@@ -29,7 +29,7 @@ fn main() {
 
     let parser = parser::Parser::new(tokens);
     let node = parser.parse();
-    parser::Parser::create_xml(node); 
+    parser::Parser::create_xml(node);
 
     // let mut scope = ScopeAnalysis::new(Rc::new(RefCell::new(node)));
     // scope.analysis();
