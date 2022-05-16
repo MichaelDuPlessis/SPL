@@ -32,14 +32,13 @@ impl ScopeAnalysis {
     pub fn scope(&mut self) {
         // builds the scope tree
         self.analysis(Rc::clone(&self.head));
-        println!("{:?}", self.scope);
+        // println!("{:?}", self.scope);
 
         self.return_found = false;
         self.proc_found = false;
 
         // // checks the scope tree
-        // self.check_scope(Rc::clone(&self.head));
-
+        self.check_scope(Rc::clone(&self.head));
     }
 
     fn check_scope(&mut self, node: LNode) {
@@ -52,7 +51,7 @@ impl ScopeAnalysis {
                         let pos = c.borrow().pos.unwrap();
 
                         if self.proc_found {
-                            self.enter(name);
+                            self.enter();
                             self.proc_found = false;
                             continue;
                         }
@@ -159,16 +158,9 @@ impl ScopeAnalysis {
         }
     }
 
-    fn enter(&mut self, scope: &str) {
-        let mut child = Rc::clone(&self.current_scope); // useless clone
-
-        for c in &self.current_scope.borrow().children {
-            if c.borrow().vtable.contains_key(scope) {
-                child = Rc::clone(c);
-                break;
-            }
-        }
-        // println!("{:?}", child);
+    fn enter(&mut self) {
+        let pos = self.current_scope.borrow_mut().next_scope();
+        let child = Rc::clone(&self.current_scope.borrow().children[pos]); // useless clone
         self.current_scope = child;
     }
 
@@ -219,6 +211,7 @@ type ScopeNode = Rc<RefCell<Scope>>;
 
 struct Scope {
     scope_id: usize,
+    scope_pos: usize,
     vtable: HashMap<String, ScopeInfo>,
     parent: Option<ScopeNode>,
     children: Vec<ScopeNode>,
@@ -277,12 +270,18 @@ impl Scope {
     fn contains(&self, name: &str) -> bool {
         self.vtable.contains_key(name)
     }
+
+    fn next_scope(&mut self) -> usize {
+        self.scope_pos += 1;
+        self.scope_pos - 1
+    }
 }
 
 impl Default for Scope {
     fn default() -> Self {
         Self {
             scope_id: 0,
+            scope_pos: 0,
             vtable: HashMap::new(),
             parent: None,
             children: Vec::new(),

@@ -1,5 +1,6 @@
 proc somefunc {
     proc somefunc2 {
+        test := 7;
         return;
         num id;
     },
@@ -9,6 +10,7 @@ proc somefunc {
         bool exists;
     },
 
+    call somefunc3;
 
     return;
     string test;
