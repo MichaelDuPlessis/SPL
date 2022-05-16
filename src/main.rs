@@ -30,7 +30,7 @@ fn main() {
     parser::Parser::create_xml(Rc::clone(&node));
 
     let mut scope = ScopeAnalysis::new(node);
-    scope.scope();
+    println!("{:?}", scope.scope());
 
     println!("{:?}", start.elapsed());
 }

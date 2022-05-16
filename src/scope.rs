@@ -29,7 +29,7 @@ impl ScopeAnalysis {
         }
     }
 
-    pub fn scope(&mut self) {
+    pub fn scope(&mut self) -> ScopeNode {
         // builds the scope tree
         self.analysis(Rc::clone(&self.head));
         // println!("{:?}", self.scope);
@@ -39,6 +39,8 @@ impl ScopeAnalysis {
 
         // // checks the scope tree
         self.check_scope(Rc::clone(&self.head));
+
+        Rc::clone(&self.current_scope)
     }
 
     fn check_scope(&mut self, node: LNode) {
@@ -188,11 +190,6 @@ impl ScopeAnalysis {
         self.current_id += 1;
         self.current_id
     }
-
-    fn old_id(&mut self) -> usize {
-        self.current_id -= 1;
-        self.current_id
-    }
     
     fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
         self.current_scope.borrow().exist_down(name)
@@ -209,7 +206,7 @@ impl ScopeAnalysis {
 
 type ScopeNode = Rc<RefCell<Scope>>;
 
-struct Scope {
+pub struct Scope {
     scope_id: usize,
     scope_pos: usize,
     vtable: HashMap<String, ScopeInfo>,

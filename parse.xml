@@ -157,17 +157,6 @@
 			</Dec>
 			<Semicolon id="102"/>
 			<VarDecl id="103">
-				<Dec id="108">
-					<TYP id="111">
-						<string id="113"/>
-					</TYP>
-					<Var id="112">
-						<userDefinedName id="114" value="test"/>
-					</Var>
-				</Dec>
-				<Semicolon id="109"/>
-				<VarDecl id="110">
-				</VarDecl>
 			</VarDecl>
 		</VarDecl>
 	</VarDecl>
