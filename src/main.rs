@@ -1,4 +1,4 @@
-use std::{fs, time::Instant, cell::RefCell, rc::Rc};
+use std::{fs, time::Instant, rc::Rc};
 
 use crate::scope::ScopeAnalysis;
 
@@ -10,15 +10,13 @@ mod stack;
 mod scope;
 
 fn main() {
-    let mut input = String::new();
-    std::io::stdin().read_line(&mut input).unwrap();
-    let input = &input[..input.len() - 1];
+    // let mut input = String::new();
+    // std::io::stdin().read_line(&mut input).unwrap();
+    // let input = &input[..input.len() - 1];
 
     let start = Instant::now();
 
-    // println!("{}", std::env::args().next().unwrap());
-    
-    let file = match fs::read_to_string(input) {
+    let file = match fs::read_to_string("./test.spl") {
         Ok(f) => f,
         Err(e) => panic!("{}", e),
     };
@@ -29,10 +27,10 @@ fn main() {
 
     let parser = parser::Parser::new(tokens);
     let node = parser.parse();
-    parser::Parser::create_xml(node);
+    parser::Parser::create_xml(Rc::clone(&node));
 
-    // let mut scope = ScopeAnalysis::new(Rc::new(RefCell::new(node)));
-    // scope.analysis();
+    let mut scope = ScopeAnalysis::new(node);
+    scope.scope();
 
     println!("{:?}", start.elapsed());
 }

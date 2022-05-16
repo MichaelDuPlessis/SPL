@@ -1,13 +1,161 @@
 <SPLProgr id="0">
 	<ProcDefs id="1">
+		<PD id="9">
+			<proc id="12"/>
+			<userDefinedName id="13" value="somefunc"/>
+			<LBrace id="14"/>
+			<ProcDefs id="15">
+				<PD id="21">
+					<proc id="24"/>
+					<userDefinedName id="25" value="somefunc2"/>
+					<LBrace id="26"/>
+					<ProcDefs id="27">
+						<PD id="33">
+							<proc id="36"/>
+							<userDefinedName id="37" value="somefunc"/>
+							<LBrace id="38"/>
+							<ProcDefs id="39">
+							</ProcDefs>
+							<Algorithm id="40">
+							</Algorithm>
+							<return id="41"/>
+							<Semicolon id="42"/>
+							<VarDecl id="43">
+							</VarDecl>
+							<RBrace id="44"/>
+						</PD>
+						<Comma id="34"/>
+						<ProcDefs id="35">
+						</ProcDefs>
+					</ProcDefs>
+					<Algorithm id="28">
+						<Instr id="45">
+							<Assign id="48">
+								<LHS id="49">
+									<userDefinedName id="52" value="exists"/>
+									<VarField id="53">
+									</VarField>
+								</LHS>
+								<Assignment id="50"/>
+								<Expr id="51">
+									<Const id="54">
+										<true id="55"/>
+									</Const>
+								</Expr>
+							</Assign>
+						</Instr>
+						<Semicolon id="46"/>
+						<Algorithm id="47">
+						</Algorithm>
+					</Algorithm>
+					<return id="29"/>
+					<Semicolon id="30"/>
+					<VarDecl id="31">
+						<Dec id="56">
+							<TYP id="59">
+								<num id="61"/>
+							</TYP>
+							<Var id="60">
+								<userDefinedName id="62" value="id"/>
+							</Var>
+						</Dec>
+						<Semicolon id="57"/>
+						<VarDecl id="58">
+						</VarDecl>
+					</VarDecl>
+					<RBrace id="32"/>
+				</PD>
+				<Comma id="22"/>
+				<ProcDefs id="23">
+				</ProcDefs>
+			</ProcDefs>
+			<Algorithm id="16">
+			</Algorithm>
+			<return id="17"/>
+			<Semicolon id="18"/>
+			<VarDecl id="19">
+				<Dec id="63">
+					<TYP id="66">
+						<bool id="68"/>
+					</TYP>
+					<Var id="67">
+						<userDefinedName id="69" value="exists"/>
+					</Var>
+				</Dec>
+				<Semicolon id="64"/>
+				<VarDecl id="65">
+				</VarDecl>
+			</VarDecl>
+			<RBrace id="20"/>
+		</PD>
+		<Comma id="10"/>
+		<ProcDefs id="11">
+		</ProcDefs>
 	</ProcDefs>
 	<main id="2"/>
 	<LBrace id="3"/>
 	<Algorithm id="4">
+		<Instr id="70">
+			<Assign id="73">
+				<LHS id="74">
+					<userDefinedName id="77" value="n"/>
+					<VarField id="78">
+					</VarField>
+				</LHS>
+				<Assignment id="75"/>
+				<Expr id="76">
+					<Const id="79">
+						<num id="80" value="7"/>
+					</Const>
+				</Expr>
+			</Assign>
+		</Instr>
+		<Semicolon id="71"/>
+		<Algorithm id="72">
+		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
+		<Dec id="81">
+			<TYP id="84">
+				<num id="86"/>
+			</TYP>
+			<Var id="85">
+				<userDefinedName id="87" value="n"/>
+			</Var>
+		</Dec>
+		<Semicolon id="82"/>
+		<VarDecl id="83">
+			<Dec id="88">
+				<arr id="91"/>
+				<TYP id="92">
+					<bool id="97"/>
+				</TYP>
+				<LBracket id="93"/>
+				<Const id="94">
+					<num id="98" value="20"/>
+				</Const>
+				<RBracket id="95"/>
+				<Var id="96">
+					<userDefinedName id="99" value="array"/>
+				</Var>
+			</Dec>
+			<Semicolon id="89"/>
+			<VarDecl id="90">
+				<Dec id="100">
+					<TYP id="103">
+						<string id="105"/>
+					</TYP>
+					<Var id="104">
+						<userDefinedName id="106" value="test"/>
+					</Var>
+				</Dec>
+				<Semicolon id="101"/>
+				<VarDecl id="102">
+				</VarDecl>
+			</VarDecl>
+		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>
 </SPLProgr>

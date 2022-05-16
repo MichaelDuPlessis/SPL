@@ -1,3 +1,19 @@
+proc somefunc {
+    proc somefunc2 {
+        exists := true;
+        return;
+        num id;
+    },
+
+    return;
+    bool exists;
+},
+
 main {
+    n := 7;
     halt;
+
+    num n;
+    arr bool[20] array;
+    string test;
 }

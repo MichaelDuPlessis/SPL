@@ -104,11 +104,12 @@ pub type LNode = Rc<RefCell<Node>>;
 pub struct Node {
     pub id: usize,
     pub symbol: Grammer,
-    pub children: Vec<Rc<RefCell<Node>>>,
+    pub children: Vec<LNode>,
     pub pos: Option<Pos>,
     pub num_value: Option<isize>,
     pub str_value: Option<String>,
-    pub data_type: Option<Terminal>,
+    pub data_type: Type,
+    pub is_array: bool,
 }
 
 impl Node {
@@ -120,13 +121,35 @@ impl Node {
             pos: None,
             num_value: None,
             str_value: None,
-            data_type: None,
+            data_type: Type::Unknown,
+            is_array: false,
         }
     } 
     
-    pub fn add_children(&mut self, children: &Vec<Rc<RefCell<Node>>>) {
+    pub fn add_children(&mut self, children: &Vec<LNode>) {
         for c in children {
             self.children.push(Rc::clone(c));
         }
     }
+}
+
+#[derive(Debug)]
+pub enum Type {
+    Number(Number),
+    Boolean(Boolean),
+    String,
+    Unknown,
+    Mixed(Box<Type>),
+}
+
+#[derive(Debug)]
+pub enum Number {
+    N,
+    NN,
+}
+
+#[derive(Debug)]
+pub enum Boolean {
+    True,
+    False,
 }

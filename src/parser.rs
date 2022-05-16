@@ -1,6 +1,6 @@
-use std::{rc::Rc, cell::RefCell, fs::File, io::Write, mem, process::exit};
+use std::{rc::Rc, cell::RefCell, fs::File, io::Write, process::exit};
 
-use crate::{grammer::*, token::{TokenList, Token, Pos, Node}, stack};
+use crate::{grammer::*, token::{TokenList, Token, Pos, Node, LNode}, stack};
 const ROWS: usize = 22;
 const COLS: usize = 40;
 
@@ -132,14 +132,14 @@ impl Parser {
     }
 
     // actual parsing
-    pub fn parse(&self) -> Node {
+    pub fn parse(&self) -> LNode {
         let mut stack = stack::Stack::from(
             vec![Grammer::from(NonTerminal::SPLProgr), Grammer::from(Terminal::Dollar)]
             .into_iter()
             .map(|g| {
                 Rc::new(RefCell::new(Node::new(g, 0)))
             })
-            .collect::<Vec<Rc<RefCell<Node>>>>()
+            .collect::<Vec<LNode>>()
         );
 
         let mut id = 0;
@@ -190,7 +190,7 @@ impl Parser {
                     first = false;
                 }
 
-                let mut rhs: Vec<Rc<RefCell<Node>>> = self.table[self.tokens[input].token() + t*COLS].as_ref().unwrap().clone() // now that it is not none
+                let mut rhs: Vec<LNode> = self.table[self.tokens[input].token() + t*COLS].as_ref().unwrap().clone() // now that it is not none
                 .into_iter()
                 .map(|g| {
                     id += 1;
@@ -206,25 +206,19 @@ impl Parser {
         }
 
         // create new head to return
-        let mut node = Node::new(RefCell::borrow(&head).symbol, RefCell::borrow(&head).id);
-        node.pos = RefCell::borrow(&head).pos;
-        node.num_value = RefCell::borrow(&head).num_value;
-        node.str_value = RefCell::borrow(&head).str_value.clone();
-        mem::swap(&mut node.children, &mut RefCell::borrow_mut(&head).children);
-
-        node
+        head
     }
 
-    pub fn create_xml(node: Node) {
+    pub fn create_xml(node: LNode) {
         let mut file = File::create("./parse.xml").unwrap();
         let mut to_write = String::new();
 
-        Self::write_to_xml(Rc::new(RefCell::new(node)), &mut to_write, 0);
+        Self::write_to_xml(node, &mut to_write, 0);
 
         file.write_all(to_write.as_bytes()).unwrap();
     }
 
-    fn write_to_xml(node: Rc<RefCell<Node>>, to_write: &mut String, level: usize) {
+    fn write_to_xml(node: LNode, to_write: &mut String, level: usize) {
         let mut tabs = String::new();
         for _ in 0..level {
             tabs.push('\t');

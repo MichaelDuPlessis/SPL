@@ -1,5 +1,5 @@
 use std::{process::exit, ops::{Mul, Add}, fmt::Display};
-use crate::token::Pos;
+use crate::token::{Pos};
 
 // types of tokens
 
@@ -91,8 +91,8 @@ impl Display for Terminal {
             Terminal::Array => write!(f, "arr"),
             Terminal::Num => write!(f, "num"),
             Terminal::Boolean => write!(f, "bool"),
-            Terminal::String => write!(f, "LParentheses"),
-            Terminal::Number => write!(f, "string"),
+            Terminal::String => write!(f, "string"),
+            Terminal::Number => write!(f, "num"),
             Terminal::UserDefined => write!(f, "userDefinedName"),
             Terminal::ShortString => write!(f, "ShortString"),
             Terminal::Dollar => write!(f, "$"),
