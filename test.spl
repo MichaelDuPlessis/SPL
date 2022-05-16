@@ -1,12 +1,17 @@
 proc somefunc {
     proc somefunc2 {
-        exists := true;
         return;
         num id;
     },
 
+    proc somefunc3 {
+        return;
+        bool exists;
+    },
+
+
     return;
-    bool exists;
+    string test;
 },
 
 main {
@@ -14,6 +19,5 @@ main {
     halt;
 
     num n;
-    arr bool[20] array;
     string test;
 }
