@@ -1,5 +1,5 @@
-use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}, borrow::BorrowMut};
-use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type, Boolean, Number}};
+use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}};
+use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type}};
 
 pub struct ScopeAnalysis {
     head: LNode,
@@ -102,9 +102,9 @@ impl ScopeAnalysis {
                 Grammer::Terminal(t) => match t {
                     Terminal::Num | Terminal::Boolean | Terminal::String => {
                         if t == Terminal::Num {
-                            self.type_found = Some(Type::Number(Number::Unknown));
+                            self.type_found = Some(Type::Number(None));
                         } else if t == Terminal::Boolean {
-                            self.type_found = Some(Type::Boolean(Boolean::Unknown));
+                            self.type_found = Some(Type::Boolean(None));
                         } else {
                             self.type_found = Some(Type::String);
                         }
@@ -304,20 +304,25 @@ impl Scope {
         // check if type does not conflict
         if let Some(si) = self.vtable.get_mut(name) {
             if si.data_type == Type::Unknown {
-                si.data_type = t;
+                si.is_defined = false;
             } else if si.data_type == t {
-                si.data_type = t;
-            } else {
-                println!("Error: cannot assign {} to {}", si.data_type, t);
-                std::process::exit(1);
+                si.is_defined = true;
             }
+            si.data_type = t;
+
+            return;
         }
 
-        let curr = &self.parent;
-        while let Some(parent) = curr {
-            if let Some(si) = RefCell::borrow_mut(parent).vtable.get_mut(name) {
+        let mut curr = Rc::clone(self.parent.as_ref().unwrap());
+        loop {
+            if let Some(si) = RefCell::borrow_mut(&curr).vtable.get_mut(name) {
                 si.data_type = t;
+                si.is_defined = true;
+                break;
             }
+
+            let parent = Rc::clone(curr.borrow().parent.as_ref().unwrap());
+            curr = parent;
         }
     }
 }
@@ -345,6 +350,7 @@ pub struct ScopeInfo {
     pub data_type: Type,
     pub is_array: bool,
     pub is_proc: bool,
+    pub is_defined: bool,
 }
 
 impl ScopeInfo {
@@ -362,6 +368,7 @@ impl Default for ScopeInfo {
             data_type: Type::Unknown,
             is_array: false,
             is_proc: false,
+            is_defined: false,
         }
     }
 }

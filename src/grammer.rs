@@ -233,8 +233,8 @@ impl Display for Grammer {
 
 #[derive(Debug, Clone, Copy)]
 pub enum Type {
-    Number(Number),
-    Boolean(Boolean),
+    Number(Option<(Number, isize)>),
+    Boolean(Option<bool>),
     String,
     Unknown,
     Mixed,
@@ -256,7 +256,7 @@ impl Display for Type {
             Type::Number(_) => "Number",
             Type::Boolean(_) => "Boolean",
             Type::String => "String",
-            Type::Unknown => "Mixed",
+            Type::Unknown => "Unknown",
             Type::Mixed => "Mixed",
         };
 
@@ -266,14 +266,12 @@ impl Display for Type {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Number {
-    Unknown,
     N,
     NN,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Boolean {
-    Unknown,
     True,
     False,
 }
