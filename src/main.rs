@@ -8,6 +8,8 @@ mod stack;
 
 fn main() {
     let mut input = String::new();
+
+    println!("Enter a file path:");
     std::io::stdin().read_line(&mut input).unwrap();
     let input = &input[..input.len() - 1];
 
