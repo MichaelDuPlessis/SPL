@@ -1,5 +1,5 @@
 use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}, borrow::BorrowMut};
-use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type}};
+use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type, Boolean, Number}};
 
 pub struct ScopeAnalysis {
     head: LNode,
@@ -9,7 +9,7 @@ pub struct ScopeAnalysis {
     proc_found: bool,
     array_found: bool,
     return_found: bool,
-    type_found: bool,
+    type_found: Option<Type>,
     call_found: bool,
 }
 
@@ -24,7 +24,7 @@ impl ScopeAnalysis {
             array_found: false,
             proc_found: false,
             return_found: false,
-            type_found: false,
+            type_found: None,
             call_found: false,
         }
     }
@@ -100,7 +100,15 @@ impl ScopeAnalysis {
             let symbol = c.borrow().symbol;
             match symbol {
                 Grammer::Terminal(t) => match t {
-                    Terminal::Num | Terminal::Boolean | Terminal::String => self.type_found = true,
+                    Terminal::Num | Terminal::Boolean | Terminal::String => {
+                        if t == Terminal::Num {
+                            self.type_found = Some(Type::Number(Number::Unknown));
+                        } else if t == Terminal::Boolean {
+                            self.type_found = Some(Type::Boolean(Boolean::Unknown));
+                        } else {
+                            self.type_found = Some(Type::String);
+                        }
+                    },
                     Terminal::Array => self.array_found = true,
                     Terminal::UserDefined => {
                         // name/key
@@ -128,9 +136,9 @@ impl ScopeAnalysis {
                             self.bind(name.clone(), node);
 
                             self.enter_new(name);
-                        } else if self.type_found {
+                        } else if let Some(typ) = self.type_found {
                             if self.contains(&name) {
-                                println!("Error: var {} at {} already defined in.", name, c.borrow().pos.unwrap());
+                                println!("Error: var {} at {} already defined.", name, c.borrow().pos.unwrap());
                                 std::process::exit(1);
                             }
 
@@ -138,11 +146,13 @@ impl ScopeAnalysis {
                                 node.is_array = true;
                             }
 
+                            node.data_type = typ;
+
                             self.bind(name, node);
                         }
 
                         self.array_found = false;
-                        self.type_found = false;
+                        self.type_found = None;
                         self.proc_found = false;
                     },
                     Terminal::Proc => self.proc_found = true,
@@ -265,7 +275,11 @@ impl Scope {
     }
 
     fn contains(&self, name: &str) -> bool {
-        self.vtable.contains_key(name)
+        if let Some(si) = self.vtable.get(name) {
+            !si.is_proc
+        } else {
+            false
+        }
     }
 
     fn scope_pos(&self, name: &str) -> usize {
@@ -287,8 +301,16 @@ impl Scope {
     }
 
     pub fn add_type(&mut self, name: &str, t: Type) {
+        // check if type does not conflict
         if let Some(si) = self.vtable.get_mut(name) {
-            si.data_type = t;
+            if si.data_type == Type::Unknown {
+                si.data_type = t;
+            } else if si.data_type == t {
+                si.data_type = t;
+            } else {
+                println!("Error: cannot assign {} to {}", si.data_type, t);
+                std::process::exit(1);
+            }
         }
 
         let curr = &self.parent;

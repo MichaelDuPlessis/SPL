@@ -1,7 +1,12 @@
+proc testproc1 {
+    return;
+},
+
 main {
     n := 7;
     halt;
 
+    bool testproc1;
     num n;
     string test;
 }

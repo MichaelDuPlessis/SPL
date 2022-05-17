@@ -7,7 +7,6 @@ pub struct TypeChecker {
     ast: LNode,
     enter_scope: bool,
     exit_scope: bool,
-    assign: bool,
 }
 
 impl TypeChecker {
@@ -17,11 +16,11 @@ impl TypeChecker {
             ast,
             enter_scope: false,
             exit_scope: false,
-            assign: false,
         }
     }
 
     pub fn type_check(&mut self) {
+        println!("started type checking");
         self.analysis(Rc::clone(&self.ast));
         println!("{:?}", self.scope);
     }
@@ -34,7 +33,7 @@ impl TypeChecker {
                     Terminal::Proc => self.enter_scope = true,
                     Terminal::UserDefined => {
                         if self.enter_scope {
-                            self.exit_scope = false;
+                            self.enter_scope = false;
                             self.enter(c.borrow().str_value.as_ref().unwrap());
                         }
                     }

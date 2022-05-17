@@ -240,14 +240,40 @@ pub enum Type {
     Mixed,
 }
 
-#[derive(Debug, Clone, Copy)]
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Number(_), Self::Number(_)) => true,
+            (Self::Boolean(_), Self::Boolean(_)) => true,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
+}
+
+impl Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let print = match self {
+            Type::Number(_) => "Number",
+            Type::Boolean(_) => "Boolean",
+            Type::String => "String",
+            Type::Unknown => "Mixed",
+            Type::Mixed => "Mixed",
+        };
+
+        write!(f, "{}", print)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Number {
+    Unknown,
     N,
     NN,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Boolean {
+    Unknown,
     True,
     False,
 }
