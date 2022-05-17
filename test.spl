@@ -1,6 +1,5 @@
 main {
-    x := 2;
-    n := add(7, mult(2, x));
+    n := 7;
     halt;
 
     num n;

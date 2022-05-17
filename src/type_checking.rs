@@ -68,7 +68,8 @@ impl TypeChecker {
                 }
             }
 
-            self.scope.borrow_mut().add_type(name, self.expr_type(&children[2]));
+            let typ = self.expr_type(&children[2]);
+            self.scope.borrow_mut().add_type(name, typ);
         }
     }
 
@@ -77,12 +78,29 @@ impl TypeChecker {
         let sym = kind.borrow().symbol;
 
         match sym {
-            Grammer::Terminal(_) => Type::Unknown, // for array indexing do later
+            Grammer::Terminal(t) => match t {
+                Terminal::UserDefined => self.udn_type(kind),
+                _ => panic!("Should never get here expr_type terminal"),
+            }, 
             Grammer::NonTerminal(nt) => match nt {
                 NonTerminal::Const => self.const_type(kind),
+                NonTerminal::UnOp => self.un_op_type(kind),
                 NonTerminal::BinOp => self.bin_op_type(kind),
                 _ => Type::Unknown,
             },
+        }
+    }
+
+    fn udn_type(&self, node: &LNode) -> Type {
+        let name = node.borrow();
+        let name = name.str_value.as_ref().unwrap();
+
+        let scope_info = self.scope.borrow().exist_up(name);
+
+        if let Some(si) = scope_info {
+            si.data_type
+        } else {
+            panic!("Should never get here udn_type");
         }
     }
 

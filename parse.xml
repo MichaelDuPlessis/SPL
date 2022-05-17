@@ -7,89 +7,45 @@
 		<Instr id="9">
 			<Assign id="12">
 				<LHS id="13">
-					<userDefinedName id="16" value="x"/>
+					<userDefinedName id="16" value="n"/>
 					<VarField id="17">
 					</VarField>
 				</LHS>
 				<Assignment id="14"/>
 				<Expr id="15">
 					<Const id="18">
-						<num id="19" value="2"/>
+						<num id="19" value="7"/>
 					</Const>
 				</Expr>
 			</Assign>
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
-			<Instr id="20">
-				<Assign id="23">
-					<LHS id="24">
-						<userDefinedName id="27" value="n"/>
-						<VarField id="28">
-						</VarField>
-					</LHS>
-					<Assignment id="25"/>
-					<Expr id="26">
-						<BinOp id="29">
-							<add id="30"/>
-							<LParentheses id="31"/>
-							<Expr id="32">
-								<Const id="36">
-									<num id="37" value="7"/>
-								</Const>
-							</Expr>
-							<Comma id="33"/>
-							<Expr id="34">
-								<BinOp id="38">
-									<mult id="39"/>
-									<LParentheses id="40"/>
-									<Expr id="41">
-										<Const id="45">
-											<num id="46" value="2"/>
-										</Const>
-									</Expr>
-									<Comma id="42"/>
-									<Expr id="43">
-										<userDefinedName id="47" value="x"/>
-										<VarField id="48">
-										</VarField>
-									</Expr>
-									<RParentheses id="44"/>
-								</BinOp>
-							</Expr>
-							<RParentheses id="35"/>
-						</BinOp>
-					</Expr>
-				</Assign>
-			</Instr>
-			<Semicolon id="21"/>
-			<Algorithm id="22">
-			</Algorithm>
 		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="49">
-			<TYP id="52">
-				<num id="54"/>
+		<Dec id="20">
+			<TYP id="23">
+				<num id="25"/>
 			</TYP>
-			<Var id="53">
-				<userDefinedName id="55" value="n"/>
+			<Var id="24">
+				<userDefinedName id="26" value="n"/>
 			</Var>
 		</Dec>
-		<Semicolon id="50"/>
-		<VarDecl id="51">
-			<Dec id="56">
-				<TYP id="59">
-					<num id="61"/>
+		<Semicolon id="21"/>
+		<VarDecl id="22">
+			<Dec id="27">
+				<TYP id="30">
+					<num id="32"/>
 				</TYP>
-				<Var id="60">
-					<userDefinedName id="62" value="x"/>
+				<Var id="31">
+					<userDefinedName id="33" value="x"/>
 				</Var>
 			</Dec>
-			<Semicolon id="57"/>
-			<VarDecl id="58">
+			<Semicolon id="28"/>
+			<VarDecl id="29">
 			</VarDecl>
 		</VarDecl>
 	</VarDecl>

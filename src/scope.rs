@@ -11,6 +11,7 @@ pub struct ScopeAnalysis {
     return_found: bool,
     type_found: Option<Type>,
     call_found: bool,
+    halt_found: bool,
 }
 
 impl ScopeAnalysis {
@@ -26,6 +27,7 @@ impl ScopeAnalysis {
             return_found: false,
             type_found: None,
             call_found: false,
+            halt_found: false,
         }
     }
 
@@ -39,6 +41,11 @@ impl ScopeAnalysis {
 
         // // checks the scope tree
         self.check_scope(Rc::clone(&self.head));
+
+        if !self.all_used() {
+            println!("Not all variables and procedures used");
+            std::process::exit(1);
+        }
 
         Rc::clone(&self.current_scope)
     }
@@ -63,6 +70,7 @@ impl ScopeAnalysis {
                                 println!("Error: proc call {} at {} is not defined.", name, pos);
                                 std::process::exit(1);
                             }
+                            self.used(name, true);
                             self.call_found = false;
                             continue;
                         }
@@ -72,16 +80,20 @@ impl ScopeAnalysis {
                                 println!("Error: var {} at {} is not defined.", name, pos);
                                 std::process::exit(1); 
                             }
+                            if !self.return_found && !self.halt_found {
+                                self.used(name, false);
+                            }
+
                             continue;
                         }
 
-                        // println!("{:?}", self.current_scope);
                         println!("Error: var {} at {} is not defined.", name, pos);
                         std::process::exit(1); 
                     },
                     Terminal::Call => self.call_found = true,
                     Terminal::Proc => self.proc_found = true,
                     Terminal::Return => self.return_found = true,
+                    Terminal::Halt => self.halt_found = true,
                     Terminal::RBrace => {
                         if !self.return_found { continue; }
 
@@ -212,6 +224,18 @@ impl ScopeAnalysis {
     fn contains(&self, name: &str) -> bool {
         self.current_scope.borrow().contains(name)
     }
+
+    fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
+        self.current_scope.borrow().find_in_scope(name).map(|si| *si)
+    }
+
+    fn used(&self, name: &str, call: bool) {
+        self.scope.borrow_mut().used(name, call);
+    }
+
+    fn all_used(&self) -> bool {
+        self.scope.borrow().all_used()
+    }
 }
 
 pub type ScopeNode = Rc<RefCell<Scope>>;
@@ -264,7 +288,7 @@ impl Scope {
 
     pub fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
         if self.vtable.contains_key(name) {
-            return self.vtable.get(name).map(|opt| *opt);
+            return self.vtable.get(name).map(|si| *si);
         }
 
         if let Some(parent) = &self.parent {
@@ -280,6 +304,10 @@ impl Scope {
         } else {
             false
         }
+    }
+
+    fn find_in_scope(&self, name: &str) -> Option<&ScopeInfo> {
+        self.vtable.get(name)
     }
 
     fn scope_pos(&self, name: &str) -> usize {
@@ -298,6 +326,35 @@ impl Scope {
 
     pub fn parent(&self) -> ScopeNode {
         Rc::clone(self.parent.as_ref().unwrap())
+    }
+
+    fn used(&mut self, name: &str, call: bool) {
+        if let Some(si) = self.vtable.get_mut(name) {
+            if si.is_proc == call {
+                si.is_used = true;
+                return;
+            }
+        }
+
+        if let Some(parent) = &self.parent {
+            parent.borrow_mut().used(name, call);
+        }
+    }
+
+    fn all_used(&self) -> bool {
+        for (_, si) in &self.vtable {
+            if !si.is_used {
+                return false;
+            }
+        }
+
+        for c in &self.children {
+            if !c.borrow().all_used() {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     pub fn add_type(&mut self, name: &str, t: Type) {
@@ -351,6 +408,7 @@ pub struct ScopeInfo {
     pub is_array: bool,
     pub is_proc: bool,
     pub is_defined: bool,
+    pub is_used: bool,
 }
 
 impl ScopeInfo {
@@ -369,6 +427,7 @@ impl Default for ScopeInfo {
             is_array: false,
             is_proc: false,
             is_defined: false,
+            is_used: false,
         }
     }
 }
