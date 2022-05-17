@@ -1,5 +1,5 @@
-use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug, Display}, default};
-use crate::{token::{LNode, Type}, grammer::{Terminal, Grammer}};
+use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}};
+use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type}};
 
 pub struct ScopeAnalysis {
     head: LNode,
@@ -53,7 +53,7 @@ impl ScopeAnalysis {
                         let pos = c.borrow().pos.unwrap();
 
                         if self.proc_found {
-                            self.enter();
+                            self.enter(name);
                             self.proc_found = false;
                             continue;
                         }
@@ -125,9 +125,9 @@ impl ScopeAnalysis {
                             }
 
                             node.is_proc = true;
-                            self.bind(name, node);
+                            self.bind(name.clone(), node);
 
-                            self.enter_new();
+                            self.enter_new(name);
                         } else if self.type_found {
                             if self.contains(&name) {
                                 println!("Error: var {} at {} already defined in.", name, c.borrow().pos.unwrap());
@@ -160,16 +160,16 @@ impl ScopeAnalysis {
         }
     }
 
-    fn enter(&mut self) {
-        let pos = self.current_scope.borrow_mut().next_scope();
+    fn enter(&mut self, name: &str) {
+        let pos = self.current_scope.borrow().scope_pos(name);
         let child = Rc::clone(&self.current_scope.borrow().children[pos]); // useless clone
         self.current_scope = child;
     }
 
-    fn enter_new(&mut self) {
+    fn enter_new(&mut self, name: String) {
         let child = Scope::new(self.next_id(), Rc::clone(&self.current_scope));
         let child = Rc::new(RefCell::new(child));
-        self.current_scope.borrow_mut().children.push(Rc::clone(&child));
+        self.current_scope.borrow_mut().add_scope(Rc::clone(&child), name);
         self.current_scope = child;
     }
 
@@ -208,7 +208,7 @@ type ScopeNode = Rc<RefCell<Scope>>;
 
 pub struct Scope {
     scope_id: usize,
-    scope_pos: usize,
+    scope_map: HashMap<String, usize>,
     vtable: HashMap<String, ScopeInfo>,
     parent: Option<ScopeNode>,
     children: Vec<ScopeNode>,
@@ -268,9 +268,13 @@ impl Scope {
         self.vtable.contains_key(name)
     }
 
-    fn next_scope(&mut self) -> usize {
-        self.scope_pos += 1;
-        self.scope_pos - 1
+    fn scope_pos(&self, name: &str) -> usize {
+        *self.scope_map.get(name).unwrap()
+    }
+
+    fn add_scope(&mut self, child: ScopeNode, name: String) {
+        self.scope_map.insert(name, self.children.len());
+        self.children.push(Rc::clone(&child));
     }
 }
 
@@ -278,7 +282,7 @@ impl Default for Scope {
     fn default() -> Self {
         Self {
             scope_id: 0,
-            scope_pos: 0,
+            scope_map: HashMap::new(),
             vtable: HashMap::new(),
             parent: None,
             children: Vec::new(),
@@ -294,6 +298,7 @@ impl Debug for Scope {
 
 #[derive(Debug, Clone, Copy)]
 struct ScopeInfo {
+    data_type: Type,
     is_array: bool,
     is_proc: bool,
 }
@@ -301,6 +306,7 @@ struct ScopeInfo {
 impl Default for ScopeInfo {
     fn default() -> Self {
         Self {
+            data_type: Type::Unknown,
             is_array: false,
             is_proc: false,
         }

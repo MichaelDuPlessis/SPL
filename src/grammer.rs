@@ -230,3 +230,24 @@ impl Display for Grammer {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum Type {
+    Number(Number),
+    Boolean(Boolean),
+    String,
+    Unknown,
+    Mixed,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Number {
+    N,
+    NN,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Boolean {
+    True,
+    False,
+}

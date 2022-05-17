@@ -10,10 +10,6 @@ mod stack;
 mod scope;
 
 fn main() {
-    // let mut input = String::new();
-    // std::io::stdin().read_line(&mut input).unwrap();
-    // let input = &input[..input.len() - 1];
-
     let start = Instant::now();
 
     let file = match fs::read_to_string("./test.spl") {
