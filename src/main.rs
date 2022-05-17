@@ -1,6 +1,6 @@
 use std::{fs, time::Instant, rc::Rc};
 
-use crate::scope::ScopeAnalysis;
+use crate::{scope::ScopeAnalysis, type_checking::TypeChecker};
 
 mod lexer;
 mod parser;
@@ -8,6 +8,7 @@ mod grammer;
 mod token;
 mod stack;
 mod scope;
+mod type_checking;
 
 fn main() {
     let start = Instant::now();
@@ -25,8 +26,12 @@ fn main() {
     let node = parser.parse();
     parser::Parser::create_xml(Rc::clone(&node));
 
-    let mut scope = ScopeAnalysis::new(node);
-    println!("{:?}", scope.scope());
+    let mut scope_analysis = ScopeAnalysis::new(Rc::clone(&node));
+    let scope = scope_analysis.scope();
+    // println!("{:?}", scope.scope());
+
+    let mut type_checker = TypeChecker::new(Rc::clone(&scope), Rc::clone(&node));
+    type_checker.type_check();
 
     println!("{:?}", start.elapsed());
 }

@@ -108,7 +108,6 @@ pub struct Node {
     pub pos: Option<Pos>,
     pub num_value: Option<isize>,
     pub str_value: Option<String>,
-    pub is_array: bool,
 }
 
 impl Node {
@@ -120,7 +119,6 @@ impl Node {
             pos: None,
             num_value: None,
             str_value: None,
-            is_array: false,
         }
     } 
     

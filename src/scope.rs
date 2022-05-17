@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}};
+use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}, borrow::BorrowMut};
 use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type}};
 
 pub struct ScopeAnalysis {
@@ -169,7 +169,7 @@ impl ScopeAnalysis {
     fn enter_new(&mut self, name: String) {
         let child = Scope::new(self.next_id(), Rc::clone(&self.current_scope));
         let child = Rc::new(RefCell::new(child));
-        self.current_scope.borrow_mut().add_scope(Rc::clone(&child), name);
+        RefCell::borrow_mut(&self.current_scope).add_scope(Rc::clone(&child), name);
         self.current_scope = child;
     }
 
@@ -179,7 +179,7 @@ impl ScopeAnalysis {
     }
 
     fn bind(&self, name: String, node: ScopeInfo) {
-        self.current_scope.borrow_mut().bind(name, node);
+        RefCell::borrow_mut(&self.current_scope).bind(name, node);
     }
 
     fn lookup(&self, name: &str) -> Option<ScopeInfo> {
@@ -204,7 +204,7 @@ impl ScopeAnalysis {
     }
 }
 
-type ScopeNode = Rc<RefCell<Scope>>;
+pub type ScopeNode = Rc<RefCell<Scope>>;
 
 pub struct Scope {
     scope_id: usize,
@@ -252,7 +252,7 @@ impl Scope {
         None
     }
 
-    fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
+    pub fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
         if self.vtable.contains_key(name) {
             return self.vtable.get(name).map(|opt| *opt);
         }
@@ -272,9 +272,31 @@ impl Scope {
         *self.scope_map.get(name).unwrap()
     }
 
+    pub fn child_scope(&self, name: &str) -> ScopeNode {
+        let pos = *self.scope_map.get(name).unwrap();
+        Rc::clone(&self.children[pos])
+    }
+
     fn add_scope(&mut self, child: ScopeNode, name: String) {
         self.scope_map.insert(name, self.children.len());
         self.children.push(Rc::clone(&child));
+    }
+
+    pub fn parent(&self) -> ScopeNode {
+        Rc::clone(self.parent.as_ref().unwrap())
+    }
+
+    pub fn add_type(&mut self, name: &str, t: Type) {
+        if let Some(si) = self.vtable.get_mut(name) {
+            si.data_type = t;
+        }
+
+        let curr = &self.parent;
+        while let Some(parent) = curr {
+            if let Some(si) = RefCell::borrow_mut(parent).vtable.get_mut(name) {
+                si.data_type = t;
+            }
+        }
     }
 }
 
@@ -297,10 +319,19 @@ impl Debug for Scope {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ScopeInfo {
-    data_type: Type,
-    is_array: bool,
-    is_proc: bool,
+pub struct ScopeInfo {
+    pub data_type: Type,
+    pub is_array: bool,
+    pub is_proc: bool,
+}
+
+impl ScopeInfo {
+    fn new(data_type: Type) -> Self {
+        Self {
+            data_type,
+            ..Default::default()
+        }
+    }
 }
 
 impl Default for ScopeInfo {
