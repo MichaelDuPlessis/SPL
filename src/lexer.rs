@@ -159,7 +159,8 @@ impl<'a> Lexer<'a> {
         if self.current_token == "0" {
             if let Some(next_char) = self.peek() {
                 let next_char = *next_char;
-                if !FILLER.contains(&next_char) {
+                if !FILLER.contains(&next_char) && next_char != ',' && next_char != ')' && next_char != ';' && next_char != ']' {
+                    println!("{}", next_char);
                     println!("Invalid token {} at {}", next_char, self.current_pos);
                     exit(1);
                 }
@@ -171,7 +172,7 @@ impl<'a> Lexer<'a> {
         if self.current_token == "-" {
             match self.next() {
                 Some(current_char) => {
-                    if !('1'..'9').contains(&current_char) {
+                    if !('1'..':').contains(&current_char) {
                         println!("Invalid symbol {} afer - at {}", current_char, token_pos);
                         exit(1);
                     }

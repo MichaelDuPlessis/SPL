@@ -5,19 +5,41 @@
 	<LBrace id="3"/>
 	<Algorithm id="4">
 		<Instr id="9">
-			<Assign id="12">
-				<LHS id="13">
-					<userDefinedName id="16" value="n"/>
-					<VarField id="17">
-					</VarField>
-				</LHS>
-				<Assignment id="14"/>
+			<Branch id="12">
+				<if id="13"/>
+				<LParentheses id="14"/>
 				<Expr id="15">
-					<Const id="18">
-						<num id="19" value="7"/>
+					<Const id="22">
+						<true id="23"/>
 					</Const>
 				</Expr>
-			</Assign>
+				<RParentheses id="16"/>
+				<then id="17"/>
+				<LBrace id="18"/>
+				<Algorithm id="19">
+					<Instr id="24">
+						<Assign id="27">
+							<LHS id="28">
+								<userDefinedName id="31" value="n"/>
+								<VarField id="32">
+								</VarField>
+							</LHS>
+							<Assignment id="29"/>
+							<Expr id="30">
+								<Const id="33">
+									<true id="34"/>
+								</Const>
+							</Expr>
+						</Assign>
+					</Instr>
+					<Semicolon id="25"/>
+					<Algorithm id="26">
+					</Algorithm>
+				</Algorithm>
+				<RBrace id="20"/>
+				<Alternat id="21">
+				</Alternat>
+			</Branch>
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
@@ -26,16 +48,16 @@
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="20">
-			<TYP id="23">
-				<num id="25"/>
+		<Dec id="35">
+			<TYP id="38">
+				<bool id="40"/>
 			</TYP>
-			<Var id="24">
-				<userDefinedName id="26" value="n"/>
+			<Var id="39">
+				<userDefinedName id="41" value="n"/>
 			</Var>
 		</Dec>
-		<Semicolon id="21"/>
-		<VarDecl id="22">
+		<Semicolon id="36"/>
+		<VarDecl id="37">
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>

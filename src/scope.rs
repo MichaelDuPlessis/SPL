@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}};
+use std::{cell::RefCell, rc::Rc, collections::{HashMap, LinkedList}, fmt::{Debug}};
 use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type, Number, Boolean}};
 
 pub struct ScopeAnalysis {
@@ -51,7 +51,7 @@ impl ScopeAnalysis {
     }
 
     fn check_scope(&mut self, node: LNode) {
-        for c in &node.borrow().children {
+        for (i, c) in node.borrow().children.iter().enumerate() {
             match c.borrow().symbol {
                 Grammer::Terminal(t) => match t {
                     Terminal::UserDefined => {
@@ -70,7 +70,8 @@ impl ScopeAnalysis {
                                 println!("Error: proc call {} at {} is not defined.", name, pos);
                                 std::process::exit(1);
                             }
-                            self.used(name, true);
+
+                            self.used(name, true, false);
                             self.call_found = false;
                             continue;
                         }
@@ -81,7 +82,11 @@ impl ScopeAnalysis {
                                 std::process::exit(1); 
                             }
                             if !self.return_found && !self.halt_found {
-                                self.used(name, false);
+                                if node.borrow().children[i+1].borrow().children.is_empty() {
+                                    self.used(name, false, false);
+                                } else {
+                                    self.used(name, false, true);
+                                }
                             }
 
                             continue;
@@ -204,9 +209,9 @@ impl ScopeAnalysis {
         RefCell::borrow_mut(&self.current_scope).bind(name, node);
     }
 
-    fn lookup(&self, name: &str) -> Option<ScopeInfo> {
-        self.scope.borrow().lookup(name)
-    }
+    // fn lookup(&self, name: &str) -> Option<ScopeInfo> {
+    //     self.scope.borrow().lookup(name)
+    // }
 
     fn next_id(&mut self) -> usize {
         self.current_id += 1;
@@ -221,16 +226,12 @@ impl ScopeAnalysis {
         self.current_scope.borrow().exist_up(name)
     }
 
-    fn contains(&self, name: &str) -> bool {
-        self.current_scope.borrow().contains(name)
-    }
-
     fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
-        self.current_scope.borrow().find_in_scope(name).map(|si| *si)
+        self.current_scope.borrow().find_in_scope(name)
     }
 
-    fn used(&self, name: &str, call: bool) {
-        self.scope.borrow_mut().used(name, call);
+    fn used(&self, name: &str, call: bool, arr: bool) {
+        self.current_scope.borrow_mut().used(name, call, arr);
     }
 
     fn all_used(&self) -> bool {
@@ -243,7 +244,7 @@ pub type ScopeNode = Rc<RefCell<Scope>>;
 pub struct Scope {
     scope_id: usize,
     scope_map: HashMap<String, usize>,
-    vtable: HashMap<String, ScopeInfo>,
+    vtable: LinkedList<(String, ScopeInfo)>,
     parent: Option<ScopeNode>,
     children: Vec<ScopeNode>,
 }
@@ -259,22 +260,23 @@ impl Scope {
     }
 
     fn bind(&mut self, name: String, node: ScopeInfo) {
-        self.vtable.insert(name, node);
+        self.vtable.push_front((name, node));
     }
 
-    fn lookup(&self, name: &str) -> Option<ScopeInfo> {
-        let mut node = self.vtable.get(name).map(|opt| *opt);
+    // fn lookup(&self, name: &str) -> Option<ScopeInfo> {
+    //     // let mut node = self.vtable.get(name).map(|opt| *opt);
+    //     let mut node = self.vtable.iter().find(|i| i.0 == name);
 
-        if node.is_none() {
-            node = if let Some(p) = &self.parent { p.borrow().lookup(name) } else { None }
-        }
+    //     if node.is_none() {
+    //         node = if let Some(p) = &self.parent { p.borrow().lookup(name) } else { None }
+    //     }
 
-        node
-    }
+    //     node
+    // }
 
     fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
-        if self.vtable.contains_key(name) {
-            return self.vtable.get(name).map(|opt| *opt);
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+            return Some(si.1);
         }
 
         for c in &self.children {
@@ -287,8 +289,8 @@ impl Scope {
     }
 
     pub fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
-        if self.vtable.contains_key(name) {
-            return self.vtable.get(name).map(|si| *si);
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+            return Some(si.1);
         }
 
         if let Some(parent) = &self.parent {
@@ -298,16 +300,12 @@ impl Scope {
         None
     }
 
-    fn contains(&self, name: &str) -> bool {
-        if let Some(si) = self.vtable.get(name) {
-            !si.is_proc
+    fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+            Some(si.1)
         } else {
-            false
+            None
         }
-    }
-
-    fn find_in_scope(&self, name: &str) -> Option<&ScopeInfo> {
-        self.vtable.get(name)
     }
 
     fn scope_pos(&self, name: &str) -> usize {
@@ -328,16 +326,15 @@ impl Scope {
         Rc::clone(self.parent.as_ref().unwrap())
     }
 
-    fn used(&mut self, name: &str, call: bool) {
-        if let Some(si) = self.vtable.get_mut(name) {
-            if si.is_proc == call {
-                si.is_used = true;
-                return;
-            }
+    fn used(&mut self, name: &str, call: bool, arr: bool) {
+        if let Some((_, si)) = self.vtable.iter_mut().find(|i|
+            i.0 == name && i.1.is_proc == call && i.1.is_array == arr) {
+            si.is_used = true;
+            return;
         }
 
         if let Some(parent) = &self.parent {
-            parent.borrow_mut().used(name, call);
+            parent.borrow_mut().used(name, call, arr);
         }
     }
 
@@ -359,20 +356,25 @@ impl Scope {
 
     pub fn add_type(&mut self, name: &str, t: Type) {
         // check if type does not conflict
-        if let Some(si) = self.vtable.get_mut(name) {
+        if let Some((_, si)) = self.vtable.iter_mut().find(|i| i.0 == name) {
             if si.data_type == Type::Unknown {
                 si.is_defined = false;
             } else if si.data_type == t {
                 si.is_defined = true;
             }
-            si.data_type = t;
 
+            if si.data_type != t {
+                println!("Error: Cannot assign {} to {}", t, si.data_type);
+                std::process::exit(1);
+            }
+
+            si.data_type = t;
             return;
         }
 
         let mut curr = Rc::clone(self.parent.as_ref().unwrap());
         loop {
-            if let Some(si) = RefCell::borrow_mut(&curr).vtable.get_mut(name) {
+            if let Some((_, si)) = RefCell::borrow_mut(&curr).vtable.iter_mut().find(|i| i.0 == name) {
                 si.data_type = t;
                 si.is_defined = true;
                 break;
@@ -389,7 +391,7 @@ impl Default for Scope {
         Self {
             scope_id: 0,
             scope_map: HashMap::new(),
-            vtable: HashMap::new(),
+            vtable: LinkedList::new(),
             parent: None,
             children: Vec::new(),
         }

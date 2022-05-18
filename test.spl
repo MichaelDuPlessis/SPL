@@ -1,6 +1,9 @@
 main {
-    n := 7;
+    if (true) then {
+        n := true;
+    };
+    
     halt;
 
-    num n;
+    bool n;
 }
