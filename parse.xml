@@ -5,59 +5,79 @@
 	<LBrace id="3"/>
 	<Algorithm id="4">
 		<Instr id="9">
-			<Branch id="12">
-				<if id="13"/>
-				<LParentheses id="14"/>
+			<Assign id="12">
+				<LHS id="13">
+					<userDefinedName id="16" value="b"/>
+					<VarField id="17">
+						<LBracket id="18"/>
+						<FType id="19">
+							<Var id="20">
+								<userDefinedName id="22" value="b"/>
+							</Var>
+							<RBracket id="21"/>
+						</FType>
+					</VarField>
+				</LHS>
+				<Assignment id="14"/>
 				<Expr id="15">
-					<Const id="22">
-						<true id="23"/>
+					<Const id="23">
+						<true id="24"/>
 					</Const>
 				</Expr>
-				<RParentheses id="16"/>
-				<then id="17"/>
-				<LBrace id="18"/>
-				<Algorithm id="19">
-					<Instr id="24">
-						<Assign id="27">
-							<LHS id="28">
-								<userDefinedName id="31" value="n"/>
-								<VarField id="32">
-								</VarField>
-							</LHS>
-							<Assignment id="29"/>
-							<Expr id="30">
-								<Const id="33">
-									<true id="34"/>
-								</Const>
-							</Expr>
-						</Assign>
-					</Instr>
-					<Semicolon id="25"/>
-					<Algorithm id="26">
-					</Algorithm>
-				</Algorithm>
-				<RBrace id="20"/>
-				<Alternat id="21">
-				</Alternat>
-			</Branch>
+			</Assign>
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
+			<Instr id="25">
+				<Assign id="28">
+					<LHS id="29">
+						<userDefinedName id="32" value="b"/>
+						<VarField id="33">
+						</VarField>
+					</LHS>
+					<Assignment id="30"/>
+					<Expr id="31">
+						<Const id="34">
+							<num id="35" value="0"/>
+						</Const>
+					</Expr>
+				</Assign>
+			</Instr>
+			<Semicolon id="26"/>
+			<Algorithm id="27">
+			</Algorithm>
 		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="35">
-			<TYP id="38">
-				<bool id="40"/>
+		<Dec id="36">
+			<arr id="39"/>
+			<TYP id="40">
+				<bool id="45"/>
 			</TYP>
-			<Var id="39">
-				<userDefinedName id="41" value="n"/>
+			<LBracket id="41"/>
+			<Const id="42">
+				<num id="46" value="10"/>
+			</Const>
+			<RBracket id="43"/>
+			<Var id="44">
+				<userDefinedName id="47" value="b"/>
 			</Var>
 		</Dec>
-		<Semicolon id="36"/>
-		<VarDecl id="37">
+		<Semicolon id="37"/>
+		<VarDecl id="38">
+			<Dec id="48">
+				<TYP id="51">
+					<num id="53"/>
+				</TYP>
+				<Var id="52">
+					<userDefinedName id="54" value="b"/>
+				</Var>
+			</Dec>
+			<Semicolon id="49"/>
+			<VarDecl id="50">
+			</VarDecl>
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>

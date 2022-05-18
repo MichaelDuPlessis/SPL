@@ -82,7 +82,8 @@ impl ScopeAnalysis {
                                 std::process::exit(1); 
                             }
                             if !self.return_found && !self.halt_found {
-                                if node.borrow().children[i+1].borrow().children.is_empty() {
+                                if node.borrow().children.len() > i + 1 &&
+                                node.borrow().children[i+1].borrow().children.is_empty() {
                                     self.used(name, false, false);
                                 } else {
                                     self.used(name, false, true);
@@ -119,7 +120,7 @@ impl ScopeAnalysis {
                 Grammer::Terminal(t) => match t {
                     Terminal::Num | Terminal::Boolean | Terminal::String => {
                         if t == Terminal::Num {
-                            self.type_found = Some(Type::Number(Number::NN));
+                            self.type_found = Some(Type::Number(Number::N));
                         } else if t == Terminal::Boolean {
                             self.type_found = Some(Type::Boolean(Boolean::Unknown));
                         } else {
@@ -354,9 +355,11 @@ impl Scope {
         return true;
     }
 
-    pub fn add_type(&mut self, name: &str, t: Type) {
+    pub fn add_type(&mut self, name: &str, t: Type, arr: bool) {
+        let find = |(n, si): &&mut (String, ScopeInfo)| n == name && si.is_array == arr;
+
         // check if type does not conflict
-        if let Some((_, si)) = self.vtable.iter_mut().find(|i| i.0 == name) {
+        if let Some((_, si)) = self.vtable.iter_mut().find(find) {
             if si.data_type == Type::Unknown {
                 si.is_defined = false;
             } else if si.data_type == t {
@@ -368,13 +371,20 @@ impl Scope {
                 std::process::exit(1);
             }
 
-            si.data_type = t;
+            si.data_type = match t {
+                Type::Number(_) => Type::Number(Number::N),
+                Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
+                Type::String => Type::String,
+                Type::Unknown => panic!("Should never get here add_type"),
+                Type::Mixed => Type::Mixed,
+            };
+
             return;
         }
 
         let mut curr = Rc::clone(self.parent.as_ref().unwrap());
         loop {
-            if let Some((_, si)) = RefCell::borrow_mut(&curr).vtable.iter_mut().find(|i| i.0 == name) {
+            if let Some((_, si)) = RefCell::borrow_mut(&curr).vtable.iter_mut().find(find) {
                 si.data_type = t;
                 si.is_defined = true;
                 break;

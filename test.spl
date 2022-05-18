@@ -1,9 +1,23 @@
+proc test {
+    proc test2 {
+        proc test3 {
+            return;
+        },
+        return;
+    }
+
+    b := 7;
+    return;
+
+    bool var;
+},
+
 main {
-    if (true) then {
-        n := true;
-    };
+    b[b] := true;
+
+    call test;
     
     halt;
-
-    bool n;
+    arr bool[10] b;
+    num b;
 }

@@ -25,8 +25,19 @@ impl TypeChecker {
     }
 
     fn analysis(&mut self, node: LNode) {
+        let mut skip_if = false;
+        let mut skip_else = false;
+
         for c in &node.borrow().children {
             let grammer = c.borrow().symbol;
+            if skip_if {
+                if grammer == Grammer::NonTerminal(NonTerminal::Alternat) {
+                    skip_if = false;
+                    self.analysis(Rc::clone(c));
+                }
+                continue;
+            }
+
             match grammer {
                 Grammer::Terminal(t) => match t {
                     Terminal::Proc => self.enter_scope = true,
@@ -43,10 +54,26 @@ impl TypeChecker {
                             self.exit();
                         }
                     }
+                    // conditionals
+                    Terminal::If => {
+                        let typ = self.expr_type(&node.borrow().children[2]);
+                        if let Type::Boolean(typ) = typ {
+                            if typ == Boolean::True {
+                                skip_else = true;
+                            } else if typ == Boolean::False {
+                                skip_if = true;
+                            } // else do nothing evaluate both
+                        }
+                    },
                     _ => (),
                 },
                 Grammer::NonTerminal(nt) => match nt {
                     NonTerminal::Assign => self.check_assign(c),
+                    NonTerminal::Alternat => if !skip_else {
+                        self.analysis(Rc::clone(c));
+                    } else {
+                        skip_else = false;
+                    },
                     _ => self.analysis(Rc::clone(c)),
                 },
             }
@@ -55,21 +82,53 @@ impl TypeChecker {
 
     fn check_assign(&self, node: &LNode) {
         let children = &node.borrow().children; // children of assign
-        let child1 = children[0].borrow();
-        let child1 = child1.children[0].borrow(); // var to assign to
+        let lhs = children[0].borrow();
+        let child1 = lhs.children[0].borrow(); // var to assign to
 
         if child1.symbol == Grammer::Terminal(Terminal::UserDefined) {
             let name = child1.str_value.as_ref().unwrap();
 
             if let Some(s) = self.scope.borrow().exist_up(name) {
                 if s.is_proc {
-                    println!("Error: cannot assign to procedure {} at {}", name, children[0].borrow().pos.unwrap());
+                    println!("Error: Cannot assign to procedure {} at {}", name, children[0].borrow().pos.unwrap());
                     std::process::exit(1);
                 }
             }
 
-            let typ = self.expr_type(&children[2]);
-            self.scope.borrow_mut().add_type(name, typ);
+            let typ = self.expr_type(&children[2]);            
+            // if array check paramter valid
+            let var_field = &lhs.children[1].borrow().children;
+            if !var_field.is_empty() {
+                let indexer = &var_field[1];
+                let typ = self.expr_type(indexer);
+                let symbol = indexer.borrow().children[0].borrow().symbol;
+
+                if symbol == Grammer::NonTerminal(NonTerminal::Var) {
+                    if let Type::Number(num) = typ {
+                        if num != Number::N {
+                            println!("Error: type of var indexer must be Number");
+                            std::process::exit(1);
+                        }
+                    } else {
+                        println!("Error: type of var indexer must be Number");
+                        std::process::exit(1);
+                    }
+                } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
+                    if let Type::Number(num) = typ {
+                        if num != Number::NN {
+                            println!("Error: type of const indexer must be non-negative Number");
+                            std::process::exit(1);
+                        }
+                    } else {
+                        println!("Error: type of const indexer must be non-negative Number");
+                        std::process::exit(1);
+                    }
+                }
+
+                self.scope.borrow_mut().add_type(name, typ, true);
+            } else {
+                self.scope.borrow_mut().add_type(name, typ, false);
+            }
         }
     }
 
@@ -190,8 +249,8 @@ impl TypeChecker {
                     }
                 },
                 Terminal::ShortString => Type::String,
-                Terminal::True => Type::Boolean(Boolean::Unknown),
-                Terminal::False => Type::Boolean(Boolean::Unknown),
+                Terminal::True => Type::Boolean(Boolean::True),
+                Terminal::False => Type::Boolean(Boolean::False),
                 _ => Type::Unknown,
             },
             Grammer::NonTerminal(_) => Type::Unknown,
