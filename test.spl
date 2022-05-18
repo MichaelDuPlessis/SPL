@@ -1,3 +1,12 @@
+proc test {
+    call test;
+
+    test := 7;
+
+    return;
+
+    num test;
+},
 main {
     b := 0;
     b[b] := true;

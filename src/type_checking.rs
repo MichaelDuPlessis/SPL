@@ -19,11 +19,13 @@ impl TypeChecker {
     }
 
     pub fn type_check(&mut self) {
-        // start at ProcDefs for main
         // Do anaylsis there and if encounter call, search AST to find it and do analysis there
+        // ignore any procdefs and only analysis when matching call found
 
         self.analysis(Rc::clone(&self.ast));
         println!("{:?}", self.scope);
+
+        // after anaylsis check to make sure each variable is defined
     }
 
     fn analysis(&mut self, node: LNode) {
@@ -71,6 +73,7 @@ impl TypeChecker {
                 },
                 Grammer::NonTerminal(nt) => match nt {
                     NonTerminal::Assign => self.check_assign(c),
+                    NonTerminal::ProcDefs => return, // if encounter procdefs leave
                     NonTerminal::Alternat => if !skip_else {
                         self.analysis(Rc::clone(c));
                     } else {
@@ -80,6 +83,12 @@ impl TypeChecker {
                 },
             }
         }
+    }
+
+    fn find_head(&self, node: LNode) -> LNode {
+        
+
+        todo!()
     }
 
     fn check_assign(&self, node: &LNode) {
