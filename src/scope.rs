@@ -65,7 +65,7 @@ impl ScopeAnalysis {
                         }
 
                         if self.call_found {
-                            if self.exist_up(name).is_none() {
+                            if self.exist_proc(name).is_none() {
                                 error(&format!("proc call {} at {} is not defined.", name, pos));
                             }
 
@@ -132,7 +132,7 @@ impl ScopeAnalysis {
                         let mut node: ScopeInfo = Default::default();
 
                         if self.proc_found {
-                            if let Some(si) = self.exist_up(&name) {
+                            if let Some(si) = self.exist_proc(&name) {
                                 if si.is_proc {
                                     error(&format!("proc {} at {} already defined.", name, c.borrow().pos.unwrap()));
                                 }
@@ -220,6 +220,10 @@ impl ScopeAnalysis {
         self.current_scope.borrow().exist_up(name)
     }
 
+    fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
+        self.current_scope.borrow().exist_proc(name)
+    }
+
     fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
         self.current_scope.borrow().find_in_scope(name)
     }
@@ -268,6 +272,7 @@ impl Scope {
     //     node
     // }
 
+    // only use for procs
     fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
         if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
             return Some(si.1);
@@ -275,13 +280,16 @@ impl Scope {
 
         for c in &self.children {
             if let Some(si) = c.borrow().exist_down(name) {
-                return Some(si);
+                if let Some(si) = c.borrow().vtable.iter().find(|i| i.0 == name) {
+                    return Some(si.1);
+                }
             }
         }
 
         None
     }
 
+    // used for vars
     pub fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
         if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
             return Some(si.1);
@@ -289,6 +297,21 @@ impl Scope {
 
         if let Some(parent) = &self.parent {
             return parent.borrow().exist_up(name);
+        }
+
+        None
+    }
+
+    // used for procs
+    pub fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+            return Some(si.1);
+        }
+
+        if let Some(parent) = &self.parent {
+            if let Some(si) = parent.borrow().vtable.iter().find(|i| i.0 == name) {
+                return Some(si.1);
+            }
         }
 
         None
