@@ -1,5 +1,4 @@
 use std::{fs, time::Instant, rc::Rc};
-
 use crate::{scope::ScopeAnalysis, type_checking::TypeChecker};
 
 mod lexer;
@@ -9,6 +8,7 @@ mod token;
 mod stack;
 mod scope;
 mod type_checking;
+mod error;
 
 fn main() {
     let start = Instant::now();

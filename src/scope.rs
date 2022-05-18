@@ -1,5 +1,5 @@
 use std::{cell::RefCell, rc::Rc, collections::{HashMap, LinkedList}, fmt::{Debug}};
-use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type, Number, Boolean}};
+use crate::{token::LNode, grammer::{Terminal, Grammer, Type, Number, Boolean}, error::error};
 
 pub struct ScopeAnalysis {
     head: LNode,
@@ -43,8 +43,7 @@ impl ScopeAnalysis {
         self.check_scope(Rc::clone(&self.head));
 
         if !self.all_used() {
-            println!("Not all variables and procedures used");
-            std::process::exit(1);
+            error(&format!("Not all variables and procedures used"));
         }
 
         Rc::clone(&self.current_scope)
@@ -67,8 +66,7 @@ impl ScopeAnalysis {
 
                         if self.call_found {
                             if self.exist_up(name).is_none() {
-                                println!("Error: proc call {} at {} is not defined.", name, pos);
-                                std::process::exit(1);
+                                error(&format!("proc call {} at {} is not defined.", name, pos));
                             }
 
                             self.used(name, true, false);
@@ -78,8 +76,7 @@ impl ScopeAnalysis {
 
                         if let Some(si) = self.exist_up(name) {
                             if si.is_proc {
-                                println!("Error: var {} at {} is not defined.", name, pos);
-                                std::process::exit(1); 
+                                error(&format!("var {} at {} is not defined.", name, pos));
                             }
                             if !self.return_found && !self.halt_found {
                                 if node.borrow().children.len() > i + 1 &&
@@ -93,8 +90,7 @@ impl ScopeAnalysis {
                             continue;
                         }
 
-                        println!("Error: var {} at {} is not defined.", name, pos);
-                        std::process::exit(1); 
+                        error(&format!("var {} at {} is not defined.", name, pos));
                     },
                     Terminal::Call => self.call_found = true,
                     Terminal::Proc => self.proc_found = true,
@@ -138,15 +134,13 @@ impl ScopeAnalysis {
                         if self.proc_found {
                             if let Some(si) = self.exist_up(&name) {
                                 if si.is_proc {
-                                    println!("Error: proc {} at {} already defined.", name, c.borrow().pos.unwrap());
-                                    std::process::exit(1);
+                                    error(&format!("proc {} at {} already defined.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
                             if let Some(si) = self.exist_down(&name) {
                                 if si.is_proc {
-                                    println!("Error: proc {} at {} already defined in same scope.", name, c.borrow().pos.unwrap());
-                                    std::process::exit(1);
+                                    error(&format!("proc {} at {} already defined in same scope.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
@@ -157,8 +151,7 @@ impl ScopeAnalysis {
                         } else if let Some(typ) = self.type_found {
                             if let Some(si) = self.find_in_scope(&name) {
                                 if self.array_found == si.is_array {
-                                    println!("Error: var {} at {} already defined.", name, c.borrow().pos.unwrap());
-                                    std::process::exit(1);
+                                    error(&format!("var {} at {} already defined.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
@@ -367,8 +360,7 @@ impl Scope {
             }
 
             if si.data_type != t {
-                println!("Error: Cannot assign {} to {}", t, si.data_type);
-                std::process::exit(1);
+                error(&format!("Cannot assign {} to {}", t, si.data_type));
             }
 
             si.data_type = match t {

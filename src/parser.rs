@@ -1,6 +1,6 @@
 use std::{rc::Rc, cell::RefCell, fs::File, io::Write, process::exit};
+use crate::{grammer::*, token::{TokenList, Token, Pos, Node, LNode}, stack, error::error};
 
-use crate::{grammer::*, token::{TokenList, Token, Pos, Node, LNode}, stack};
 const ROWS: usize = 22;
 const COLS: usize = 40;
 
@@ -173,14 +173,12 @@ impl Parser {
                     input += 1;
                     stack.pop();
                 } else {
-                    println!("Expected {} but found {} on Ln {}, Col {}", t, if let Some(val) = self.tokens[input].str_value() { val } else { self.tokens[input].token().to_string() }, self.tokens[input].row(), self.tokens[input].col());
-                    exit(1);
+                    error(&format!("Expected {} but found {} on Ln {}, Col {}", t, if let Some(val) = self.tokens[input].str_value() { val } else { self.tokens[input].token().to_string() }, self.tokens[input].row(), self.tokens[input].col()));
                 }
             } else if let Grammer::NonTerminal(t) = top {
                 // println!("{} : {}", self.tokens[input].token(), t);
                 if self.table[self.tokens[input].token() + t*COLS].is_none() {
-                    println!("Error: {} cannot follow {}", self.tokens[input].token(), self.tokens[input-1].token());
-                    exit(1);
+                    error(&format!("{} cannot follow {}", self.tokens[input].token(), self.tokens[input-1].token()));
                 }
 
                 let terminal = Rc::clone(&stack.pop());

@@ -1,6 +1,5 @@
 use std::rc::Rc;
-
-use crate::{token::LNode, scope::ScopeNode, grammer::{Terminal, NonTerminal, Grammer, Type, Boolean, Number}};
+use crate::{token::LNode, scope::ScopeNode, grammer::{Terminal, NonTerminal, Grammer, Type, Boolean, Number}, error::error};
 
 pub struct TypeChecker {
     scope: ScopeNode,
@@ -20,6 +19,9 @@ impl TypeChecker {
     }
 
     pub fn type_check(&mut self) {
+        // start at ProcDefs for main
+        // Do anaylsis there and if encounter call, search AST to find it and do analysis there
+
         self.analysis(Rc::clone(&self.ast));
         println!("{:?}", self.scope);
     }
@@ -90,8 +92,7 @@ impl TypeChecker {
 
             if let Some(s) = self.scope.borrow().exist_up(name) {
                 if s.is_proc {
-                    println!("Error: Cannot assign to procedure {} at {}", name, children[0].borrow().pos.unwrap());
-                    std::process::exit(1);
+                    error(&format!("Cannot assign to procedure {} at {}", name, children[0].borrow().pos.unwrap()));
                 }
             }
 
@@ -106,22 +107,18 @@ impl TypeChecker {
                 if symbol == Grammer::NonTerminal(NonTerminal::Var) {
                     if let Type::Number(num) = t {
                         if num != Number::N {
-                            println!("Error: type of var indexer must be Number");
-                            std::process::exit(1);
+                            error(&format!("type of var indexer must be Number"));
                         }
                     } else {
-                        println!("Error: type of var indexer must be Number");
-                        std::process::exit(1);
+                        error(&format!("Error: type of var indexer must be Number"));
                     }
                 } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
                     if let Type::Number(num) = t {
                         if num != Number::NN {
-                            println!("Error: type of const indexer must be non-negative Number");
-                            std::process::exit(1);
+                            error(&format!("Error: type of const indexer must be non-negative Number"));
                         }
                     } else {
-                        println!("Error: type of const indexer must be non-negative Number");
-                        std::process::exit(1);
+                        error(&format!("Error: type of const indexer must be non-negative Number"));
                     }
                 }
 
@@ -158,6 +155,10 @@ impl TypeChecker {
         let scope_info = scope_info.exist_up(name);
 
         if let Some(si) = scope_info {
+            if !si.is_defined {
+                
+            }
+
             si.data_type
         } else {
             panic!("Should never get here udn_type");
@@ -225,13 +226,13 @@ impl TypeChecker {
     }
 
     fn incompatible(t1: Type, t2: Type) -> Type {
-        println!("Error: incompatible types {} and {}", t1, t2);
-        std::process::exit(1);
+        error(&format!("Incompatible types {} and {}", t1, t2));
+        Type::Unknown
     }
 
     fn bad_type(t: Type) -> Type {
-        println!("Error: bade type {} on unary operator", t);
-        std::process::exit(1);
+        error(&format!("Bad type {} on unary operator", t));
+        Type::Unknown
     }
 
     // pass in const to get type
