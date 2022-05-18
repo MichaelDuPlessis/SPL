@@ -1,25 +1,23 @@
-proc somefunc {
-    proc somefunc2 {
-        test := 7;
+proc 2test {
+    proc test2 {
+        proc test3 {
+            return;
+        },
         return;
-        num id;
     },
 
-    proc somefunc3 {
-        return;
-        bool exists;
-    },
-
-    call somefunc3;
-
+    b := 7;
     return;
-    string test;
+
+    bool var;
 },
 
 main {
-    n := 7;
-    halt;
+    b[b] := true;
 
-    num n;
-    string test;
+    call test;
+    
+    halt;
+    arr bool[10] b;
+    num b;
 }

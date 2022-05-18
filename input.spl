@@ -22,7 +22,7 @@ variable[cdc] := eq(mult(false,true),add(true,false));
 variable[cdc] := or(mult(false,true),add(true,false));
 variable[cdc] := and(mult(false,true),add(true,false));
 variable[qw] := not(and(mult(false,true),add(true,false)));
-output :=true; 
+output := "AAAAAAAAAAAAAZ9"; 
 if(false)then{}
 else
 {};

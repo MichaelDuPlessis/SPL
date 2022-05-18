@@ -2,109 +2,982 @@
 	<ProcDefs id="1">
 		<PD id="9">
 			<proc id="12"/>
-			<userDefinedName id="13" value="somefunc"/>
+			<userDefinedName id="13" value="start"/>
 			<LBrace id="14"/>
 			<ProcDefs id="15">
 				<PD id="21">
 					<proc id="24"/>
-					<userDefinedName id="25" value="somefunc2"/>
+					<userDefinedName id="25" value="testing"/>
 					<LBrace id="26"/>
 					<ProcDefs id="27">
 					</ProcDefs>
 					<Algorithm id="28">
-						<Instr id="33">
-							<Assign id="36">
-								<LHS id="37">
-									<userDefinedName id="40" value="test"/>
-									<VarField id="41">
-									</VarField>
-								</LHS>
-								<Assignment id="38"/>
-								<Expr id="39">
-									<Const id="42">
-										<num id="43" value="7"/>
-									</Const>
-								</Expr>
-							</Assign>
-						</Instr>
-						<Semicolon id="34"/>
-						<Algorithm id="35">
-						</Algorithm>
 					</Algorithm>
 					<return id="29"/>
 					<Semicolon id="30"/>
 					<VarDecl id="31">
-						<Dec id="44">
-							<TYP id="47">
-								<num id="49"/>
-							</TYP>
-							<Var id="48">
-								<userDefinedName id="50" value="id"/>
-							</Var>
-						</Dec>
-						<Semicolon id="45"/>
-						<VarDecl id="46">
-						</VarDecl>
 					</VarDecl>
 					<RBrace id="32"/>
 				</PD>
 				<Comma id="22"/>
 				<ProcDefs id="23">
-					<PD id="51">
-						<proc id="54"/>
-						<userDefinedName id="55" value="somefunc3"/>
-						<LBrace id="56"/>
-						<ProcDefs id="57">
-						</ProcDefs>
-						<Algorithm id="58">
-						</Algorithm>
-						<return id="59"/>
-						<Semicolon id="60"/>
-						<VarDecl id="61">
-							<Dec id="63">
-								<TYP id="66">
-									<bool id="68"/>
-								</TYP>
-								<Var id="67">
-									<userDefinedName id="69" value="exists"/>
-								</Var>
-							</Dec>
-							<Semicolon id="64"/>
-							<VarDecl id="65">
-							</VarDecl>
-						</VarDecl>
-						<RBrace id="62"/>
-					</PD>
-					<Comma id="52"/>
-					<ProcDefs id="53">
-					</ProcDefs>
 				</ProcDefs>
 			</ProcDefs>
 			<Algorithm id="16">
-				<Instr id="70">
-					<PCall id="73">
-						<call id="74"/>
-						<userDefinedName id="75" value="somefunc3"/>
-					</PCall>
+				<Instr id="33">
+					<Assign id="36">
+						<LHS id="37">
+							<userDefinedName id="40" value="variable"/>
+							<VarField id="41">
+								<LBracket id="42"/>
+								<FType id="43">
+									<Var id="44">
+										<userDefinedName id="46" value="int"/>
+									</Var>
+									<RBracket id="45"/>
+								</FType>
+							</VarField>
+						</LHS>
+						<Assignment id="38"/>
+						<Expr id="39">
+							<Const id="47">
+								<num id="48" value="-5"/>
+							</Const>
+						</Expr>
+					</Assign>
 				</Instr>
-				<Semicolon id="71"/>
-				<Algorithm id="72">
+				<Semicolon id="34"/>
+				<Algorithm id="35">
+					<Instr id="49">
+						<Assign id="52">
+							<LHS id="53">
+								<userDefinedName id="56" value="variable"/>
+								<VarField id="57">
+									<LBracket id="58"/>
+									<FType id="59">
+										<Var id="60">
+											<userDefinedName id="62" value="int"/>
+										</Var>
+										<RBracket id="61"/>
+									</FType>
+								</VarField>
+							</LHS>
+							<Assignment id="54"/>
+							<Expr id="55">
+								<Const id="63">
+									<num id="64" value="5"/>
+								</Const>
+							</Expr>
+						</Assign>
+					</Instr>
+					<Semicolon id="50"/>
+					<Algorithm id="51">
+						<Instr id="65">
+							<Assign id="68">
+								<LHS id="69">
+									<userDefinedName id="72" value="variable"/>
+									<VarField id="73">
+										<LBracket id="74"/>
+										<FType id="75">
+											<Var id="76">
+												<userDefinedName id="78" value="ccc"/>
+											</Var>
+											<RBracket id="77"/>
+										</FType>
+									</VarField>
+								</LHS>
+								<Assignment id="70"/>
+								<Expr id="71">
+									<Const id="79">
+										<ShortString id="80" value="HI ALEX"/>
+									</Const>
+								</Expr>
+							</Assign>
+						</Instr>
+						<Semicolon id="66"/>
+						<Algorithm id="67">
+							<Instr id="81">
+								<Assign id="84">
+									<LHS id="85">
+										<userDefinedName id="88" value="variable"/>
+										<VarField id="89">
+											<LBracket id="90"/>
+											<FType id="91">
+												<Var id="92">
+													<userDefinedName id="94" value="ccc"/>
+												</Var>
+												<RBracket id="93"/>
+											</FType>
+										</VarField>
+									</LHS>
+									<Assignment id="86"/>
+									<Expr id="87">
+										<UnOp id="95">
+											<input id="96"/>
+											<LParentheses id="97"/>
+											<Var id="98">
+												<userDefinedName id="100" value="tmep"/>
+											</Var>
+											<RParentheses id="99"/>
+										</UnOp>
+									</Expr>
+								</Assign>
+							</Instr>
+							<Semicolon id="82"/>
+							<Algorithm id="83">
+								<Instr id="101">
+									<Assign id="104">
+										<LHS id="105">
+											<userDefinedName id="108" value="variable"/>
+											<VarField id="109">
+												<LBracket id="110"/>
+												<FType id="111">
+													<Var id="112">
+														<userDefinedName id="114" value="ccc"/>
+													</Var>
+													<RBracket id="113"/>
+												</FType>
+											</VarField>
+										</LHS>
+										<Assignment id="106"/>
+										<Expr id="107">
+											<UnOp id="115">
+												<not id="116"/>
+												<LParentheses id="117"/>
+												<Expr id="118">
+													<Const id="120">
+														<false id="121"/>
+													</Const>
+												</Expr>
+												<RParentheses id="119"/>
+											</UnOp>
+										</Expr>
+									</Assign>
+								</Instr>
+								<Semicolon id="102"/>
+								<Algorithm id="103">
+									<Instr id="122">
+										<Assign id="125">
+											<LHS id="126">
+												<userDefinedName id="129" value="variable"/>
+												<VarField id="130">
+													<LBracket id="131"/>
+													<FType id="132">
+														<Var id="133">
+															<userDefinedName id="135" value="ccc"/>
+														</Var>
+														<RBracket id="134"/>
+													</FType>
+												</VarField>
+											</LHS>
+											<Assignment id="127"/>
+											<Expr id="128">
+												<BinOp id="136">
+													<and id="137"/>
+													<LParentheses id="138"/>
+													<Expr id="139">
+														<Const id="143">
+															<true id="144"/>
+														</Const>
+													</Expr>
+													<Comma id="140"/>
+													<Expr id="141">
+														<Const id="145">
+															<true id="146"/>
+														</Const>
+													</Expr>
+													<RParentheses id="142"/>
+												</BinOp>
+											</Expr>
+										</Assign>
+									</Instr>
+									<Semicolon id="123"/>
+									<Algorithm id="124">
+										<Instr id="147">
+											<Assign id="150">
+												<LHS id="151">
+													<userDefinedName id="154" value="variable"/>
+													<VarField id="155">
+														<LBracket id="156"/>
+														<FType id="157">
+															<Var id="158">
+																<userDefinedName id="160" value="cdc"/>
+															</Var>
+															<RBracket id="159"/>
+														</FType>
+													</VarField>
+												</LHS>
+												<Assignment id="152"/>
+												<Expr id="153">
+													<BinOp id="161">
+														<or id="162"/>
+														<LParentheses id="163"/>
+														<Expr id="164">
+															<Const id="168">
+																<false id="169"/>
+															</Const>
+														</Expr>
+														<Comma id="165"/>
+														<Expr id="166">
+															<Const id="170">
+																<true id="171"/>
+															</Const>
+														</Expr>
+														<RParentheses id="167"/>
+													</BinOp>
+												</Expr>
+											</Assign>
+										</Instr>
+										<Semicolon id="148"/>
+										<Algorithm id="149">
+											<Instr id="172">
+												<Assign id="175">
+													<LHS id="176">
+														<userDefinedName id="179" value="variable"/>
+														<VarField id="180">
+															<LBracket id="181"/>
+															<FType id="182">
+																<Var id="183">
+																	<userDefinedName id="185" value="cdc"/>
+																</Var>
+																<RBracket id="184"/>
+															</FType>
+														</VarField>
+													</LHS>
+													<Assignment id="177"/>
+													<Expr id="178">
+														<BinOp id="186">
+															<equal id="187"/>
+															<LParentheses id="188"/>
+															<Expr id="189">
+																<Const id="193">
+																	<false id="194"/>
+																</Const>
+															</Expr>
+															<Comma id="190"/>
+															<Expr id="191">
+																<Const id="195">
+																	<true id="196"/>
+																</Const>
+															</Expr>
+															<RParentheses id="192"/>
+														</BinOp>
+													</Expr>
+												</Assign>
+											</Instr>
+											<Semicolon id="173"/>
+											<Algorithm id="174">
+												<Instr id="197">
+													<Assign id="200">
+														<LHS id="201">
+															<userDefinedName id="204" value="variable"/>
+															<VarField id="205">
+																<LBracket id="206"/>
+																<FType id="207">
+																	<Var id="208">
+																		<userDefinedName id="210" value="cdc"/>
+																	</Var>
+																	<RBracket id="209"/>
+																</FType>
+															</VarField>
+														</LHS>
+														<Assignment id="202"/>
+														<Expr id="203">
+															<BinOp id="211">
+																<add id="212"/>
+																<LParentheses id="213"/>
+																<Expr id="214">
+																	<Const id="218">
+																		<false id="219"/>
+																	</Const>
+																</Expr>
+																<Comma id="215"/>
+																<Expr id="216">
+																	<Const id="220">
+																		<true id="221"/>
+																	</Const>
+																</Expr>
+																<RParentheses id="217"/>
+															</BinOp>
+														</Expr>
+													</Assign>
+												</Instr>
+												<Semicolon id="198"/>
+												<Algorithm id="199">
+													<Instr id="222">
+														<Assign id="225">
+															<LHS id="226">
+																<userDefinedName id="229" value="variable"/>
+																<VarField id="230">
+																	<LBracket id="231"/>
+																	<FType id="232">
+																		<Var id="233">
+																			<userDefinedName id="235" value="cdc"/>
+																		</Var>
+																		<RBracket id="234"/>
+																	</FType>
+																</VarField>
+															</LHS>
+															<Assignment id="227"/>
+															<Expr id="228">
+																<BinOp id="236">
+																	<sub id="237"/>
+																	<LParentheses id="238"/>
+																	<Expr id="239">
+																		<Const id="243">
+																			<false id="244"/>
+																		</Const>
+																	</Expr>
+																	<Comma id="240"/>
+																	<Expr id="241">
+																		<Const id="245">
+																			<true id="246"/>
+																		</Const>
+																	</Expr>
+																	<RParentheses id="242"/>
+																</BinOp>
+															</Expr>
+														</Assign>
+													</Instr>
+													<Semicolon id="223"/>
+													<Algorithm id="224">
+														<Instr id="247">
+															<Assign id="250">
+																<LHS id="251">
+																	<userDefinedName id="254" value="variable"/>
+																	<VarField id="255">
+																		<LBracket id="256"/>
+																		<FType id="257">
+																			<Var id="258">
+																				<userDefinedName id="260" value="cdc"/>
+																			</Var>
+																			<RBracket id="259"/>
+																		</FType>
+																	</VarField>
+																</LHS>
+																<Assignment id="252"/>
+																<Expr id="253">
+																	<BinOp id="261">
+																		<mult id="262"/>
+																		<LParentheses id="263"/>
+																		<Expr id="264">
+																			<Const id="268">
+																				<false id="269"/>
+																			</Const>
+																		</Expr>
+																		<Comma id="265"/>
+																		<Expr id="266">
+																			<Const id="270">
+																				<true id="271"/>
+																			</Const>
+																		</Expr>
+																		<RParentheses id="267"/>
+																	</BinOp>
+																</Expr>
+															</Assign>
+														</Instr>
+														<Semicolon id="248"/>
+														<Algorithm id="249">
+															<Instr id="272">
+																<Assign id="275">
+																	<LHS id="276">
+																		<userDefinedName id="279" value="variable"/>
+																		<VarField id="280">
+																			<LBracket id="281"/>
+																			<FType id="282">
+																				<Var id="283">
+																					<userDefinedName id="285" value="cdc"/>
+																				</Var>
+																				<RBracket id="284"/>
+																			</FType>
+																		</VarField>
+																	</LHS>
+																	<Assignment id="277"/>
+																	<Expr id="278">
+																		<BinOp id="286">
+																			<mult id="287"/>
+																			<LParentheses id="288"/>
+																			<Expr id="289">
+																				<BinOp id="293">
+																					<mult id="294"/>
+																					<LParentheses id="295"/>
+																					<Expr id="296">
+																						<Const id="300">
+																							<false id="301"/>
+																						</Const>
+																					</Expr>
+																					<Comma id="297"/>
+																					<Expr id="298">
+																						<Const id="302">
+																							<true id="303"/>
+																						</Const>
+																					</Expr>
+																					<RParentheses id="299"/>
+																				</BinOp>
+																			</Expr>
+																			<Comma id="290"/>
+																			<Expr id="291">
+																				<BinOp id="304">
+																					<add id="305"/>
+																					<LParentheses id="306"/>
+																					<Expr id="307">
+																						<Const id="311">
+																							<true id="312"/>
+																						</Const>
+																					</Expr>
+																					<Comma id="308"/>
+																					<Expr id="309">
+																						<Const id="313">
+																							<false id="314"/>
+																						</Const>
+																					</Expr>
+																					<RParentheses id="310"/>
+																				</BinOp>
+																			</Expr>
+																			<RParentheses id="292"/>
+																		</BinOp>
+																	</Expr>
+																</Assign>
+															</Instr>
+															<Semicolon id="273"/>
+															<Algorithm id="274">
+																<Instr id="315">
+																	<Assign id="318">
+																		<LHS id="319">
+																			<userDefinedName id="322" value="variable"/>
+																			<VarField id="323">
+																				<LBracket id="324"/>
+																				<FType id="325">
+																					<Var id="326">
+																						<userDefinedName id="328" value="cdc"/>
+																					</Var>
+																					<RBracket id="327"/>
+																				</FType>
+																			</VarField>
+																		</LHS>
+																		<Assignment id="320"/>
+																		<Expr id="321">
+																			<BinOp id="329">
+																				<add id="330"/>
+																				<LParentheses id="331"/>
+																				<Expr id="332">
+																					<BinOp id="336">
+																						<mult id="337"/>
+																						<LParentheses id="338"/>
+																						<Expr id="339">
+																							<Const id="343">
+																								<false id="344"/>
+																							</Const>
+																						</Expr>
+																						<Comma id="340"/>
+																						<Expr id="341">
+																							<Const id="345">
+																								<true id="346"/>
+																							</Const>
+																						</Expr>
+																						<RParentheses id="342"/>
+																					</BinOp>
+																				</Expr>
+																				<Comma id="333"/>
+																				<Expr id="334">
+																					<BinOp id="347">
+																						<add id="348"/>
+																						<LParentheses id="349"/>
+																						<Expr id="350">
+																							<Const id="354">
+																								<true id="355"/>
+																							</Const>
+																						</Expr>
+																						<Comma id="351"/>
+																						<Expr id="352">
+																							<Const id="356">
+																								<false id="357"/>
+																							</Const>
+																						</Expr>
+																						<RParentheses id="353"/>
+																					</BinOp>
+																				</Expr>
+																				<RParentheses id="335"/>
+																			</BinOp>
+																		</Expr>
+																	</Assign>
+																</Instr>
+																<Semicolon id="316"/>
+																<Algorithm id="317">
+																	<Instr id="358">
+																		<Assign id="361">
+																			<LHS id="362">
+																				<userDefinedName id="365" value="variable"/>
+																				<VarField id="366">
+																					<LBracket id="367"/>
+																					<FType id="368">
+																						<Var id="369">
+																							<userDefinedName id="371" value="cdc"/>
+																						</Var>
+																						<RBracket id="370"/>
+																					</FType>
+																				</VarField>
+																			</LHS>
+																			<Assignment id="363"/>
+																			<Expr id="364">
+																				<BinOp id="372">
+																					<sub id="373"/>
+																					<LParentheses id="374"/>
+																					<Expr id="375">
+																						<BinOp id="379">
+																							<mult id="380"/>
+																							<LParentheses id="381"/>
+																							<Expr id="382">
+																								<Const id="386">
+																									<false id="387"/>
+																								</Const>
+																							</Expr>
+																							<Comma id="383"/>
+																							<Expr id="384">
+																								<Const id="388">
+																									<true id="389"/>
+																								</Const>
+																							</Expr>
+																							<RParentheses id="385"/>
+																						</BinOp>
+																					</Expr>
+																					<Comma id="376"/>
+																					<Expr id="377">
+																						<BinOp id="390">
+																							<add id="391"/>
+																							<LParentheses id="392"/>
+																							<Expr id="393">
+																								<Const id="397">
+																									<true id="398"/>
+																								</Const>
+																							</Expr>
+																							<Comma id="394"/>
+																							<Expr id="395">
+																								<Const id="399">
+																									<false id="400"/>
+																								</Const>
+																							</Expr>
+																							<RParentheses id="396"/>
+																						</BinOp>
+																					</Expr>
+																					<RParentheses id="378"/>
+																				</BinOp>
+																			</Expr>
+																		</Assign>
+																	</Instr>
+																	<Semicolon id="359"/>
+																	<Algorithm id="360">
+																		<Instr id="401">
+																			<Assign id="404">
+																				<LHS id="405">
+																					<userDefinedName id="408" value="variable"/>
+																					<VarField id="409">
+																						<LBracket id="410"/>
+																						<FType id="411">
+																							<Var id="412">
+																								<userDefinedName id="414" value="cdc"/>
+																							</Var>
+																							<RBracket id="413"/>
+																						</FType>
+																					</VarField>
+																				</LHS>
+																				<Assignment id="406"/>
+																				<Expr id="407">
+																					<BinOp id="415">
+																						<equal id="416"/>
+																						<LParentheses id="417"/>
+																						<Expr id="418">
+																							<BinOp id="422">
+																								<mult id="423"/>
+																								<LParentheses id="424"/>
+																								<Expr id="425">
+																									<Const id="429">
+																										<false id="430"/>
+																									</Const>
+																								</Expr>
+																								<Comma id="426"/>
+																								<Expr id="427">
+																									<Const id="431">
+																										<true id="432"/>
+																									</Const>
+																								</Expr>
+																								<RParentheses id="428"/>
+																							</BinOp>
+																						</Expr>
+																						<Comma id="419"/>
+																						<Expr id="420">
+																							<BinOp id="433">
+																								<add id="434"/>
+																								<LParentheses id="435"/>
+																								<Expr id="436">
+																									<Const id="440">
+																										<true id="441"/>
+																									</Const>
+																								</Expr>
+																								<Comma id="437"/>
+																								<Expr id="438">
+																									<Const id="442">
+																										<false id="443"/>
+																									</Const>
+																								</Expr>
+																								<RParentheses id="439"/>
+																							</BinOp>
+																						</Expr>
+																						<RParentheses id="421"/>
+																					</BinOp>
+																				</Expr>
+																			</Assign>
+																		</Instr>
+																		<Semicolon id="402"/>
+																		<Algorithm id="403">
+																			<Instr id="444">
+																				<Assign id="447">
+																					<LHS id="448">
+																						<userDefinedName id="451" value="variable"/>
+																						<VarField id="452">
+																							<LBracket id="453"/>
+																							<FType id="454">
+																								<Var id="455">
+																									<userDefinedName id="457" value="cdc"/>
+																								</Var>
+																								<RBracket id="456"/>
+																							</FType>
+																						</VarField>
+																					</LHS>
+																					<Assignment id="449"/>
+																					<Expr id="450">
+																						<BinOp id="458">
+																							<or id="459"/>
+																							<LParentheses id="460"/>
+																							<Expr id="461">
+																								<BinOp id="465">
+																									<mult id="466"/>
+																									<LParentheses id="467"/>
+																									<Expr id="468">
+																										<Const id="472">
+																											<false id="473"/>
+																										</Const>
+																									</Expr>
+																									<Comma id="469"/>
+																									<Expr id="470">
+																										<Const id="474">
+																											<true id="475"/>
+																										</Const>
+																									</Expr>
+																									<RParentheses id="471"/>
+																								</BinOp>
+																							</Expr>
+																							<Comma id="462"/>
+																							<Expr id="463">
+																								<BinOp id="476">
+																									<add id="477"/>
+																									<LParentheses id="478"/>
+																									<Expr id="479">
+																										<Const id="483">
+																											<true id="484"/>
+																										</Const>
+																									</Expr>
+																									<Comma id="480"/>
+																									<Expr id="481">
+																										<Const id="485">
+																											<false id="486"/>
+																										</Const>
+																									</Expr>
+																									<RParentheses id="482"/>
+																								</BinOp>
+																							</Expr>
+																							<RParentheses id="464"/>
+																						</BinOp>
+																					</Expr>
+																				</Assign>
+																			</Instr>
+																			<Semicolon id="445"/>
+																			<Algorithm id="446">
+																				<Instr id="487">
+																					<Assign id="490">
+																						<LHS id="491">
+																							<userDefinedName id="494" value="variable"/>
+																							<VarField id="495">
+																								<LBracket id="496"/>
+																								<FType id="497">
+																									<Var id="498">
+																										<userDefinedName id="500" value="cdc"/>
+																									</Var>
+																									<RBracket id="499"/>
+																								</FType>
+																							</VarField>
+																						</LHS>
+																						<Assignment id="492"/>
+																						<Expr id="493">
+																							<BinOp id="501">
+																								<and id="502"/>
+																								<LParentheses id="503"/>
+																								<Expr id="504">
+																									<BinOp id="508">
+																										<mult id="509"/>
+																										<LParentheses id="510"/>
+																										<Expr id="511">
+																											<Const id="515">
+																												<false id="516"/>
+																											</Const>
+																										</Expr>
+																										<Comma id="512"/>
+																										<Expr id="513">
+																											<Const id="517">
+																												<true id="518"/>
+																											</Const>
+																										</Expr>
+																										<RParentheses id="514"/>
+																									</BinOp>
+																								</Expr>
+																								<Comma id="505"/>
+																								<Expr id="506">
+																									<BinOp id="519">
+																										<add id="520"/>
+																										<LParentheses id="521"/>
+																										<Expr id="522">
+																											<Const id="526">
+																												<true id="527"/>
+																											</Const>
+																										</Expr>
+																										<Comma id="523"/>
+																										<Expr id="524">
+																											<Const id="528">
+																												<false id="529"/>
+																											</Const>
+																										</Expr>
+																										<RParentheses id="525"/>
+																									</BinOp>
+																								</Expr>
+																								<RParentheses id="507"/>
+																							</BinOp>
+																						</Expr>
+																					</Assign>
+																				</Instr>
+																				<Semicolon id="488"/>
+																				<Algorithm id="489">
+																					<Instr id="530">
+																						<Assign id="533">
+																							<LHS id="534">
+																								<userDefinedName id="537" value="variable"/>
+																								<VarField id="538">
+																									<LBracket id="539"/>
+																									<FType id="540">
+																										<Var id="541">
+																											<userDefinedName id="543" value="qw"/>
+																										</Var>
+																										<RBracket id="542"/>
+																									</FType>
+																								</VarField>
+																							</LHS>
+																							<Assignment id="535"/>
+																							<Expr id="536">
+																								<UnOp id="544">
+																									<not id="545"/>
+																									<LParentheses id="546"/>
+																									<Expr id="547">
+																										<BinOp id="549">
+																											<and id="550"/>
+																											<LParentheses id="551"/>
+																											<Expr id="552">
+																												<BinOp id="556">
+																													<mult id="557"/>
+																													<LParentheses id="558"/>
+																													<Expr id="559">
+																														<Const id="563">
+																															<false id="564"/>
+																														</Const>
+																													</Expr>
+																													<Comma id="560"/>
+																													<Expr id="561">
+																														<Const id="565">
+																															<true id="566"/>
+																														</Const>
+																													</Expr>
+																													<RParentheses id="562"/>
+																												</BinOp>
+																											</Expr>
+																											<Comma id="553"/>
+																											<Expr id="554">
+																												<BinOp id="567">
+																													<add id="568"/>
+																													<LParentheses id="569"/>
+																													<Expr id="570">
+																														<Const id="574">
+																															<true id="575"/>
+																														</Const>
+																													</Expr>
+																													<Comma id="571"/>
+																													<Expr id="572">
+																														<Const id="576">
+																															<false id="577"/>
+																														</Const>
+																													</Expr>
+																													<RParentheses id="573"/>
+																												</BinOp>
+																											</Expr>
+																											<RParentheses id="555"/>
+																										</BinOp>
+																									</Expr>
+																									<RParentheses id="548"/>
+																								</UnOp>
+																							</Expr>
+																						</Assign>
+																					</Instr>
+																					<Semicolon id="531"/>
+																					<Algorithm id="532">
+																						<Instr id="578">
+																							<Assign id="581">
+																								<LHS id="582">
+																									<output id="585"/>
+																								</LHS>
+																								<Assignment id="583"/>
+																								<Expr id="584">
+																									<Const id="586">
+																										<ShortString id="587" value="AAAAAAAAAAAAAZ9"/>
+																									</Const>
+																								</Expr>
+																							</Assign>
+																						</Instr>
+																						<Semicolon id="579"/>
+																						<Algorithm id="580">
+																							<Instr id="588">
+																								<Branch id="591">
+																									<if id="592"/>
+																									<LParentheses id="593"/>
+																									<Expr id="594">
+																										<Const id="601">
+																											<false id="602"/>
+																										</Const>
+																									</Expr>
+																									<RParentheses id="595"/>
+																									<then id="596"/>
+																									<LBrace id="597"/>
+																									<Algorithm id="598">
+																									</Algorithm>
+																									<RBrace id="599"/>
+																									<Alternat id="600">
+																										<else id="603"/>
+																										<LBrace id="604"/>
+																										<Algorithm id="605">
+																										</Algorithm>
+																										<RBrace id="606"/>
+																									</Alternat>
+																								</Branch>
+																							</Instr>
+																							<Semicolon id="589"/>
+																							<Algorithm id="590">
+																								<Instr id="607">
+																									<Loop id="610">
+																										<while id="611"/>
+																										<LParentheses id="612"/>
+																										<Expr id="613">
+																											<Const id="619">
+																												<true id="620"/>
+																											</Const>
+																										</Expr>
+																										<RParentheses id="614"/>
+																										<do id="615"/>
+																										<LBrace id="616"/>
+																										<Algorithm id="617">
+																										</Algorithm>
+																										<RBrace id="618"/>
+																									</Loop>
+																								</Instr>
+																								<Semicolon id="608"/>
+																								<Algorithm id="609">
+																									<Instr id="621">
+																										<PCall id="624">
+																											<call id="625"/>
+																											<userDefinedName id="626" value="johncc"/>
+																										</PCall>
+																									</Instr>
+																									<Semicolon id="622"/>
+																									<Algorithm id="623">
+																										<Instr id="627">
+																											<Loop id="630">
+																												<do id="631"/>
+																												<LBrace id="632"/>
+																												<Algorithm id="633">
+																													<Instr id="639">
+																														<Assign id="642">
+																															<LHS id="643">
+																																<userDefinedName id="646" value="variable"/>
+																																<VarField id="647">
+																																	<LBracket id="648"/>
+																																	<FType id="649">
+																																		<Var id="650">
+																																			<userDefinedName id="652" value="cdc"/>
+																																		</Var>
+																																		<RBracket id="651"/>
+																																	</FType>
+																																</VarField>
+																															</LHS>
+																															<Assignment id="644"/>
+																															<Expr id="645">
+																																<BinOp id="653">
+																																	<sub id="654"/>
+																																	<LParentheses id="655"/>
+																																	<Expr id="656">
+																																		<Const id="660">
+																																			<false id="661"/>
+																																		</Const>
+																																	</Expr>
+																																	<Comma id="657"/>
+																																	<Expr id="658">
+																																		<Const id="662">
+																																			<true id="663"/>
+																																		</Const>
+																																	</Expr>
+																																	<RParentheses id="659"/>
+																																</BinOp>
+																															</Expr>
+																														</Assign>
+																													</Instr>
+																													<Semicolon id="640"/>
+																													<Algorithm id="641">
+																													</Algorithm>
+																												</Algorithm>
+																												<RBrace id="634"/>
+																												<until id="635"/>
+																												<LParentheses id="636"/>
+																												<Expr id="637">
+																													<Const id="664">
+																														<true id="665"/>
+																													</Const>
+																												</Expr>
+																												<RParentheses id="638"/>
+																											</Loop>
+																										</Instr>
+																										<Semicolon id="628"/>
+																										<Algorithm id="629">
+																										</Algorithm>
+																									</Algorithm>
+																								</Algorithm>
+																							</Algorithm>
+																						</Algorithm>
+																					</Algorithm>
+																				</Algorithm>
+																			</Algorithm>
+																		</Algorithm>
+																	</Algorithm>
+																</Algorithm>
+															</Algorithm>
+														</Algorithm>
+													</Algorithm>
+												</Algorithm>
+											</Algorithm>
+										</Algorithm>
+									</Algorithm>
+								</Algorithm>
+							</Algorithm>
+						</Algorithm>
+					</Algorithm>
 				</Algorithm>
 			</Algorithm>
 			<return id="17"/>
 			<Semicolon id="18"/>
 			<VarDecl id="19">
-				<Dec id="76">
-					<TYP id="79">
-						<string id="81"/>
-					</TYP>
-					<Var id="80">
-						<userDefinedName id="82" value="test"/>
-					</Var>
-				</Dec>
-				<Semicolon id="77"/>
-				<VarDecl id="78">
-				</VarDecl>
 			</VarDecl>
 			<RBrace id="20"/>
 		</PD>
@@ -115,50 +988,10 @@
 	<main id="2"/>
 	<LBrace id="3"/>
 	<Algorithm id="4">
-		<Instr id="83">
-			<Assign id="86">
-				<LHS id="87">
-					<userDefinedName id="90" value="n"/>
-					<VarField id="91">
-					</VarField>
-				</LHS>
-				<Assignment id="88"/>
-				<Expr id="89">
-					<Const id="92">
-						<num id="93" value="7"/>
-					</Const>
-				</Expr>
-			</Assign>
-		</Instr>
-		<Semicolon id="84"/>
-		<Algorithm id="85">
-		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="94">
-			<TYP id="97">
-				<num id="99"/>
-			</TYP>
-			<Var id="98">
-				<userDefinedName id="100" value="n"/>
-			</Var>
-		</Dec>
-		<Semicolon id="95"/>
-		<VarDecl id="96">
-			<Dec id="101">
-				<TYP id="104">
-					<string id="106"/>
-				</TYP>
-				<Var id="105">
-					<userDefinedName id="107" value="test"/>
-				</Var>
-			</Dec>
-			<Semicolon id="102"/>
-			<VarDecl id="103">
-			</VarDecl>
-		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>
 </SPLProgr>

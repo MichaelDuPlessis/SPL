@@ -230,3 +230,49 @@ impl Display for Grammer {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum Type {
+    Number(Number),
+    Boolean(Boolean),
+    String,
+    Unknown,
+    Mixed,
+}
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Number(_), Self::Number(_)) => true,
+            (Self::Boolean(_), Self::Boolean(_)) => true,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
+}
+
+impl Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let print = match self {
+            Type::Number(_) => "Number",
+            Type::Boolean(_) => "Boolean",
+            Type::String => "String",
+            Type::Unknown => "Unknown",
+            Type::Mixed => "Mixed",
+        };
+
+        write!(f, "{}", print)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Number {
+    N,
+    NN,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Boolean {
+    True,
+    False,
+    Unknown,
+}

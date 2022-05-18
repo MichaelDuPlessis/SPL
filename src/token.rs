@@ -108,8 +108,6 @@ pub struct Node {
     pub pos: Option<Pos>,
     pub num_value: Option<isize>,
     pub str_value: Option<String>,
-    pub data_type: Type,
-    pub is_array: bool,
 }
 
 impl Node {
@@ -121,8 +119,6 @@ impl Node {
             pos: None,
             num_value: None,
             str_value: None,
-            data_type: Type::Unknown,
-            is_array: false,
         }
     } 
     
@@ -131,25 +127,4 @@ impl Node {
             self.children.push(Rc::clone(c));
         }
     }
-}
-
-#[derive(Debug)]
-pub enum Type {
-    Number(Number),
-    Boolean(Boolean),
-    String,
-    Unknown,
-    Mixed(Box<Type>),
-}
-
-#[derive(Debug)]
-pub enum Number {
-    N,
-    NN,
-}
-
-#[derive(Debug)]
-pub enum Boolean {
-    True,
-    False,
 }

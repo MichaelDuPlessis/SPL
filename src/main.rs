@@ -11,7 +11,7 @@ fn main() {
 
     println!("Enter a file path:");
     std::io::stdin().read_line(&mut input).unwrap();
-    let input = &input[..input.len() - 1];
+    let input = input.replace('\r', "").replace('\n', "");
 
     let file = match fs::read_to_string(input) {
         Ok(f) => f,

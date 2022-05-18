@@ -125,7 +125,7 @@ impl<'a> Lexer<'a> {
 
         self.next();
 
-        let valid_chars = ('A'..'Z').chain('0'..'9').chain([' ']).collect::<Vec<char>>();
+        let valid_chars = ('A'..'[').chain('0'..':').chain([' ']).collect::<Vec<char>>();
 
         while let Some(current_char) = self.next() {
             if current_char == '\"' {
@@ -159,7 +159,8 @@ impl<'a> Lexer<'a> {
         if self.current_token == "0" {
             if let Some(next_char) = self.peek() {
                 let next_char = *next_char;
-                if !FILLER.contains(&next_char) {
+                if !FILLER.contains(&next_char) && next_char != ',' && next_char != ')' && next_char != ';' && next_char != ']' {
+                    println!("{}", next_char);
                     println!("Invalid token {} at {}", next_char, self.current_pos);
                     exit(1);
                 }
@@ -171,7 +172,7 @@ impl<'a> Lexer<'a> {
         if self.current_token == "-" {
             match self.next() {
                 Some(current_char) => {
-                    if !('1'..'9').contains(&current_char) {
+                    if !('1'..':').contains(&current_char) {
                         println!("Invalid symbol {} afer - at {}", current_char, token_pos);
                         exit(1);
                     }
@@ -194,10 +195,10 @@ impl<'a> Lexer<'a> {
                 return;
             }
 
-            if ('0'..'9').contains(&current_char) {
+            if ('0'..':').contains(&current_char) {
                 self.current_token.push(current_char); // can unwrap cause we know its just zeros
             } else {
-                println!("Invalid symbol {} after - at {}", current_char, token_pos);
+                println!("Invalid symbol {} at {}", current_char, token_pos);
                 exit(1);
             }
 
