@@ -99,12 +99,12 @@ impl TypeChecker {
             // if array check paramter valid
             let var_field = &lhs.children[1].borrow().children;
             if !var_field.is_empty() {
-                let indexer = &var_field[1];
-                let typ = self.expr_type(indexer);
-                let symbol = indexer.borrow().children[0].borrow().symbol;
+                let indexer = &var_field[1].borrow().children[0];
+                let t = self.expr_type(indexer);
+                let symbol = indexer.borrow().symbol;
 
                 if symbol == Grammer::NonTerminal(NonTerminal::Var) {
-                    if let Type::Number(num) = typ {
+                    if let Type::Number(num) = t {
                         if num != Number::N {
                             println!("Error: type of var indexer must be Number");
                             std::process::exit(1);
@@ -114,7 +114,7 @@ impl TypeChecker {
                         std::process::exit(1);
                     }
                 } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
-                    if let Type::Number(num) = typ {
+                    if let Type::Number(num) = t {
                         if num != Number::NN {
                             println!("Error: type of const indexer must be non-negative Number");
                             std::process::exit(1);

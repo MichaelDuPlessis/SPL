@@ -1,22 +1,7 @@
-proc test {
-    proc test2 {
-        proc test3 {
-            return;
-        },
-        return;
-    }
-
-    b := 7;
-    return;
-
-    bool var;
-},
-
 main {
+    b := 0;
     b[b] := true;
 
-    call test;
-    
     halt;
     arr bool[10] b;
     num b;

@@ -9,42 +9,42 @@
 				<LHS id="13">
 					<userDefinedName id="16" value="b"/>
 					<VarField id="17">
-						<LBracket id="18"/>
-						<FType id="19">
-							<Var id="20">
-								<userDefinedName id="22" value="b"/>
-							</Var>
-							<RBracket id="21"/>
-						</FType>
 					</VarField>
 				</LHS>
 				<Assignment id="14"/>
 				<Expr id="15">
-					<Const id="23">
-						<true id="24"/>
+					<Const id="18">
+						<num id="19" value="0"/>
 					</Const>
 				</Expr>
 			</Assign>
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
-			<Instr id="25">
-				<Assign id="28">
-					<LHS id="29">
-						<userDefinedName id="32" value="b"/>
-						<VarField id="33">
+			<Instr id="20">
+				<Assign id="23">
+					<LHS id="24">
+						<userDefinedName id="27" value="b"/>
+						<VarField id="28">
+							<LBracket id="29"/>
+							<FType id="30">
+								<Var id="31">
+									<userDefinedName id="33" value="b"/>
+								</Var>
+								<RBracket id="32"/>
+							</FType>
 						</VarField>
 					</LHS>
-					<Assignment id="30"/>
-					<Expr id="31">
+					<Assignment id="25"/>
+					<Expr id="26">
 						<Const id="34">
-							<num id="35" value="0"/>
+							<true id="35"/>
 						</Const>
 					</Expr>
 				</Assign>
 			</Instr>
-			<Semicolon id="26"/>
-			<Algorithm id="27">
+			<Semicolon id="21"/>
+			<Algorithm id="22">
 			</Algorithm>
 		</Algorithm>
 	</Algorithm>
