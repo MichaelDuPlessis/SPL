@@ -233,8 +233,8 @@ impl Display for Grammer {
 
 #[derive(Debug, Clone, Copy)]
 pub enum Type {
-    Number(Option<(Number, isize)>),
-    Boolean(Option<bool>),
+    Number(Number),
+    Boolean(Boolean),
     String,
     Unknown,
     Mixed,
@@ -274,4 +274,5 @@ pub enum Number {
 pub enum Boolean {
     True,
     False,
+    Unknown,
 }

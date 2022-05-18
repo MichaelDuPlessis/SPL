@@ -1,5 +1,5 @@
 use std::{cell::RefCell, rc::Rc, collections::HashMap, fmt::{Debug}};
-use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type}};
+use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type, Number, Boolean}};
 
 pub struct ScopeAnalysis {
     head: LNode,
@@ -114,9 +114,9 @@ impl ScopeAnalysis {
                 Grammer::Terminal(t) => match t {
                     Terminal::Num | Terminal::Boolean | Terminal::String => {
                         if t == Terminal::Num {
-                            self.type_found = Some(Type::Number(None));
+                            self.type_found = Some(Type::Number(Number::NN));
                         } else if t == Terminal::Boolean {
-                            self.type_found = Some(Type::Boolean(None));
+                            self.type_found = Some(Type::Boolean(Boolean::Unknown));
                         } else {
                             self.type_found = Some(Type::String);
                         }
@@ -149,14 +149,14 @@ impl ScopeAnalysis {
 
                             self.enter_new(name);
                         } else if let Some(typ) = self.type_found {
-                            if self.contains(&name) {
-                                println!("Error: var {} at {} already defined.", name, c.borrow().pos.unwrap());
-                                std::process::exit(1);
+                            if let Some(si) = self.find_in_scope(&name) {
+                                if self.array_found == si.is_array {
+                                    println!("Error: var {} at {} already defined.", name, c.borrow().pos.unwrap());
+                                    std::process::exit(1);
+                                }
                             }
 
-                            if self.array_found {
-                                node.is_array = true;
-                            }
+                            node.is_array = self.array_found;
 
                             node.data_type = typ;
 

@@ -95,7 +95,8 @@ impl TypeChecker {
         let name = node.borrow();
         let name = name.str_value.as_ref().unwrap();
 
-        let scope_info = self.scope.borrow().exist_up(name);
+        let scope_info = self.scope.borrow();
+        let scope_info = scope_info.exist_up(name);
 
         if let Some(si) = scope_info {
             si.data_type
@@ -115,10 +116,7 @@ impl TypeChecker {
         match sym {
             Grammer::Terminal(t) => match t {
                 Terminal::Not => match typ {
-                    Type::Boolean(b) => match b {
-                        Some(b) => Type::Boolean(Some(!b)),
-                        None => Type::Boolean(None),
-                    }
+                    Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
                     _ => Self::bad_type(typ),
                 },
                 _ => panic!("bin_op_type should not get here terminal"), // should never get here
@@ -141,67 +139,24 @@ impl TypeChecker {
         match sym {
             Grammer::Terminal(t) => match t {
                 // logical operators
-                Terminal::And => match (type1, type2) {
-                    (Type::Boolean(bool1), Type::Boolean(bool2)) => match (bool1, bool2) {
-                        (Some(bool1), Some(bool2)) => Type::Boolean(Some(bool1 && bool2)),
-                        _ => Type::Boolean(None), // if unkown, i.e. one is a uDN from user input
-                    },
-                    _ => Self::incompatible(type1, type2),
-                },
-                Terminal::Or => match (type1, type2) {
-                    (Type::Boolean(bool1), Type::Boolean(bool2)) => match (bool1, bool2) {
-                        (Some(bool1), Some(bool2)) => Type::Boolean(Some(bool1 || bool2)),
-                        _ => Type::Boolean(None), // if unkown, i.e. one is a uDN from user input
-                    },
+                Terminal::And | Terminal::Or => match (type1, type2) {
+                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::Unknown),
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Equal => match (type1, type2) {
-                    (Type::Boolean(bool1), Type::Boolean(bool2)) => match (bool1, bool2) {
-                        (Some(bool1), Some(bool2)) => Type::Boolean(Some(bool1 == bool2)),
-                        _ => Type::Boolean(None), // if unkown, i.e. one is a uDN from user input
-                    },
-                    _ => Type::Boolean(Some(false)),
+                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::Unknown),
+                    _ => Type::Boolean(Boolean::False),
                 },
                 Terminal::Add => match (type1, type2) {
-                    (Type::Number(num1), Type::Number(num2)) => match (num1, num2) {
-                        (Some((_, num1)), Some((_, num2))) => {
-                            let num = num1 + num2;
-                            if num >= 0 {
-                                Type::Number(Some((Number::NN, num)))
-                            } else {
-                                Type::Number(Some((Number::N, num)))
-                            }
-                        },
-                        _ => Type::Number(None),
-                    },
+                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Mult => match (type1, type2) {
-                    (Type::Number(num1), Type::Number(num2)) => match (num1, num2) {
-                        (Some((_, num1)), Some((_, num2))) => {
-                            let num = num1 * num2;
-                            if num >= 0 {
-                                Type::Number(Some((Number::NN, num)))
-                            } else {
-                                Type::Number(Some((Number::N, num)))
-                            }
-                        },
-                        _ => Type::Number(None),
-                    },
+                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Sub => match (type1, type2) {
-                    (Type::Number(num1), Type::Number(num2)) => match (num1, num2) {
-                        (Some((_, num1)), Some((_, num2))) => {
-                            let num = num1 - num2;
-                            if num >= 0 {
-                                Type::Number(Some((Number::NN, num)))
-                            } else {
-                                Type::Number(Some((Number::N, num)))
-                            }
-                        },
-                        _ => Type::Number(None),
-                    },
+                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
                     _ => Self::incompatible(type1, type2),
                 },
                 _ => panic!("bin_op_type should not get here terminal"),
@@ -229,14 +184,14 @@ impl TypeChecker {
                 Terminal::Number => {
                     let num = con.borrow().num_value.unwrap();
                     if num < 0 {
-                        Type::Number(Some((Number::N, num)))
+                        Type::Number(Number::N)
                     } else {
-                        Type::Number(Some((Number::NN, num)))
+                        Type::Number(Number::NN)
                     }
                 },
                 Terminal::ShortString => Type::String,
-                Terminal::True => Type::Boolean(Some(true)),
-                Terminal::False => Type::Boolean(Some(false)),
+                Terminal::True => Type::Boolean(Boolean::Unknown),
+                Terminal::False => Type::Boolean(Boolean::Unknown),
                 _ => Type::Unknown,
             },
             Grammer::NonTerminal(_) => Type::Unknown,

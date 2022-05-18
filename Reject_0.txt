@@ -1,0 +1,21 @@
+main{
+	if(x)
+	then{
+		do{
+			if(mult(add(2,3),sub(5,4)))
+			then{
+					while(sub(larger(-5,6),and(4,6)))
+					do{
+						if(or(not(0,-102),input(x)))
+						then{
+							output := and(-0,5);
+						}
+					};
+			};
+		}
+		until(input(y));
+	}
+	else{
+};
+halt;
+}

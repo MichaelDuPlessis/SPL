@@ -3,5 +3,4 @@ main {
     halt;
 
     num n;
-    num x;
 }

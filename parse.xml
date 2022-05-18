@@ -36,17 +36,6 @@
 		</Dec>
 		<Semicolon id="21"/>
 		<VarDecl id="22">
-			<Dec id="27">
-				<TYP id="30">
-					<num id="32"/>
-				</TYP>
-				<Var id="31">
-					<userDefinedName id="33" value="x"/>
-				</Var>
-			</Dec>
-			<Semicolon id="28"/>
-			<VarDecl id="29">
-			</VarDecl>
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>
