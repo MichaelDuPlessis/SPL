@@ -7,14 +7,14 @@
 		<Instr id="9">
 			<Assign id="12">
 				<LHS id="13">
-					<userDefinedName id="16" value="x"/>
+					<userDefinedName id="16" value="n"/>
 					<VarField id="17">
 					</VarField>
 				</LHS>
 				<Assignment id="14"/>
 				<Expr id="15">
 					<Const id="18">
-						<num id="19" value="10"/>
+						<num id="19" value="0"/>
 					</Const>
 				</Expr>
 			</Assign>
@@ -29,7 +29,7 @@
 							<LBracket id="29"/>
 							<FType id="30">
 								<Var id="31">
-									<userDefinedName id="33" value="x"/>
+									<userDefinedName id="33" value="n"/>
 								</Var>
 								<RBracket id="32"/>
 							</FType>
@@ -38,7 +38,7 @@
 					<Assignment id="25"/>
 					<Expr id="26">
 						<Const id="34">
-							<num id="35" value="0"/>
+							<num id="35" value="10"/>
 						</Const>
 					</Expr>
 				</Assign>
@@ -52,31 +52,31 @@
 	<Semicolon id="6"/>
 	<VarDecl id="7">
 		<Dec id="36">
-			<TYP id="39">
-				<num id="41"/>
+			<arr id="39"/>
+			<TYP id="40">
+				<num id="45"/>
 			</TYP>
-			<Var id="40">
-				<userDefinedName id="42" value="x"/>
+			<LBracket id="41"/>
+			<Const id="42">
+				<num id="46" value="7"/>
+			</Const>
+			<RBracket id="43"/>
+			<Var id="44">
+				<userDefinedName id="47" value="x"/>
 			</Var>
 		</Dec>
 		<Semicolon id="37"/>
 		<VarDecl id="38">
-			<Dec id="43">
-				<arr id="46"/>
-				<TYP id="47">
-					<num id="52"/>
+			<Dec id="48">
+				<TYP id="51">
+					<num id="53"/>
 				</TYP>
-				<LBracket id="48"/>
-				<Const id="49">
-					<num id="53" value="10"/>
-				</Const>
-				<RBracket id="50"/>
-				<Var id="51">
-					<userDefinedName id="54" value="x"/>
+				<Var id="52">
+					<userDefinedName id="54" value="n"/>
 				</Var>
 			</Dec>
-			<Semicolon id="44"/>
-			<VarDecl id="45">
+			<Semicolon id="49"/>
+			<VarDecl id="50">
 			</VarDecl>
 		</VarDecl>
 	</VarDecl>

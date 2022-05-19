@@ -74,20 +74,32 @@ impl ScopeAnalysis {
                             continue;
                         }
 
-                        if let Some(si) = self.exist_up(name) {
-                            if !self.return_found && !self.halt_found {
-                                if node.borrow().children.len() > i + 1 &&
-                                node.borrow().children[i+1].borrow().children.is_empty() {
-                                    self.used(name, false, false);
+                        if !self.return_found && !self.halt_found {
+                            if node.borrow().children.len() > i + 1 {
+                                if node.borrow().children[i+1].borrow().children.is_empty() {
+                                    if let Some(_) = self.exist_up(name, false) {
+                                        self.used(name, false, false);
+                                        continue;
+                                    }  else {
+                                        error(&format!("var {} at {} is not defined.", name, pos));
+                                    }
                                 } else {
-                                    self.used(name, false, true);
+                                    if let Some(_) = self.exist_up(name, true) {
+                                        self.used(name, false, true);
+                                        continue;
+                                    } else {
+                                        error(&format!("var {} at {} is not defined.", name, pos));
+                                    }
+                                }
+                            } else {
+                                if let Some(_) = self.exist_up(name, false) {
+                                    self.used(name, false, false);
+                                    continue;
+                                } else {
+                                    error(&format!("var {} at {} is not defined.", name, pos));
                                 }
                             }
-
-                            continue;
                         }
-
-                        error(&format!("var {} at {} is not defined.", name, pos));
                     },
                     Terminal::Call => self.call_found = true,
                     Terminal::Proc => self.proc_found = true,
@@ -213,8 +225,8 @@ impl ScopeAnalysis {
         self.current_scope.borrow().exist_down(name)
     }
 
-    fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
-        self.current_scope.borrow().exist_up(name, false)
+    fn exist_up(&self, name: &str, arr: bool) -> Option<ScopeInfo> {
+        self.current_scope.borrow().exist_up(name, arr)
     }
 
     fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {

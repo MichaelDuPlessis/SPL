@@ -104,18 +104,18 @@ impl TypeChecker {
                 if symbol == Grammer::NonTerminal(NonTerminal::Var) {
                     if let Type::Number(num) = t {
                         if num != Number::N {
-                            error(&format!("type of var indexer must be Number"));
+                            error(&format!("Type of var indexer must be Number"));
                         }
                     } else {
-                        error(&format!("Error: type of var indexer must be Number"));
+                        error(&format!("Type of var indexer must be Number"));
                     }
                 } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
                     if let Type::Number(num) = t {
                         if num != Number::NN {
-                            error(&format!("Error: type of const indexer must be non-negative Number"));
+                            error(&format!("Type of const indexer must be non-negative Number"));
                         }
                     } else {
-                        error(&format!("Error: type of const indexer must be non-negative Number"));
+                        error(&format!("Type of const indexer must be non-negative Number"));
                     }
                 }
 
@@ -127,11 +127,11 @@ impl TypeChecker {
             let typ = self.expr_type(&children[2]);
 
             match typ {
-                Type::Number(_) => todo!(),
-                Type::Boolean(_) => todo!(),
-                Type::String => todo!(),
-                Type::Unknown => todo!(),
-                Type::Mixed => todo!(),
+                Type::Number(_) => (),
+                Type::String => (),
+                Type::Mixed => (),
+                Type::Boolean(_) => error("Output cannot be of type boolean"),
+                Type::Unknown => error("Output cannot be of type Unknown"),
             }
         }
     }
@@ -163,7 +163,7 @@ impl TypeChecker {
 
         if let Some(si) = scope_info {
             if !si.is_defined {
-                
+                error(&format!("{} has not been assigned to.", name));
             }
 
             si.data_type
