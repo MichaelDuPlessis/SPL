@@ -73,7 +73,7 @@ impl TypeChecker {
                 },
                 Grammer::NonTerminal(nt) => match nt {
                     NonTerminal::Assign => self.check_assign(c),
-                    NonTerminal::ProcDefs => return, // if encounter procdefs leave
+                    // NonTerminal::ProcDefs => return, // if encounter procdefs leave
                     NonTerminal::Alternat => if !skip_else {
                         self.analysis(Rc::clone(c));
                     } else {
@@ -85,12 +85,6 @@ impl TypeChecker {
         }
     }
 
-    fn find_head(&self, node: LNode) -> LNode {
-        
-
-        todo!()
-    }
-
     fn check_assign(&self, node: &LNode) {
         let children = &node.borrow().children; // children of assign
         let lhs = children[0].borrow();
@@ -98,12 +92,6 @@ impl TypeChecker {
 
         if child1.symbol == Grammer::Terminal(Terminal::UserDefined) {
             let name = child1.str_value.as_ref().unwrap();
-
-            if let Some(s) = self.scope.borrow().exist_up(name) {
-                if s.is_proc {
-                    error(&format!("Cannot assign to procedure {} at {}", name, children[0].borrow().pos.unwrap()));
-                }
-            }
 
             let typ = self.expr_type(&children[2]);            
             // if array check paramter valid
@@ -135,6 +123,16 @@ impl TypeChecker {
             } else {
                 self.scope.borrow_mut().add_type(name, typ, false);
             }
+        } else if child1.symbol == Grammer::Terminal(Terminal::Out) {
+            let typ = self.expr_type(&children[2]);
+
+            match typ {
+                Type::Number(_) => todo!(),
+                Type::Boolean(_) => todo!(),
+                Type::String => todo!(),
+                Type::Unknown => todo!(),
+                Type::Mixed => todo!(),
+            }
         }
     }
 
@@ -161,7 +159,7 @@ impl TypeChecker {
         let name = name.str_value.as_ref().unwrap();
 
         let scope_info = self.scope.borrow();
-        let scope_info = scope_info.exist_up(name);
+        let scope_info = scope_info.exist_up(name, false);
 
         if let Some(si) = scope_info {
             if !si.is_defined {

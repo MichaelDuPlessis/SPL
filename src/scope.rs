@@ -75,9 +75,6 @@ impl ScopeAnalysis {
                         }
 
                         if let Some(si) = self.exist_up(name) {
-                            if si.is_proc {
-                                error(&format!("var {} at {} is not defined.", name, pos));
-                            }
                             if !self.return_found && !self.halt_found {
                                 if node.borrow().children.len() > i + 1 &&
                                 node.borrow().children[i+1].borrow().children.is_empty() {
@@ -217,7 +214,7 @@ impl ScopeAnalysis {
     }
 
     fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
-        self.current_scope.borrow().exist_up(name)
+        self.current_scope.borrow().exist_up(name, false)
     }
 
     fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
@@ -290,13 +287,13 @@ impl Scope {
     }
 
     // used for vars
-    pub fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
-        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+    pub fn exist_up(&self, name: &str, arr: bool) -> Option<ScopeInfo> {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name && i.1.is_array == arr && i.1.is_proc == false) {
             return Some(si.1);
         }
 
         if let Some(parent) = &self.parent {
-            return parent.borrow().exist_up(name);
+            return parent.borrow().exist_up(name, arr);
         }
 
         None

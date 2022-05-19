@@ -1,4 +1,9 @@
 main {
+    x := 10;
+    x[x] := 0;
 
     halt;
+
+    num x;
+    arr num[10] x;
 }
