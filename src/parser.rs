@@ -1,4 +1,4 @@
-use std::{rc::Rc, cell::RefCell, fs::File, io::Write, process::exit};
+use std::{rc::Rc, cell::RefCell, fs::File, io::Write};
 use crate::{grammer::*, token::{TokenList, Token, Pos, Node, LNode}, stack, error::error};
 
 const ROWS: usize = 22;

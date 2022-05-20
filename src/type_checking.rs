@@ -21,7 +21,7 @@ impl TypeChecker {
     pub fn type_check(&mut self) {
         // Do anaylsis there and if encounter call, search AST to find it and do analysis there
         // ignore any procdefs and only analysis when matching call found
-
+        
         self.analysis(Rc::clone(&self.ast));
         println!("{:?}", self.scope);
 
@@ -32,7 +32,7 @@ impl TypeChecker {
         let mut skip_if = false;
         let mut skip_else = false;
 
-        for c in &node.borrow().children {
+        for (i, c) in node.borrow().children.iter().enumerate() {
             let grammer = c.borrow().symbol;
             if skip_if {
                 if grammer == Grammer::NonTerminal(NonTerminal::Alternat) {
@@ -44,6 +44,7 @@ impl TypeChecker {
 
             match grammer {
                 Grammer::Terminal(t) => match t {
+                    // Terminal::Input => self.check_input(&node),
                     Terminal::Proc => self.enter_scope = true,
                     Terminal::UserDefined => {
                         if self.enter_scope {
@@ -56,6 +57,43 @@ impl TypeChecker {
                         if self.exit_scope {
                             self.exit_scope = false;
                             self.exit();
+                        }
+                    }
+                    Terminal::Call => {
+                        let name = &node.borrow().children[i + 1];
+                        let name = name.borrow();
+                        let name = name.str_value.as_ref().unwrap();
+
+                        let scope = self.scope.borrow().exist_down(name);
+                        if let Some(si) = scope {
+                            let node_id = si.node_id;
+
+                            let proc_node = self.ast.borrow().find(node_id, &self.ast);
+                            if let Some(proc) = proc_node {
+                                self.analysis(Rc::clone(&proc));
+                            } else {
+                                panic!("don't think it should get here");
+                            }
+
+                            continue;
+                        } else {
+                            error(&format!("Call to {} not in scope", name));
+                        }
+
+                        let scope = self.scope.borrow().exist_proc(name);
+                        if let Some(si) = scope {
+                            let node_id = si.node_id;
+
+                            let proc_node = self.ast.borrow().find(node_id, &self.ast);
+                            if let Some(proc) = proc_node {
+                                self.analysis(Rc::clone(&proc));
+                            } else {
+                                panic!("don't think it should get here");
+                            }
+
+                            continue;
+                        } else {
+                            error(&format!("Call to {} not in scope", name));
                         }
                     }
                     // conditionals
@@ -73,7 +111,7 @@ impl TypeChecker {
                 },
                 Grammer::NonTerminal(nt) => match nt {
                     NonTerminal::Assign => self.check_assign(c),
-                    // NonTerminal::ProcDefs => return, // if encounter procdefs leave
+                    NonTerminal::ProcDefs => continue, // if encounter procdefs leave
                     NonTerminal::Alternat => if !skip_else {
                         self.analysis(Rc::clone(c));
                     } else {
@@ -94,12 +132,14 @@ impl TypeChecker {
             let name = child1.str_value.as_ref().unwrap();
 
             let typ = self.expr_type(&children[2]);            
+
             // if array check paramter valid
+            // change to use created functions at some point
             let var_field = &lhs.children[1].borrow().children;
             if !var_field.is_empty() {
-                let indexer = &var_field[1].borrow().children[0];
+                let indexer = &var_field[1];
                 let t = self.expr_type(indexer);
-                let symbol = indexer.borrow().symbol;
+                let symbol = indexer.borrow().children[0].borrow().symbol;
 
                 if symbol == Grammer::NonTerminal(NonTerminal::Var) {
                     if let Type::Number(num) = t {
@@ -142,10 +182,11 @@ impl TypeChecker {
 
         match sym {
             Grammer::Terminal(t) => match t {
-                Terminal::UserDefined => self.udn_type(kind),
+                Terminal::UserDefined => self.udn_type(node),
                 _ => panic!("Should never get here expr_type terminal"),
             }, 
             Grammer::NonTerminal(nt) => match nt {
+                NonTerminal::Var => self.udn_type(kind),
                 NonTerminal::Const => self.const_type(kind),
                 NonTerminal::UnOp => self.un_op_type(kind),
                 NonTerminal::BinOp => self.bin_op_type(kind),
@@ -154,12 +195,66 @@ impl TypeChecker {
         }
     }
 
+    fn check_arr_valid(&self, node: &LNode) {
+        let indexer = &node;
+        let t = self.expr_type(indexer);
+        let symbol = indexer.borrow().children[0].borrow().symbol;
+
+        if symbol == Grammer::NonTerminal(NonTerminal::Var) {
+            if let Type::Number(num) = t {
+                if num != Number::N {
+                    error(&format!("Type of var indexer must be Number"));
+                }
+            } else {
+                error(&format!("Type of var indexer must be Number"));
+            }
+        } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
+            if let Type::Number(num) = t {
+                if num != Number::NN {
+                    error(&format!("Type of const indexer must be non-negative Number"));
+                }
+            } else {
+                error(&format!("Type of const indexer must be non-negative Number"));
+            }
+        }
+    }
+
+    fn array(&self, node: &LNode) -> Option<LNode> {
+        if node.borrow().children.is_empty() {
+            None
+        } else {
+            Some(Rc::clone(&node.borrow().children[1]))
+        }
+    }
+
     fn udn_type(&self, node: &LNode) -> Type {
-        let name = node.borrow();
+        let child = &node.borrow();
+
+        let var = if node.borrow().children.is_empty() {
+            node
+        } else {
+            &child.children[0]
+        };
+
+        let name = var.borrow();
         let name = name.str_value.as_ref().unwrap();
 
         let scope_info = self.scope.borrow();
-        let scope_info = scope_info.exist_up(name, false);
+        let scope_info = if node.borrow().children.len() > 1 {
+            if node.borrow().children[1].borrow().children.is_empty() {
+                scope_info.exist_up(name, false)
+            } else {
+                if let Some(n) = self.array(&node.borrow().children[1]) {
+                    self.check_arr_valid(&n);
+                    scope_info.exist_up(name, true)
+                } else {
+                    error(&format!("No index provided for array {} at {}", name, var.borrow().pos.unwrap()));
+                    None
+                }
+            }
+        } else {
+            scope_info.exist_up(name, false)
+        };
 
         if let Some(si) = scope_info {
             if !si.is_defined {

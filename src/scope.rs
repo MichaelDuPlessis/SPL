@@ -34,13 +34,13 @@ impl ScopeAnalysis {
     pub fn scope(&mut self) -> ScopeNode {
         // builds the scope tree
         self.analysis(Rc::clone(&self.head));
-        // println!("{:?}", self.scope);
-
+        
         self.return_found = false;
         self.proc_found = false;
-
+        
         // // checks the scope tree
         self.check_scope(Rc::clone(&self.head));
+        // println!("{:?}", self.scope);
 
         if !self.all_used() {
             error(&format!("Not all variables and procedures used"));
@@ -138,7 +138,7 @@ impl ScopeAnalysis {
                         let name = c.borrow().str_value.as_ref().unwrap().clone();
 
                         // adding data types
-                        let mut node: ScopeInfo = Default::default();
+                        let mut scope_info: ScopeInfo = Default::default();
 
                         if self.proc_found {
                             if let Some(si) = self.exist_proc(&name) {
@@ -153,22 +153,23 @@ impl ScopeAnalysis {
                                 }
                             }
 
-                            node.is_proc = true;
-                            self.bind(name.clone(), node);
+                            scope_info.node_id = node.borrow().id;
+                            scope_info.is_proc = true;
+                            self.bind(name.clone(), scope_info);
 
                             self.enter_new(name);
                         } else if let Some(typ) = self.type_found {
-                            if let Some(si) = self.find_in_scope(&name) {
+                            if let Some(si) = self.exist_up(&name, false) {
                                 if self.array_found == si.is_array {
                                     error(&format!("var {} at {} already defined.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
-                            node.is_array = self.array_found;
+                            scope_info.is_array = self.array_found;
 
-                            node.data_type = typ;
+                            scope_info.data_type = typ;
 
-                            self.bind(name, node);
+                            self.bind(name, scope_info);
                         }
 
                         self.array_found = false;
@@ -233,9 +234,9 @@ impl ScopeAnalysis {
         self.current_scope.borrow().exist_proc(name)
     }
 
-    fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
-        self.current_scope.borrow().find_in_scope(name)
-    }
+    // fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
+    //     self.current_scope.borrow().find_in_scope(name)
+    // }
 
     fn used(&self, name: &str, call: bool, arr: bool) {
         self.current_scope.borrow_mut().used(name, call, arr);
@@ -282,13 +283,13 @@ impl Scope {
     // }
 
     // only use for procs
-    fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
-        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+    pub fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name && i.1.is_proc == true) {
             return Some(si.1);
         }
 
         for c in &self.children {
-            if let Some(si) = c.borrow().exist_down(name) {
+            if let Some(_) = c.borrow().exist_down(name) {
                 if let Some(si) = c.borrow().vtable.iter().find(|i| i.0 == name) {
                     return Some(si.1);
                 }
@@ -326,13 +327,13 @@ impl Scope {
         None
     }
 
-    fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
-        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
-            Some(si.1)
-        } else {
-            None
-        }
-    }
+    // fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
+    //     if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+    //         Some(si.1)
+    //     } else {
+    //         None
+    //     }
+    // }
 
     fn scope_pos(&self, name: &str) -> usize {
         *self.scope_map.get(name).unwrap()
@@ -409,7 +410,14 @@ impl Scope {
         let mut curr = Rc::clone(self.parent.as_ref().unwrap());
         loop {
             if let Some((_, si)) = RefCell::borrow_mut(&curr).vtable.iter_mut().find(find) {
-                si.data_type = t;
+                si.data_type = match t {
+                    Type::Number(_) => Type::Number(Number::N),
+                    Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
+                    Type::String => Type::String,
+                    Type::Unknown => panic!("Should never get here add_type"),
+                    Type::Mixed => Type::Mixed,
+                };
+                
                 si.is_defined = true;
                 break;
             }
@@ -440,6 +448,7 @@ impl Debug for Scope {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ScopeInfo {
+    pub node_id: usize,
     pub data_type: Type,
     pub is_array: bool,
     pub is_proc: bool,
@@ -447,18 +456,10 @@ pub struct ScopeInfo {
     pub is_used: bool,
 }
 
-impl ScopeInfo {
-    fn new(data_type: Type) -> Self {
-        Self {
-            data_type,
-            ..Default::default()
-        }
-    }
-}
-
 impl Default for ScopeInfo {
     fn default() -> Self {
         Self {
+            node_id: 0,
             data_type: Type::Unknown,
             is_array: false,
             is_proc: false,

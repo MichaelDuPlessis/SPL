@@ -1,9 +1,11 @@
+proc test {
+    test := 7;
+
+    return;
+},
 main {
-    n := 0;
-    x[n] := 10;
+    call test;
 
     halt;
-
-    arr num[7] x;
-    num n;
+    num test;
 }
