@@ -192,7 +192,7 @@ impl ScopeAnalysis {
     }
 
     pub fn create_xml(node: ScopeNode) {
-        let mut file = File::create("./scope_type.xml").unwrap();
+        let mut file = File::create("./scope_type.txt").unwrap();
 
         let node = node.borrow();
         let scope_id = node.scope_id;
@@ -279,10 +279,6 @@ impl ScopeAnalysis {
     fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
         self.current_scope.borrow().exist_proc(name)
     }
-
-    // fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
-    //     self.current_scope.borrow().find_in_scope(name)
-    // }
 
     fn used(&self, name: &str, call: bool, arr: bool) {
         self.current_scope.borrow_mut().used(name, call, arr);
