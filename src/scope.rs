@@ -191,7 +191,7 @@ impl ScopeAnalysis {
         }
     }
 
-    pub fn create_xml(node: ScopeNode) {
+    pub fn create_table(node: ScopeNode) {
         let mut file = File::create("./scope_type.txt").unwrap();
 
         let node = node.borrow();
@@ -210,13 +210,13 @@ impl ScopeAnalysis {
         this_scope = format!("{}\nEnd of Scope {}\n\n", this_scope, scope_id);
 
         for c in &node.children {
-            this_scope = format!("{}{}", this_scope, Self::_create_xml(Rc::clone(c)));
+            this_scope = format!("{}{}", this_scope, Self::_create_table(Rc::clone(c)));
         }
 
         file.write_all(this_scope.as_bytes()).unwrap();
     }
 
-    fn _create_xml(node: ScopeNode) -> String {
+    fn _create_table(node: ScopeNode) -> String {
         let node = node.borrow();
         let scope_id = node.scope_id;
         let mut this_scope = format!("Start of Scope {}\n\n", scope_id);
