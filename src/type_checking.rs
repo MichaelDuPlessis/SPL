@@ -19,11 +19,28 @@ impl TypeChecker {
         // ignore any procdefs and only analysis when matching call found
         
         self.analysis(Rc::clone(&self.ast));
+        
+        // after anaylsis check to make sure each variable is defined
+        self.check_defined(Rc::clone(&self.scope));
+        
         println!("{:?}", self.scope);
 
-        // after anaylsis check to make sure each variable is defined
-
         return Rc::clone(&self.scope);
+    }
+
+    // if function completes tahn all vars defined
+    fn check_defined(&self, node: ScopeNode) {
+        let node = node.borrow();
+        
+        for (name, si) in &node.vtable {
+            if !si.is_defined {
+                error(&format!("{} in scope {} is never assigned to.", name, node.scope_id))
+            }
+        }
+
+        for c in &node.children {
+            self.check_defined(Rc::clone(c));
+        }
     }
 
     fn analysis(&mut self, node: LNode) {

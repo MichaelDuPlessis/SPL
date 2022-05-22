@@ -1,7 +1,9 @@
 main {
-    do {
-
-    } until (7);
+    while (false) do {
+        t := 7;
+    };
 
     halt;
+    
+    num t;
 }

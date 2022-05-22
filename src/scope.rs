@@ -292,11 +292,11 @@ impl ScopeAnalysis {
 pub type ScopeNode = Rc<RefCell<Scope>>;
 
 pub struct Scope {
-    scope_id: usize,
+    pub scope_id: usize,
     scope_map: HashMap<String, usize>,
-    vtable: LinkedList<(String, ScopeInfo)>,
+    pub vtable: LinkedList<(String, ScopeInfo)>,
     parent: Option<ScopeNode>,
-    children: Vec<ScopeNode>,
+    pub children: Vec<ScopeNode>,
 }
 
 impl Scope {
