@@ -235,7 +235,7 @@ impl ScopeAnalysis {
 
         // printing children scopes
         for c in &node.children {
-            this_scope = format!("{}{}", this_scope, Self::_create_xml(Rc::clone(c)));
+            this_scope = format!("{}{}", this_scope, Self::_create_table(Rc::clone(c)));
         }
 
         this_scope
