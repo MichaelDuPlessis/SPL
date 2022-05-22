@@ -29,12 +29,21 @@ impl TypeChecker {
     fn analysis(&mut self, node: LNode) {
         let mut skip_if = false;
         let mut skip_else = false;
+        let mut skipe_while = false;
 
         for (i, c) in node.borrow().children.iter().enumerate() {
             let grammer = c.borrow().symbol;
             if skip_if {
                 if grammer == Grammer::NonTerminal(NonTerminal::Alternat) {
                     skip_if = false;
+                    self.analysis(Rc::clone(c));
+                }
+                continue;
+            }
+
+            if skipe_while {
+                if grammer == Grammer::Terminal(Terminal::RBrace) {
+                    skipe_while = false;
                     self.analysis(Rc::clone(c));
                 }
                 continue;
@@ -86,6 +95,26 @@ impl TypeChecker {
                             } else if typ == Boolean::False {
                                 skip_if = true;
                             } // else do nothing evaluate both
+                        } else {
+                            error("Type of expression in if must evaluate to bool.")
+                        }
+                    },
+                    Terminal::While => {
+                        let typ = self.expr_type(&node.borrow().children[2]);
+                        if let Type::Boolean(typ) = typ {
+                            if typ == Boolean::True {
+                                skipe_while = false;
+                            } else if typ == Boolean::False {
+                                skipe_while = true;
+                            } // else do nothing evaluate both
+                        } else {
+                            error("Type of expression in while must evaluate to bool.")
+                        }
+                    },
+                    Terminal::Until => {
+                        let typ = self.expr_type(&node.borrow().children[6]);
+                        if typ != Type::Boolean(Boolean::True) {
+                            error("Type of expression in while must evaluate to bool.")
                         }
                     },
                     _ => (),
@@ -299,6 +328,10 @@ impl TypeChecker {
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Sub => match (type1, type2) {
+                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
+                    _ => Self::incompatible(type1, type2),
+                },
+                Terminal::Larger => match (type1, type2) {
                     (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
                     _ => Self::incompatible(type1, type2),
                 },

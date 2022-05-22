@@ -1,8 +1,7 @@
 main {
-    if (true) then {
-        test := 7;
-    }
+    do {
+
+    } until (7);
 
     halt;
-    num test;
 }
