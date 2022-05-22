@@ -33,7 +33,7 @@ fn main() {
     let mut type_checker = TypeChecker::new(Rc::clone(&scope), Rc::clone(&node));
     let typ = type_checker.type_check();
 
-    ScopeAnalysis::create_xml(typ);
+    ScopeAnalysis::create_table(typ);
 
     println!("{:?}", start.elapsed());
 }

@@ -1,24 +1,8 @@
-proc test {
-    proc func {
-        test := -9;
-
-        call func;
-        
-        return;
-    },
-
-    call func;
-
-    return;
-
-    num test;
-},
 main {
-    call test;
-    test := 9;
-    test[test] := "HI";
+    if (true) then {
+        test := 7;
+    }
 
     halt;
     num test;
-    arr string[10] test;
 }
