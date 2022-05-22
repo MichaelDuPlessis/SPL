@@ -4,8 +4,6 @@ use crate::{token::LNode, scope::ScopeNode, grammer::{Terminal, NonTerminal, Gra
 pub struct TypeChecker {
     scope: ScopeNode,
     ast: LNode,
-    enter_scope: bool,
-    exit_scope: bool,
 }
 
 impl TypeChecker {
@@ -13,12 +11,10 @@ impl TypeChecker {
         Self {
             scope,
             ast,
-            enter_scope: false,
-            exit_scope: false,
         }
     }
 
-    pub fn type_check(&mut self) {
+    pub fn type_check(&mut self) -> ScopeNode {
         // Do anaylsis there and if encounter call, search AST to find it and do analysis there
         // ignore any procdefs and only analysis when matching call found
         
@@ -26,6 +22,8 @@ impl TypeChecker {
         println!("{:?}", self.scope);
 
         // after anaylsis check to make sure each variable is defined
+
+        return Rc::clone(&self.scope);
     }
 
     fn analysis(&mut self, node: LNode) {
@@ -44,25 +42,12 @@ impl TypeChecker {
 
             match grammer {
                 Grammer::Terminal(t) => match t {
-                    // Terminal::Input => self.check_input(&node),
-                    Terminal::Proc => self.enter_scope = true,
-                    Terminal::UserDefined => {
-                        if self.enter_scope {
-                            self.enter_scope = false;
-                            self.enter(c.borrow().str_value.as_ref().unwrap());
-                        }
-                    }
-                    Terminal::Return => self.exit_scope = true,
-                    Terminal::RBrace => {
-                        if self.exit_scope {
-                            self.exit_scope = false;
-                            self.exit();
-                        }
-                    }
                     Terminal::Call => {
                         let name = &node.borrow().children[i + 1];
                         let name = name.borrow();
                         let name = name.str_value.as_ref().unwrap();
+
+                        self.enter(name);
 
                         let scope = self.scope.borrow().exist_down(name);
                         if let Some(si) = scope {
@@ -74,27 +59,23 @@ impl TypeChecker {
                             } else {
                                 panic!("don't think it should get here");
                             }
-
-                            continue;
                         } else {
-                            error(&format!("Call to {} not in scope", name));
-                        }
-
-                        let scope = self.scope.borrow().exist_proc(name);
-                        if let Some(si) = scope {
-                            let node_id = si.node_id;
-
-                            let proc_node = self.ast.borrow().find(node_id, &self.ast);
-                            if let Some(proc) = proc_node {
-                                self.analysis(Rc::clone(&proc));
+                            let scope = self.scope.borrow().exist_proc(name);
+                            if let Some(si) = scope {
+                                let node_id = si.node_id;
+    
+                                let proc_node = self.ast.borrow().find(node_id, &self.ast);
+                                if let Some(proc) = proc_node {
+                                    self.analysis(Rc::clone(&proc));
+                                } else {
+                                    panic!("don't think it should get here");
+                                }
                             } else {
-                                panic!("don't think it should get here");
+                                error(&format!("Call to {} not in scope", name));
                             }
-
-                            continue;
-                        } else {
-                            error(&format!("Call to {} not in scope", name));
                         }
+
+                        self.exit();
                     }
                     // conditionals
                     Terminal::If => {

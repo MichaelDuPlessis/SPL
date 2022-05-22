@@ -1,11 +1,24 @@
 proc test {
-    test := 7;
+    proc func {
+        test := -9;
+
+        call func;
+        
+        return;
+    },
+
+    call func;
 
     return;
+
+    num test;
 },
 main {
     call test;
+    test := 9;
+    test[test] := "HI";
 
     halt;
     num test;
+    arr string[10] test;
 }

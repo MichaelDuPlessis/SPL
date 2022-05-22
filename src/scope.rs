@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, collections::{HashMap, LinkedList}, fmt::{Debug}};
+use std::{cell::RefCell, rc::Rc, collections::{HashMap, LinkedList}, fmt::{Debug}, fs::File, io::Write};
 use crate::{token::LNode, grammer::{Terminal, Grammer, Type, Number, Boolean}, error::error};
 
 pub struct ScopeAnalysis {
@@ -166,7 +166,7 @@ impl ScopeAnalysis {
                             }
 
                             scope_info.is_array = self.array_found;
-
+                            scope_info.node_id = c.borrow().id;
                             scope_info.data_type = typ;
 
                             self.bind(name, scope_info);
@@ -191,6 +191,56 @@ impl ScopeAnalysis {
         }
     }
 
+    pub fn create_xml(node: ScopeNode) {
+        let mut file = File::create("./scope_type.xml").unwrap();
+
+        let node = node.borrow();
+        let scope_id = node.scope_id;
+        let mut this_scope = format!("Start of Scope {}\n\n", scope_id);
+        
+        this_scope = format!("{}{:8}\t{:8}\t{:8}\t{:8}\t{:8}\n", this_scope, "name", "node_id", "type", "is_array", "is_proc");
+        for (name, si) in &node.vtable {
+            if si.is_proc {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, "N/A", "N/A", true);
+            } else {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, si.data_type.to_string(), si.is_array, "N/A");
+            }
+        }
+
+        this_scope = format!("{}\nEnd of Scope {}\n\n", this_scope, scope_id);
+
+        for c in &node.children {
+            this_scope = format!("{}{}", this_scope, Self::_create_xml(Rc::clone(c)));
+        }
+
+        file.write_all(this_scope.as_bytes()).unwrap();
+    }
+
+    fn _create_xml(node: ScopeNode) -> String {
+        let node = node.borrow();
+        let scope_id = node.scope_id;
+        let mut this_scope = format!("Start of Scope {}\n\n", scope_id);
+
+        // printing current values
+        this_scope = format!("{}{:8}\t{:8}\t{:8}\t{:8}\t{:8}\n", this_scope, "name", "node_id", "type", "is_array", "is_proc");
+        for (name, si) in &node.vtable {
+            if si.is_proc {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, "N/A", "N/A", true);
+            } else {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, si.data_type.to_string(), si.is_array, "N/A");
+            }
+        }
+
+        this_scope = format!("{}\nEnd of Scope {}\n\n", this_scope, scope_id);
+
+        // printing children scopes
+        for c in &node.children {
+            this_scope = format!("{}{}", this_scope, Self::_create_xml(Rc::clone(c)));
+        }
+
+        this_scope
+    }
+
     fn enter(&mut self, name: &str) {
         let pos = self.current_scope.borrow().scope_pos(name);
         let child = Rc::clone(&self.current_scope.borrow().children[pos]); // useless clone
@@ -212,10 +262,6 @@ impl ScopeAnalysis {
     fn bind(&self, name: String, node: ScopeInfo) {
         RefCell::borrow_mut(&self.current_scope).bind(name, node);
     }
-
-    // fn lookup(&self, name: &str) -> Option<ScopeInfo> {
-    //     self.scope.borrow().lookup(name)
-    // }
 
     fn next_id(&mut self) -> usize {
         self.current_id += 1;
@@ -271,17 +317,6 @@ impl Scope {
         self.vtable.push_front((name, node));
     }
 
-    // fn lookup(&self, name: &str) -> Option<ScopeInfo> {
-    //     // let mut node = self.vtable.get(name).map(|opt| *opt);
-    //     let mut node = self.vtable.iter().find(|i| i.0 == name);
-
-    //     if node.is_none() {
-    //         node = if let Some(p) = &self.parent { p.borrow().lookup(name) } else { None }
-    //     }
-
-    //     node
-    // }
-
     // only use for procs
     pub fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
         if let Some(si) = self.vtable.iter().find(|i| i.0 == name && i.1.is_proc == true) {
@@ -326,14 +361,6 @@ impl Scope {
 
         None
     }
-
-    // fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
-    //     if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
-    //         Some(si.1)
-    //     } else {
-    //         None
-    //     }
-    // }
 
     fn scope_pos(&self, name: &str) -> usize {
         *self.scope_map.get(name).unwrap()

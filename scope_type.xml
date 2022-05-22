@@ -1,0 +1,23 @@
+Start of Scope 0
+
+name    	node_id 	type    	is_array	is_proc 
+test    	114     	String  	true    	N/A     
+test    	102     	Number  	false   	N/A     
+test    	9       	N/A     	N/A     	true    
+
+End of Scope 0
+
+Start of Scope 1
+
+name    	node_id 	type    	is_array	is_proc 
+test    	62      	Number  	false   	N/A     
+func    	21      	N/A     	N/A     	true    
+
+End of Scope 1
+
+Start of Scope 2
+
+name    	node_id 	type    	is_array	is_proc 
+
+End of Scope 2
+

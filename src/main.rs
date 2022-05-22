@@ -1,5 +1,5 @@
 use std::{fs, time::Instant, rc::Rc};
-use crate::{scope::ScopeAnalysis, type_checking::TypeChecker};
+use crate::{scope::{ScopeAnalysis, Scope}, type_checking::TypeChecker};
 
 mod lexer;
 mod parser;
@@ -31,7 +31,9 @@ fn main() {
 
     
     let mut type_checker = TypeChecker::new(Rc::clone(&scope), Rc::clone(&node));
-    type_checker.type_check();
+    let typ = type_checker.type_check();
+
+    ScopeAnalysis::create_xml(typ);
 
     println!("{:?}", start.elapsed());
 }
