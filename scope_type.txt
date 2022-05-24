@@ -1,7 +1,7 @@
 Start of Scope 0
 
 name    	node_id 	type    	is_array	is_proc 
-t       	40      	Number  	false   	N/A     
+x       	26      	Number  	false   	N/A     
 
 End of Scope 0
 

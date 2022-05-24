@@ -1,5 +1,5 @@
 use std::{fs, time::Instant, rc::Rc};
-use crate::{scope::{ScopeAnalysis, Scope}, type_checking::TypeChecker};
+use crate::{scope::{ScopeAnalysis, Scope}, type_checking::TypeChecker, generator::Generator};
 
 mod lexer;
 mod parser;
@@ -9,6 +9,7 @@ mod stack;
 mod scope;
 mod type_checking;
 mod error;
+mod generator;
 
 fn main() {
     let start = Instant::now();
@@ -34,6 +35,9 @@ fn main() {
     let typ = type_checker.type_check();
 
     ScopeAnalysis::create_table(typ);
+
+    let mut generator = Generator::new(Rc::clone(&node));
+    generator.generate();
 
     println!("{:?}", start.elapsed());
 }

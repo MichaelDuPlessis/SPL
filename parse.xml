@@ -5,39 +5,19 @@
 	<LBrace id="3"/>
 	<Algorithm id="4">
 		<Instr id="9">
-			<Loop id="12">
-				<while id="13"/>
-				<LParentheses id="14"/>
+			<Assign id="12">
+				<LHS id="13">
+					<userDefinedName id="16" value="x"/>
+					<VarField id="17">
+					</VarField>
+				</LHS>
+				<Assignment id="14"/>
 				<Expr id="15">
-					<Const id="21">
-						<false id="22"/>
+					<Const id="18">
+						<num id="19" value="7"/>
 					</Const>
 				</Expr>
-				<RParentheses id="16"/>
-				<do id="17"/>
-				<LBrace id="18"/>
-				<Algorithm id="19">
-					<Instr id="23">
-						<Assign id="26">
-							<LHS id="27">
-								<userDefinedName id="30" value="t"/>
-								<VarField id="31">
-								</VarField>
-							</LHS>
-							<Assignment id="28"/>
-							<Expr id="29">
-								<Const id="32">
-									<num id="33" value="7"/>
-								</Const>
-							</Expr>
-						</Assign>
-					</Instr>
-					<Semicolon id="24"/>
-					<Algorithm id="25">
-					</Algorithm>
-				</Algorithm>
-				<RBrace id="20"/>
-			</Loop>
+			</Assign>
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
@@ -46,16 +26,16 @@
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="34">
-			<TYP id="37">
-				<num id="39"/>
+		<Dec id="20">
+			<TYP id="23">
+				<num id="25"/>
 			</TYP>
-			<Var id="38">
-				<userDefinedName id="40" value="t"/>
+			<Var id="24">
+				<userDefinedName id="26" value="x"/>
 			</Var>
 		</Dec>
-		<Semicolon id="35"/>
-		<VarDecl id="36">
+		<Semicolon id="21"/>
+		<VarDecl id="22">
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>

@@ -1,9 +1,7 @@
 main {
-    while (false) do {
-        t := 7;
-    };
+    x := 7;
 
     halt;
-    
-    num t;
+
+    num x;
 }

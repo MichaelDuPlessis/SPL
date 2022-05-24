@@ -23,7 +23,7 @@ impl TypeChecker {
         // after anaylsis check to make sure each variable is defined
         self.check_defined(Rc::clone(&self.scope));
         
-        println!("{:?}", self.scope);
+        // println!("{:?}", self.scope);
 
         return Rc::clone(&self.scope);
     }
