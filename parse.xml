@@ -7,6 +7,15 @@
 			<ProcDefs id="15">
 			</ProcDefs>
 			<Algorithm id="16">
+				<Instr id="21">
+					<PCall id="24">
+						<call id="25"/>
+						<userDefinedName id="26" value="test"/>
+					</PCall>
+				</Instr>
+				<Semicolon id="22"/>
+				<Algorithm id="23">
+				</Algorithm>
 			</Algorithm>
 			<return id="17"/>
 			<Semicolon id="18"/>
@@ -21,14 +30,14 @@
 	<main id="2"/>
 	<LBrace id="3"/>
 	<Algorithm id="4">
-		<Instr id="21">
-			<PCall id="24">
-				<call id="25"/>
-				<userDefinedName id="26" value="test"/>
+		<Instr id="27">
+			<PCall id="30">
+				<call id="31"/>
+				<userDefinedName id="32" value="test"/>
 			</PCall>
 		</Instr>
-		<Semicolon id="22"/>
-		<Algorithm id="23">
+		<Semicolon id="28"/>
+		<Algorithm id="29">
 		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>

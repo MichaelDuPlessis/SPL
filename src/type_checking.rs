@@ -49,6 +49,7 @@ impl TypeChecker {
         let mut skip_if = false;
         let mut skip_else = false;
         let mut skipe_while = false;
+        let current_call = self.current_call.clone();
 
         for (i, c) in node.borrow().children.iter().enumerate() {
             let grammer = c.borrow().symbol;
@@ -76,7 +77,7 @@ impl TypeChecker {
                         let name = name.borrow();
                         let name = name.str_value.as_ref().unwrap();
 
-                        if self.current_call == *name {
+                        if current_call == *name {
                             return;
                         }
                         self.current_call = String::from(name);
@@ -108,8 +109,6 @@ impl TypeChecker {
                                 error(&format!("Call to {} not in scope", name));
                             }
                         }
-
-                        self.current_call = String::new();
 
                         self.exit();
                     }

@@ -1,5 +1,5 @@
 proc test {
-
+    call test;
     return;
 },
 main {
