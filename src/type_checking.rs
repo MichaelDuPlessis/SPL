@@ -4,6 +4,7 @@ use crate::{token::LNode, scope::ScopeNode, grammer::{Terminal, NonTerminal, Gra
 pub struct TypeChecker {
     scope: ScopeNode,
     ast: LNode,
+    current_call: String,
 }
 
 impl TypeChecker {
@@ -11,6 +12,7 @@ impl TypeChecker {
         Self {
             scope,
             ast,
+            current_call: String::new(),
         }
     }
 
@@ -33,7 +35,7 @@ impl TypeChecker {
         let node = node.borrow();
         
         for (name, si) in &node.vtable {
-            if !si.is_defined {
+            if !si.is_defined && !si.is_proc {
                 error(&format!("{} in scope {} is never assigned to.", name, node.scope_id))
             }
         }
@@ -47,6 +49,7 @@ impl TypeChecker {
         let mut skip_if = false;
         let mut skip_else = false;
         let mut skipe_while = false;
+        let current_call = self.current_call.clone();
 
         for (i, c) in node.borrow().children.iter().enumerate() {
             let grammer = c.borrow().symbol;
@@ -70,8 +73,14 @@ impl TypeChecker {
                 Grammer::Terminal(t) => match t {
                     Terminal::Call => {
                         let name = &node.borrow().children[i + 1];
+
                         let name = name.borrow();
                         let name = name.str_value.as_ref().unwrap();
+
+                        if current_call == *name {
+                            return;
+                        }
+                        self.current_call = String::from(name);
 
                         self.enter(name);
 
@@ -395,7 +404,9 @@ impl TypeChecker {
 
     fn enter(&mut self, name: &str) {
         let child = self.scope.borrow().child_scope(name);
-        self.scope = child;
+        if let Some(c) = child {
+            self.scope = c;
+        }
     }
     
     fn exit(&mut self) {
