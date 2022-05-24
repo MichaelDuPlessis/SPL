@@ -362,9 +362,14 @@ impl Scope {
         *self.scope_map.get(name).unwrap()
     }
 
-    pub fn child_scope(&self, name: &str) -> ScopeNode {
-        let pos = *self.scope_map.get(name).unwrap();
-        Rc::clone(&self.children[pos])
+    pub fn child_scope(&self, name: &str) -> Option<ScopeNode> {
+        match self.scope_map.get(name) {
+            Some(pos) => Some(Rc::clone(&self.children[*pos])),
+            None => None,
+        }
+
+        // let pos = *self.scope_map.get(name).unwrap();
+        // Rc::clone(&self.children[pos])
     }
 
     fn add_scope(&mut self, child: ScopeNode, name: String) {

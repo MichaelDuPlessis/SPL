@@ -1,9 +1,9 @@
-main {
-    while (false) do {
-        t := 7;
-    };
+proc test {
 
-    halt;
+    return;
+},
+main {
+    call test;
     
-    num t;
+    halt;
 }

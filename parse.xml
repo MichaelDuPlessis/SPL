@@ -1,62 +1,39 @@
 <SPLProgr id="0">
 	<ProcDefs id="1">
+		<PD id="9">
+			<proc id="12"/>
+			<userDefinedName id="13" value="test"/>
+			<LBrace id="14"/>
+			<ProcDefs id="15">
+			</ProcDefs>
+			<Algorithm id="16">
+			</Algorithm>
+			<return id="17"/>
+			<Semicolon id="18"/>
+			<VarDecl id="19">
+			</VarDecl>
+			<RBrace id="20"/>
+		</PD>
+		<Comma id="10"/>
+		<ProcDefs id="11">
+		</ProcDefs>
 	</ProcDefs>
 	<main id="2"/>
 	<LBrace id="3"/>
 	<Algorithm id="4">
-		<Instr id="9">
-			<Loop id="12">
-				<while id="13"/>
-				<LParentheses id="14"/>
-				<Expr id="15">
-					<Const id="21">
-						<false id="22"/>
-					</Const>
-				</Expr>
-				<RParentheses id="16"/>
-				<do id="17"/>
-				<LBrace id="18"/>
-				<Algorithm id="19">
-					<Instr id="23">
-						<Assign id="26">
-							<LHS id="27">
-								<userDefinedName id="30" value="t"/>
-								<VarField id="31">
-								</VarField>
-							</LHS>
-							<Assignment id="28"/>
-							<Expr id="29">
-								<Const id="32">
-									<num id="33" value="7"/>
-								</Const>
-							</Expr>
-						</Assign>
-					</Instr>
-					<Semicolon id="24"/>
-					<Algorithm id="25">
-					</Algorithm>
-				</Algorithm>
-				<RBrace id="20"/>
-			</Loop>
+		<Instr id="21">
+			<PCall id="24">
+				<call id="25"/>
+				<userDefinedName id="26" value="test"/>
+			</PCall>
 		</Instr>
-		<Semicolon id="10"/>
-		<Algorithm id="11">
+		<Semicolon id="22"/>
+		<Algorithm id="23">
 		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="34">
-			<TYP id="37">
-				<num id="39"/>
-			</TYP>
-			<Var id="38">
-				<userDefinedName id="40" value="t"/>
-			</Var>
-		</Dec>
-		<Semicolon id="35"/>
-		<VarDecl id="36">
-		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>
 </SPLProgr>
