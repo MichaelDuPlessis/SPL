@@ -353,12 +353,20 @@ impl TypeChecker {
         match sym {
             Grammer::Terminal(t) => match t {
                 // logical operators
-                Terminal::And | Terminal::Or => match (type1, type2) {
-                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::Unknown),
+                Terminal::And => match (type1, type2) {
+                    (Type::Boolean(Boolean::True), Type::Boolean(Boolean::True)) => Type::Boolean(Boolean::True),
+                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::False),
+                    _ => Self::incompatible(type1, type2),
+                },
+                Terminal::Or => match (type1, type2) {
+                    (Type::Boolean(Boolean::False), Type::Boolean(Boolean::False)) => Type::Boolean(Boolean::False),
+                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::True),
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Equal => match (type1, type2) {
-                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::Unknown),
+                    (Type::Boolean(x), Type::Boolean(y)) => if x == y { Type::Boolean(Boolean::True) } else { Type::Boolean(Boolean::Unknown) },
+                    (Type::String, Type::String) => Type::Boolean(Boolean::Unknown),
+                    (Type::Number(_), Type::Number(_)) => Type::Boolean(Boolean::Unknown),
                     _ => Type::Boolean(Boolean::False),
                 },
                 Terminal::Add => match (type1, type2) {

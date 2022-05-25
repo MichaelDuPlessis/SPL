@@ -10,17 +10,29 @@
 				<LParentheses id="14"/>
 				<Expr id="15">
 					<BinOp id="22">
+<<<<<<< HEAD
 						<and id="23"/>
 						<LParentheses id="24"/>
 						<Expr id="25">
 							<Const id="29">
 								<true id="30"/>
+=======
+						<equal id="23"/>
+						<LParentheses id="24"/>
+						<Expr id="25">
+							<Const id="29">
+								<num id="30" value="0"/>
+>>>>>>> type
 							</Const>
 						</Expr>
 						<Comma id="26"/>
 						<Expr id="27">
 							<Const id="31">
+<<<<<<< HEAD
 								<false id="32"/>
+=======
+								<num id="32" value="0"/>
+>>>>>>> type
 							</Const>
 						</Expr>
 						<RParentheses id="28"/>
@@ -33,14 +45,22 @@
 					<Instr id="33">
 						<Assign id="36">
 							<LHS id="37">
+<<<<<<< HEAD
 								<userDefinedName id="40" value="test"/>
+=======
+								<userDefinedName id="40" value="x"/>
+>>>>>>> type
 								<VarField id="41">
 								</VarField>
 							</LHS>
 							<Assignment id="38"/>
 							<Expr id="39">
 								<Const id="42">
+<<<<<<< HEAD
 									<ShortString id="43" value="MY USB"/>
+=======
+									<num id="43" value="7"/>
+>>>>>>> type
 								</Const>
 							</Expr>
 						</Assign>
@@ -137,6 +157,7 @@
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
+<<<<<<< HEAD
 		<Dec id="94">
 			<TYP id="97">
 				<string id="99"/>
@@ -158,6 +179,18 @@
 			<Semicolon id="102"/>
 			<VarDecl id="103">
 			</VarDecl>
+=======
+		<Dec id="44">
+			<TYP id="47">
+				<num id="49"/>
+			</TYP>
+			<Var id="48">
+				<userDefinedName id="50" value="x"/>
+			</Var>
+		</Dec>
+		<Semicolon id="45"/>
+		<VarDecl id="46">
+>>>>>>> type
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>
