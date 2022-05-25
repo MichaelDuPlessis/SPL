@@ -6,6 +6,7 @@ pub struct Generator {
     ast: LNode,
     file: File,
     line_no: usize,
+    var_no: usize,
 }
 
 impl Generator {
@@ -16,6 +17,7 @@ impl Generator {
             ast,
             file,
             line_no: 0,
+            var_no: 0,
         }
     }
 
@@ -54,6 +56,12 @@ impl Generator {
         self.line_no
     }
 
+    fn next_var(&mut self) -> String {
+        let v = format!("T{}", self.var_no);
+        self.var_no += 1;
+        return v;
+    }
+
     fn instruction(&mut self, node: &LNode) { // pass in child
         let grammer = node.borrow().symbol;
 
@@ -81,6 +89,57 @@ impl Generator {
     }
 
     fn expression(&self, node: &LNode) -> String {
-        String::from("7")
+        let node = &node.borrow().children[0];
+        let grammer = node.borrow().symbol;
+
+        match grammer {
+            Grammer::Terminal(t) => match t {
+                Terminal::UserDefined => todo!(),
+                _ => panic!("Should not get here")
+            },
+            Grammer::NonTerminal(nt) => match nt {
+                NonTerminal::Const => self.cnst(node),
+                NonTerminal::UnOp => todo!(),
+                NonTerminal::BinOp => self.binop(node),
+                _ => panic!("Should not get here")
+            },
+        }
+    }
+
+    fn binop(&self, node: &LNode) -> String {
+        let children = &node.borrow().children;
+        let opp = children[0].borrow().symbol;
+        let expr1 = self.expression(&children[2]);
+        let expr2 = self.expression(&children[4]);
+
+        match opp {
+            Grammer::Terminal(t) => match t {
+                Terminal::Add => format!("({}+{})", expr1, expr2),
+                Terminal::Mult => format!("({}*{})", expr1, expr2),
+                Terminal::Sub => format!("({}-{})", expr1, expr2),
+                _ => panic!("Should not get here"),
+            },
+            Grammer::NonTerminal(_) => panic!("should not get here"),
+        }
+    }
+
+    fn cnst(&self, node: &LNode) -> String {
+        let con = &node.borrow().children[0];
+
+        let typ = match con.borrow().symbol {
+            Grammer::Terminal(t) => match t {
+                Terminal::Number => {
+                    let num = con.borrow().num_value.unwrap();
+                    num.to_string()
+                },
+                Terminal::ShortString => con.borrow().str_value.as_ref().unwrap().clone(),
+                Terminal::True => "true".to_string(),
+                Terminal::False => false.to_string(),
+                _ => panic!("Should not get here"),
+            },
+            Grammer::NonTerminal(_) => panic!("Should not get here"),
+        };
+
+        typ
     }
 }

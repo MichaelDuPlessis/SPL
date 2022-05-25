@@ -1,5 +1,5 @@
 main {
-    x := 7;
+    x := sub(8, add(7, 2));
 
     halt;
 
