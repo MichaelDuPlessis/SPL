@@ -1,5 +1,10 @@
 proc test {
+    proc test2 {
+        return;
+    },
 
+    call test;
+    call test2;
     test := 7;
     return;
 },

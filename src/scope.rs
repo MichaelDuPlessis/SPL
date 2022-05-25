@@ -345,12 +345,12 @@ impl Scope {
 
     // used for procs
     pub fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
-        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name && i.1.is_proc) {
             return Some(si.1);
         }
 
         if let Some(parent) = &self.parent {
-            if let Some(si) = parent.borrow().vtable.iter().find(|i| i.0 == name) {
+            if let Some(si) = parent.borrow().vtable.iter().find(|i| i.0 == name && i.1.is_proc) {
                 return Some(si.1);
             }
         }
