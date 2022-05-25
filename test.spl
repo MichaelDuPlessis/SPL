@@ -1,9 +1,13 @@
 proc test {
-    call test;
+
+    test := 7;
     return;
 },
 main {
     call test;
+    test[test] := test;
     
     halt;
+    num test;
+    arr num[7] test;
 }
