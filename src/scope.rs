@@ -456,6 +456,16 @@ impl Scope {
             curr = parent;
         }
     }
+
+    pub fn get_gen_name(&self, name: &str) -> String {
+        let si = self.exist_up(name, false).unwrap();
+
+        if si.data_type == Type::String {
+            format!("{}{}$", name, self.scope_id)
+        } else {
+            format!("{}{}", name, self.scope_id)
+        }
+    }
 }
 
 impl Default for Scope {

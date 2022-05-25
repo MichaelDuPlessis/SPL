@@ -1,7 +1,15 @@
 main {
-    x := not(false);
+    if (and(true, false)) then {
+        test := "MY USB";
+    } else {
+        test := "PLEASE WORK";
+
+        if (eq(0, 0)) then {
+            x := 7;
+        };
+    };
 
     halt;
-
-    bool x;
+    string test;
+    num x;
 }

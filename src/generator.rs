@@ -1,22 +1,24 @@
-use std::{rc::Rc, fs::File, io::Write, cell::RefCell};
+use std::{rc::Rc, fs::File, io::Write, cell::RefCell, fmt::format};
 
-use crate::{token::LNode, grammer::{Grammer, Terminal, NonTerminal}};
+use crate::{token::LNode, grammer::{Grammer, Terminal, NonTerminal}, scope::ScopeNode};
 
 pub struct Generator {
     ast: LNode,
+    scope: ScopeNode,
     file: File,
     line_no: usize,
     var_no: usize,
 }
 
 impl Generator {
-    pub fn new(ast: LNode) -> Self {
+    pub fn new(ast: LNode, scope: ScopeNode) -> Self {
         let file = File::create("out.bas").unwrap();
 
         Self {
             ast,
+            scope,
             file,
-            line_no: 0,
+            line_no: 10,
             var_no: 0,
         }
     }
@@ -39,7 +41,12 @@ impl Generator {
                     _ => (),
                 },
                 Grammer::NonTerminal(nt) => match nt {
-                    NonTerminal::Instr => self.instruction(&c.borrow().children[0]),
+                    NonTerminal::Algorithm => {
+                        let code = self.algorithm(c);
+                        for c in code.split('\n') {
+                            self.write_line(c);
+                        }
+                    },
                     _ => self._generate(Rc::clone(c)),
                 },
             }
@@ -52,8 +59,9 @@ impl Generator {
     }
 
     fn next_line(&mut self) -> usize {
+        let old = self.line_no;
         self.line_no += 10;
-        self.line_no
+        old
     }
 
     fn next_var(&mut self) -> String {
@@ -62,17 +70,32 @@ impl Generator {
         return v;
     }
 
-    fn instruction(&mut self, node: &LNode) { // pass in child
-        let grammer = node.borrow().symbol;
+    fn algorithm(&mut self, node: &LNode) -> String{
+        if node.borrow().children.is_empty() {
+            return String::new();
+        }
+
+        let instr = &node.borrow().children[0];
+        let algo = &node.borrow().children[2];
+
+        let mut code = self.instruction(instr);
+
+        if !algo.borrow().children.is_empty() {
+            code = format!("{}\n{}", code, self.algorithm(algo));
+        }
+
+        code
+    }
+
+    fn instruction(&mut self, node: &LNode) -> String { // pass in child
+        let insr_node = &node.borrow().children[0];
+        let grammer = insr_node.borrow().symbol;
 
         match grammer {
-            Grammer::Terminal(_) => (),
+            Grammer::Terminal(_) => todo!(),
             Grammer::NonTerminal(nt) => match nt {
-                NonTerminal::Assign => {
-                    let to_write = self.assign(node);
-                    self.write_line(&to_write);
-                },
-                NonTerminal::Branch => todo!(),
+                NonTerminal::Assign => self.assign(insr_node),
+                NonTerminal::Branch => self.branch(insr_node),
                 NonTerminal::Loop => todo!(),
                 NonTerminal::PCall => todo!(),
                 _ => panic!("Should not get here."),
@@ -80,12 +103,41 @@ impl Generator {
         }
     }
 
+    // fn lop(&mut self, node: &LNode) -> String {
+        
+    // }
+
+    fn branch(&mut self, node: &LNode) -> String {
+        let children = &node.borrow().children;
+        let expr = self.expression(&children[2]);
+        let algo = self.algorithm(&children[6]);
+        let alternat = &children[8];
+
+        // checking for else
+        if !alternat.borrow().children.is_empty() {
+            let alt_algo = self.algorithm(&alternat.borrow().children[2]);
+            let line_num = algo.matches('\n').count()*10 + self.line_no + 40;
+            let alt_line_num = alt_algo.matches('\n').count()*10 + line_num + 10;
+
+            format!("if {} then {}\ngoto {}\n{}\ngoto {}\n{}", expr, self.line_no + 20, line_num, algo, alt_line_num, alt_algo)
+        } else {
+            format!("if {} then {}\n{}", expr, self.line_no + 10, algo)
+        }
+    }
+
     fn assign(&self, node: &LNode) -> String {
         let children = &node.borrow().children;
-        let var_name = &children[0].borrow().children[0];
-        let expr = self.expression(&children[2]);
+        let var_name = self.scope.borrow().get_gen_name(children[0].borrow().children[0].borrow().str_value.as_ref().unwrap());
         
-        format!("{}={}", RefCell::borrow(var_name).str_value.as_ref().unwrap(), expr)
+        // cause input is special
+        if children[2].borrow().children[0].borrow().symbol == Grammer::NonTerminal(NonTerminal::UnOp) {
+            if children[2].borrow().children[0].borrow().children[0].borrow().symbol == Grammer::Terminal(Terminal::Input) {
+                return format!("INPUT {}", var_name);
+            }
+        }
+
+        let expr = self.expression(&children[2]);
+        format!("{} = {}", var_name, expr)
     }
 
     fn expression(&self, node: &LNode) -> String {
@@ -129,9 +181,13 @@ impl Generator {
 
         match opp {
             Grammer::Terminal(t) => match t {
-                Terminal::Add => format!("({}+{})", expr1, expr2),
-                Terminal::Mult => format!("({}*{})", expr1, expr2),
-                Terminal::Sub => format!("({}-{})", expr1, expr2),
+                Terminal::Add => format!("({} + {})", expr1, expr2),
+                Terminal::Mult => format!("({} * {})", expr1, expr2),
+                Terminal::Sub => format!("({} - {})", expr1, expr2),
+                Terminal::Equal => format!("({} = {})", expr1, expr2),
+                Terminal::Larger => format!("({} > {})", expr1, expr2),
+                Terminal::And => format!("(({} + {}) = 2)", expr1, expr2),
+                Terminal::Or => format!("(({} + {}) > 0)", expr1, expr2),
                 _ => panic!("Should not get here"),
             },
             Grammer::NonTerminal(_) => panic!("should not get here"),

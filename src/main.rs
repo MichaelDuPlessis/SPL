@@ -33,9 +33,9 @@ fn main() {
     let mut type_checker = TypeChecker::new(Rc::clone(&scope), Rc::clone(&node));
     let typ = type_checker.type_check();
 
-    ScopeAnalysis::create_table(typ);
+    ScopeAnalysis::create_table(Rc::clone(&typ));
 
-    let mut generator = Generator::new(Rc::clone(&node));
+    let mut generator = Generator::new(Rc::clone(&node), Rc::clone(&typ));
     generator.generate();
 
     println!("{:?}", start.elapsed());

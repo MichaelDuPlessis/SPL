@@ -1,7 +1,8 @@
 Start of Scope 0
 
 name    	node_id 	type    	is_array	is_proc 
-x       	31      	Boolean 	false   	N/A     
+x       	107     	Number  	false   	N/A     
+test    	100     	String  	false   	N/A     
 
 End of Scope 0
 
