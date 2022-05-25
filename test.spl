@@ -1,7 +1,7 @@
 main {
-    x := sub(8, add(7, 2));
+    x := not(true);
 
     halt;
 
-    num x;
+    bool x;
 }

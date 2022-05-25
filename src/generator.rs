@@ -132,9 +132,9 @@ impl Generator {
                     let num = con.borrow().num_value.unwrap();
                     num.to_string()
                 },
-                Terminal::ShortString => con.borrow().str_value.as_ref().unwrap().clone(),
-                Terminal::True => "true".to_string(),
-                Terminal::False => false.to_string(),
+                Terminal::ShortString => format!("\"{}\"", con.borrow().str_value.as_ref().unwrap()),
+                Terminal::True => "1".to_string(),
+                Terminal::False => "0".to_string(),
                 _ => panic!("Should not get here"),
             },
             Grammer::NonTerminal(_) => panic!("Should not get here"),
