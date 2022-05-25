@@ -5,6 +5,7 @@ pub struct TypeChecker {
     scope: ScopeNode,
     ast: LNode,
     current_call: String,
+    input_found: bool,
 }
 
 impl TypeChecker {
@@ -13,6 +14,7 @@ impl TypeChecker {
             scope,
             ast,
             current_call: String::new(),
+            input_found: false,
         }
     }
 
@@ -48,7 +50,7 @@ impl TypeChecker {
     fn analysis(&mut self, node: LNode) {
         let mut skip_if = false;
         let mut skip_else = false;
-        let mut skipe_while = false;
+        let mut skip_while = false;
         let current_call = self.current_call.clone();
 
         for (i, c) in node.borrow().children.iter().enumerate() {
@@ -61,9 +63,9 @@ impl TypeChecker {
                 continue;
             }
 
-            if skipe_while {
+            if skip_while {
                 if grammer == Grammer::Terminal(Terminal::RBrace) {
-                    skipe_while = false;
+                    skip_while = false;
                     self.analysis(Rc::clone(c));
                 }
                 continue;
@@ -129,9 +131,9 @@ impl TypeChecker {
                         let typ = self.expr_type(&node.borrow().children[2]);
                         if let Type::Boolean(typ) = typ {
                             if typ == Boolean::True {
-                                skipe_while = false;
+                                skip_while = false;
                             } else if typ == Boolean::False {
-                                skipe_while = true;
+                                skip_while = true;
                             } // else do nothing evaluate both
                         } else {
                             error("Type of expression in while must evaluate to bool.")
@@ -309,13 +311,27 @@ impl TypeChecker {
 
         let expr = &node.borrow().children[2]; // expr
 
-        let typ = self.expr_type(expr);
-
         match sym {
             Grammer::Terminal(t) => match t {
-                Terminal::Not => match typ {
-                    Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
-                    _ => Self::bad_type(typ),
+                Terminal::Not => {
+                    let typ = self.expr_type(expr);
+                    match typ {
+                        Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
+                        _ => Self::bad_type(typ),
+                }
+                },
+                Terminal::Input => {
+                    let child = &expr.borrow().children[0];
+
+                    let name = child.borrow();
+                    let name = name.str_value.as_ref().unwrap();
+
+                    let scope_info = self.scope.borrow();
+                    scope_info.exist_up(name, false);
+                    drop(scope_info);
+                    self.scope.borrow_mut().add_type(name, Type::Mixed, false);
+
+                    Type::Mixed
                 },
                 _ => panic!("bin_op_type should not get here terminal"), // should never get here
             },
@@ -337,12 +353,20 @@ impl TypeChecker {
         match sym {
             Grammer::Terminal(t) => match t {
                 // logical operators
-                Terminal::And | Terminal::Or => match (type1, type2) {
-                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::Unknown),
+                Terminal::And => match (type1, type2) {
+                    (Type::Boolean(Boolean::True), Type::Boolean(Boolean::True)) => Type::Boolean(Boolean::True),
+                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::False),
+                    _ => Self::incompatible(type1, type2),
+                },
+                Terminal::Or => match (type1, type2) {
+                    (Type::Boolean(Boolean::False), Type::Boolean(Boolean::False)) => Type::Boolean(Boolean::False),
+                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::True),
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Equal => match (type1, type2) {
-                    (Type::Boolean(_), Type::Boolean(_)) => Type::Boolean(Boolean::Unknown),
+                    (Type::Boolean(x), Type::Boolean(y)) => if x == y { Type::Boolean(Boolean::True) } else { Type::Boolean(Boolean::Unknown) },
+                    (Type::String, Type::String) => Type::Boolean(Boolean::Unknown),
+                    (Type::Number(_), Type::Number(_)) => Type::Boolean(Boolean::Unknown),
                     _ => Type::Boolean(Boolean::False),
                 },
                 Terminal::Add => match (type1, type2) {
