@@ -96,16 +96,38 @@ impl Generator {
             Grammer::NonTerminal(nt) => match nt {
                 NonTerminal::Assign => self.assign(insr_node),
                 NonTerminal::Branch => self.branch(insr_node),
-                NonTerminal::Loop => todo!(),
+                NonTerminal::Loop => self.lop(insr_node),
                 NonTerminal::PCall => todo!(),
                 _ => panic!("Should not get here."),
             },
         }
     }
 
-    // fn lop(&mut self, node: &LNode) -> String {
-        
-    // }
+    fn lop(&mut self, node: &LNode) -> String {
+        let children = &node.borrow().children;
+        let kind = children[0].borrow().symbol;
+
+        match kind {
+            Grammer::Terminal(t) => match t {
+                Terminal::While => {
+                    let expr = self.expression(&children[2]);
+                    let algo = self.algorithm(&children[6]);
+                    let end_while = self.size_of_algo(&algo) + 50;
+
+                    format!("if {} then {}\ngoto {}\n{}\ngoto {}", expr, self.line_no + 20, end_while, algo, self.line_no)
+                },
+                Terminal::Do => {
+                    let expr = self.expression(&children[6]);
+                    let algo = self.algorithm(&children[2]);
+                    let end_while = self.size_of_algo(&algo);
+
+                    format!("{algo}\nif {expr} then {}\n{algo}\ngoto {}", self.line_no + end_while + 20, self.line_no + end_while + 10)
+                },
+                _ => panic!("Shouldn't get here"),
+            },
+            Grammer::NonTerminal(_) => todo!(),
+        }
+    }
 
     fn branch(&mut self, node: &LNode) -> String {
         let children = &node.borrow().children;
@@ -116,8 +138,8 @@ impl Generator {
         // checking for else
         if !alternat.borrow().children.is_empty() {
             let alt_algo = self.algorithm(&alternat.borrow().children[2]);
-            let line_num = algo.matches('\n').count()*10 + self.line_no + 40;
-            let alt_line_num = alt_algo.matches('\n').count()*10 + line_num + 10;
+            let line_num = self.size_of_algo(&algo) + self.line_no + 40;
+            let alt_line_num = self.size_of_algo(&alt_algo) + line_num + 10;
 
             format!("if {} then {}\ngoto {}\n{}\ngoto {}\n{}", expr, self.line_no + 20, line_num, algo, alt_line_num, alt_algo)
         } else {
@@ -212,5 +234,9 @@ impl Generator {
         };
 
         typ
+    }
+
+    fn size_of_algo(&self, algo: &str) -> usize {
+        algo.matches('\n').count()*10
     }
 }

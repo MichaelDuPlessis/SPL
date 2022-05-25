@@ -1,15 +1,9 @@
 main {
-    if (and(true, false)) then {
-        test := "MY USB";
-    } else {
-        test := "PLEASE WORK";
-
-        if (eq(0, 0)) then {
-            x := 7;
-        };
-    };
+    do {
+        x := 7;
+        x := 7;
+    } until (true);
 
     halt;
-    string test;
     num x;
 }
