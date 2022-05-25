@@ -99,10 +99,25 @@ impl Generator {
             },
             Grammer::NonTerminal(nt) => match nt {
                 NonTerminal::Const => self.cnst(node),
-                NonTerminal::UnOp => todo!(),
+                NonTerminal::UnOp => self.unop(node),
                 NonTerminal::BinOp => self.binop(node),
                 _ => panic!("Should not get here")
             },
+        }
+    }
+
+    fn unop(&self, node: &LNode) -> String {
+        let children = &node.borrow().children;
+        let opp = children[0].borrow().symbol;
+        let expr = self.expression(&children[2]);
+
+        match opp {
+            Grammer::Terminal(t) => match t {
+                Terminal::Not => format!("({} + 1) mod 2", expr),
+                Terminal::Input => todo!(),
+                _ => panic!("Should not get here"),
+            },
+            Grammer::NonTerminal(_) => panic!("should not get here"),
         }
     }
 

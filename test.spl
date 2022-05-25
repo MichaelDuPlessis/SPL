@@ -1,5 +1,5 @@
 main {
-    x := not(true);
+    x := not(false);
 
     halt;
 
