@@ -9,36 +9,44 @@
 				<if id="13"/>
 				<LParentheses id="14"/>
 				<Expr id="15">
-					<UnOp id="22">
-						<input id="23"/>
+					<BinOp id="22">
+						<equal id="23"/>
 						<LParentheses id="24"/>
-						<Var id="25">
-							<userDefinedName id="27" value="t"/>
-						</Var>
-						<RParentheses id="26"/>
-					</UnOp>
+						<Expr id="25">
+							<Const id="29">
+								<num id="30" value="0"/>
+							</Const>
+						</Expr>
+						<Comma id="26"/>
+						<Expr id="27">
+							<Const id="31">
+								<num id="32" value="0"/>
+							</Const>
+						</Expr>
+						<RParentheses id="28"/>
+					</BinOp>
 				</Expr>
 				<RParentheses id="16"/>
 				<then id="17"/>
 				<LBrace id="18"/>
 				<Algorithm id="19">
-					<Instr id="28">
-						<Assign id="31">
-							<LHS id="32">
-								<userDefinedName id="35" value="x"/>
-								<VarField id="36">
+					<Instr id="33">
+						<Assign id="36">
+							<LHS id="37">
+								<userDefinedName id="40" value="x"/>
+								<VarField id="41">
 								</VarField>
 							</LHS>
-							<Assignment id="33"/>
-							<Expr id="34">
-								<Const id="37">
-									<num id="38" value="7"/>
+							<Assignment id="38"/>
+							<Expr id="39">
+								<Const id="42">
+									<num id="43" value="7"/>
 								</Const>
 							</Expr>
 						</Assign>
 					</Instr>
-					<Semicolon id="29"/>
-					<Algorithm id="30">
+					<Semicolon id="34"/>
+					<Algorithm id="35">
 					</Algorithm>
 				</Algorithm>
 				<RBrace id="20"/>
@@ -53,27 +61,16 @@
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="39">
-			<TYP id="42">
-				<num id="44"/>
+		<Dec id="44">
+			<TYP id="47">
+				<num id="49"/>
 			</TYP>
-			<Var id="43">
-				<userDefinedName id="45" value="x"/>
+			<Var id="48">
+				<userDefinedName id="50" value="x"/>
 			</Var>
 		</Dec>
-		<Semicolon id="40"/>
-		<VarDecl id="41">
-			<Dec id="46">
-				<TYP id="49">
-					<num id="51"/>
-				</TYP>
-				<Var id="50">
-					<userDefinedName id="52" value="t"/>
-				</Var>
-			</Dec>
-			<Semicolon id="47"/>
-			<VarDecl id="48">
-			</VarDecl>
+		<Semicolon id="45"/>
+		<VarDecl id="46">
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>

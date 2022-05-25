@@ -1,9 +1,8 @@
 main {
-    if (input(t)) then {
+    if (eq(0, 0)) then {
         x := 7;
     };
 
     halt;
     num x;
-    num t;
 }
