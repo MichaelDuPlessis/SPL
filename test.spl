@@ -1,13 +1,9 @@
-proc test {
-
-    test := 7;
-    return;
-},
 main {
-    call test;
-    test[test] := test;
-    
+    if (input(t)) then {
+        x := 7;
+    };
+
     halt;
-    num test;
-    arr num[7] test;
+    num x;
+    num t;
 }

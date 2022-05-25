@@ -420,7 +420,7 @@ impl Scope {
                 si.is_defined = true;
             }
 
-            if si.data_type != t {
+            if si.data_type != t && (t != Type::Mixed && si.data_type != Type::Boolean(Boolean::True)) {
                 error(&format!("Cannot assign {} to {}", t, si.data_type));
             }
 
@@ -431,6 +431,8 @@ impl Scope {
                 Type::Unknown => panic!("Should never get here add_type"),
                 Type::Mixed => Type::Mixed,
             };
+
+            si.is_defined = true;
 
             return;
         }

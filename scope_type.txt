@@ -1,15 +1,8 @@
 Start of Scope 0
 
 name    	node_id 	type    	is_array	is_proc 
-test    	72      	Number  	true    	N/A     
-test    	60      	Number  	false   	N/A     
-test    	9       	N/A     	N/A     	true    
+t       	37      	Mixed   	false   	N/A     
+x       	30      	Mixed   	false   	N/A     
 
 End of Scope 0
-
-Start of Scope 1
-
-name    	node_id 	type    	is_array	is_proc 
-
-End of Scope 1
 

@@ -29,7 +29,6 @@ fn main() {
     let mut scope_analysis = ScopeAnalysis::new(Rc::clone(&node));
     let scope = scope_analysis.scope();
 
-    
     let mut type_checker = TypeChecker::new(Rc::clone(&scope), Rc::clone(&node));
     let typ = type_checker.type_check();
 
