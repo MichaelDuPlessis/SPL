@@ -25,7 +25,7 @@
 					</UnOp>
 				</Expr>
 			</Assign>
-		</Instr>
+s		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
 		</Algorithm>
@@ -33,6 +33,7 @@
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
+<<<<<<< HEAD
 		<Dec id="25">
 			<TYP id="28">
 				<bool id="30"/>
@@ -43,6 +44,29 @@
 		</Dec>
 		<Semicolon id="26"/>
 		<VarDecl id="27">
+=======
+		<Dec id="39">
+			<TYP id="42">
+				<num id="44"/>
+			</TYP>
+			<Var id="43">
+				<userDefinedName id="45" value="x"/>
+			</Var>
+		</Dec>
+		<Semicolon id="40"/>
+		<VarDecl id="41">
+			<Dec id="46">
+				<TYP id="49">
+					<num id="51"/>
+				</TYP>
+				<Var id="50">
+					<userDefinedName id="52" value="t"/>
+				</Var>
+			</Dec>
+			<Semicolon id="47"/>
+			<VarDecl id="48">
+			</VarDecl>
+>>>>>>> type
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>
