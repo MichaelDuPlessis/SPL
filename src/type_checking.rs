@@ -1,12 +1,10 @@
 use std::rc::Rc;
-
-use crate::{token::LNode, scope::ScopeNode, grammer::{Terminal, NonTerminal, Grammer, Type, Boolean, Number}};
+use crate::{token::LNode, scope::ScopeNode, grammer::{Terminal, NonTerminal, Grammer, Type, Boolean, Number}, error::error};
 
 pub struct TypeChecker {
     scope: ScopeNode,
     ast: LNode,
-    enter_scope: bool,
-    exit_scope: bool,
+    current_call: String,
 }
 
 impl TypeChecker {
@@ -14,21 +12,46 @@ impl TypeChecker {
         Self {
             scope,
             ast,
-            enter_scope: false,
-            exit_scope: false,
+            current_call: String::new(),
         }
     }
 
-    pub fn type_check(&mut self) {
+    pub fn type_check(&mut self) -> ScopeNode {
+        // Do anaylsis there and if encounter call, search AST to find it and do analysis there
+        // ignore any procdefs and only analysis when matching call found
+        
         self.analysis(Rc::clone(&self.ast));
+        
+        // after anaylsis check to make sure each variable is defined
+        self.check_defined(Rc::clone(&self.scope));
+        
         println!("{:?}", self.scope);
+
+        return Rc::clone(&self.scope);
+    }
+
+    // if function completes tahn all vars defined
+    fn check_defined(&self, node: ScopeNode) {
+        let node = node.borrow();
+        
+        for (name, si) in &node.vtable {
+            if !si.is_defined && !si.is_proc {
+                error(&format!("{} in scope {} is never assigned to.", name, node.scope_id))
+            }
+        }
+
+        for c in &node.children {
+            self.check_defined(Rc::clone(c));
+        }
     }
 
     fn analysis(&mut self, node: LNode) {
         let mut skip_if = false;
         let mut skip_else = false;
+        let mut skipe_while = false;
+        let current_call = self.current_call.clone();
 
-        for c in &node.borrow().children {
+        for (i, c) in node.borrow().children.iter().enumerate() {
             let grammer = c.borrow().symbol;
             if skip_if {
                 if grammer == Grammer::NonTerminal(NonTerminal::Alternat) {
@@ -38,21 +61,56 @@ impl TypeChecker {
                 continue;
             }
 
+            if skipe_while {
+                if grammer == Grammer::Terminal(Terminal::RBrace) {
+                    skipe_while = false;
+                    self.analysis(Rc::clone(c));
+                }
+                continue;
+            }
+
             match grammer {
                 Grammer::Terminal(t) => match t {
-                    Terminal::Proc => self.enter_scope = true,
-                    Terminal::UserDefined => {
-                        if self.enter_scope {
-                            self.enter_scope = false;
-                            self.enter(c.borrow().str_value.as_ref().unwrap());
+                    Terminal::Call => {
+                        let name = &node.borrow().children[i + 1];
+
+                        let name = name.borrow();
+                        let name = name.str_value.as_ref().unwrap();
+
+                        if current_call == *name {
+                            return;
                         }
-                    }
-                    Terminal::Return => self.exit_scope = true,
-                    Terminal::RBrace => {
-                        if self.exit_scope {
-                            self.exit_scope = false;
-                            self.exit();
+                        self.current_call = String::from(name);
+
+                        self.enter(name);
+
+                        let scope = self.scope.borrow().exist_down(name);
+                        if let Some(si) = scope {
+                            let node_id = si.node_id;
+
+                            let proc_node = self.ast.borrow().find(node_id, &self.ast);
+                            if let Some(proc) = proc_node {
+                                self.analysis(Rc::clone(&proc));
+                            } else {
+                                panic!("don't think it should get here");
+                            }
+                        } else {
+                            let scope = self.scope.borrow().exist_proc(name);
+                            if let Some(si) = scope {
+                                let node_id = si.node_id;
+    
+                                let proc_node = self.ast.borrow().find(node_id, &self.ast);
+                                if let Some(proc) = proc_node {
+                                    self.analysis(Rc::clone(&proc));
+                                } else {
+                                    panic!("don't think it should get here");
+                                }
+                            } else {
+                                error(&format!("Call to {} not in scope", name));
+                            }
                         }
+
+                        self.exit();
                     }
                     // conditionals
                     Terminal::If => {
@@ -63,12 +121,33 @@ impl TypeChecker {
                             } else if typ == Boolean::False {
                                 skip_if = true;
                             } // else do nothing evaluate both
+                        } else {
+                            error("Type of expression in if must evaluate to bool.")
+                        }
+                    },
+                    Terminal::While => {
+                        let typ = self.expr_type(&node.borrow().children[2]);
+                        if let Type::Boolean(typ) = typ {
+                            if typ == Boolean::True {
+                                skipe_while = false;
+                            } else if typ == Boolean::False {
+                                skipe_while = true;
+                            } // else do nothing evaluate both
+                        } else {
+                            error("Type of expression in while must evaluate to bool.")
+                        }
+                    },
+                    Terminal::Until => {
+                        let typ = self.expr_type(&node.borrow().children[6]);
+                        if typ != Type::Boolean(Boolean::True) {
+                            error("Type of expression in while must evaluate to bool.")
                         }
                     },
                     _ => (),
                 },
                 Grammer::NonTerminal(nt) => match nt {
                     NonTerminal::Assign => self.check_assign(c),
+                    NonTerminal::ProcDefs => continue, // if encounter procdefs leave
                     NonTerminal::Alternat => if !skip_else {
                         self.analysis(Rc::clone(c));
                     } else {
@@ -88,46 +167,47 @@ impl TypeChecker {
         if child1.symbol == Grammer::Terminal(Terminal::UserDefined) {
             let name = child1.str_value.as_ref().unwrap();
 
-            if let Some(s) = self.scope.borrow().exist_up(name) {
-                if s.is_proc {
-                    println!("Error: Cannot assign to procedure {} at {}", name, children[0].borrow().pos.unwrap());
-                    std::process::exit(1);
-                }
-            }
-
             let typ = self.expr_type(&children[2]);            
+
             // if array check paramter valid
+            // change to use created functions at some point
             let var_field = &lhs.children[1].borrow().children;
             if !var_field.is_empty() {
                 let indexer = &var_field[1];
-                let typ = self.expr_type(indexer);
+                let t = self.expr_type(indexer);
                 let symbol = indexer.borrow().children[0].borrow().symbol;
 
                 if symbol == Grammer::NonTerminal(NonTerminal::Var) {
-                    if let Type::Number(num) = typ {
+                    if let Type::Number(num) = t {
                         if num != Number::N {
-                            println!("Error: type of var indexer must be Number");
-                            std::process::exit(1);
+                            error(&format!("Type of var indexer must be Number"));
                         }
                     } else {
-                        println!("Error: type of var indexer must be Number");
-                        std::process::exit(1);
+                        error(&format!("Type of var indexer must be Number"));
                     }
                 } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
-                    if let Type::Number(num) = typ {
+                    if let Type::Number(num) = t {
                         if num != Number::NN {
-                            println!("Error: type of const indexer must be non-negative Number");
-                            std::process::exit(1);
+                            error(&format!("Type of const indexer must be non-negative Number"));
                         }
                     } else {
-                        println!("Error: type of const indexer must be non-negative Number");
-                        std::process::exit(1);
+                        error(&format!("Type of const indexer must be non-negative Number"));
                     }
                 }
 
                 self.scope.borrow_mut().add_type(name, typ, true);
             } else {
                 self.scope.borrow_mut().add_type(name, typ, false);
+            }
+        } else if child1.symbol == Grammer::Terminal(Terminal::Out) {
+            let typ = self.expr_type(&children[2]);
+
+            match typ {
+                Type::Number(_) => (),
+                Type::String => (),
+                Type::Mixed => (),
+                Type::Boolean(_) => error("Output cannot be of type boolean"),
+                Type::Unknown => error("Output cannot be of type Unknown"),
             }
         }
     }
@@ -138,10 +218,11 @@ impl TypeChecker {
 
         match sym {
             Grammer::Terminal(t) => match t {
-                Terminal::UserDefined => self.udn_type(kind),
+                Terminal::UserDefined => self.udn_type(node),
                 _ => panic!("Should never get here expr_type terminal"),
             }, 
             Grammer::NonTerminal(nt) => match nt {
+                NonTerminal::Var => self.udn_type(kind),
                 NonTerminal::Const => self.const_type(kind),
                 NonTerminal::UnOp => self.un_op_type(kind),
                 NonTerminal::BinOp => self.bin_op_type(kind),
@@ -150,14 +231,72 @@ impl TypeChecker {
         }
     }
 
+    fn check_arr_valid(&self, node: &LNode) {
+        let indexer = &node;
+        let t = self.expr_type(indexer);
+        let symbol = indexer.borrow().children[0].borrow().symbol;
+
+        if symbol == Grammer::NonTerminal(NonTerminal::Var) {
+            if let Type::Number(num) = t {
+                if num != Number::N {
+                    error(&format!("Type of var indexer must be Number"));
+                }
+            } else {
+                error(&format!("Type of var indexer must be Number"));
+            }
+        } else if symbol == Grammer::NonTerminal(NonTerminal::Const) {
+            if let Type::Number(num) = t {
+                if num != Number::NN {
+                    error(&format!("Type of const indexer must be non-negative Number"));
+                }
+            } else {
+                error(&format!("Type of const indexer must be non-negative Number"));
+            }
+        }
+    }
+
+    fn array(&self, node: &LNode) -> Option<LNode> {
+        if node.borrow().children.is_empty() {
+            None
+        } else {
+            Some(Rc::clone(&node.borrow().children[1]))
+        }
+    }
+
     fn udn_type(&self, node: &LNode) -> Type {
-        let name = node.borrow();
+        let child = &node.borrow();
+
+        let var = if node.borrow().children.is_empty() {
+            node
+        } else {
+            &child.children[0]
+        };
+
+        let name = var.borrow();
         let name = name.str_value.as_ref().unwrap();
 
         let scope_info = self.scope.borrow();
-        let scope_info = scope_info.exist_up(name);
+        let scope_info = if node.borrow().children.len() > 1 {
+            if node.borrow().children[1].borrow().children.is_empty() {
+                scope_info.exist_up(name, false)
+            } else {
+                if let Some(n) = self.array(&node.borrow().children[1]) {
+                    self.check_arr_valid(&n);
+                    scope_info.exist_up(name, true)
+                } else {
+                    error(&format!("No index provided for array {} at {}", name, var.borrow().pos.unwrap()));
+                    None
+                }
+            }
+        } else {
+            scope_info.exist_up(name, false)
+        };
 
         if let Some(si) = scope_info {
+            if !si.is_defined {
+                error(&format!("{} has not been assigned to.", name));
+            }
+
             si.data_type
         } else {
             panic!("Should never get here udn_type");
@@ -218,6 +357,10 @@ impl TypeChecker {
                     (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
                     _ => Self::incompatible(type1, type2),
                 },
+                Terminal::Larger => match (type1, type2) {
+                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
+                    _ => Self::incompatible(type1, type2),
+                },
                 _ => panic!("bin_op_type should not get here terminal"),
             },
             Grammer::NonTerminal(_) => panic!("bin_op_type should not get here nonterminal"), // should never get here
@@ -225,13 +368,13 @@ impl TypeChecker {
     }
 
     fn incompatible(t1: Type, t2: Type) -> Type {
-        println!("Error: incompatible types {} and {}", t1, t2);
-        std::process::exit(1);
+        error(&format!("Incompatible types {} and {}", t1, t2));
+        Type::Unknown
     }
 
     fn bad_type(t: Type) -> Type {
-        println!("Error: bade type {} on unary operator", t);
-        std::process::exit(1);
+        error(&format!("Bad type {} on unary operator", t));
+        Type::Unknown
     }
 
     // pass in const to get type
@@ -261,7 +404,9 @@ impl TypeChecker {
 
     fn enter(&mut self, name: &str) {
         let child = self.scope.borrow().child_scope(name);
-        self.scope = child;
+        if let Some(c) = child {
+            self.scope = c;
+        }
     }
     
     fn exit(&mut self) {

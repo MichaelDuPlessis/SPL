@@ -1,23 +1,13 @@
-proc 2test {
-    proc test2 {
-        proc test3 {
-            return;
-        },
-        return;
-    },
+proc test {
 
-    b := 7;
+    test := 7;
     return;
-
-    bool var;
 },
-
 main {
-    b[b] := true;
-
     call test;
+    test[test] := test;
     
     halt;
-    arr bool[10] b;
-    num b;
+    num test;
+    arr num[7] test;
 }

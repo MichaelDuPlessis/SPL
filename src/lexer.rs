@@ -1,5 +1,5 @@
-use std::{str::Chars, iter::Peekable, process::exit, mem};
-use crate::{grammer::{Terminal}, token::*};
+use std::{str::Chars, iter::Peekable, mem};
+use crate::{grammer::{Terminal}, token::*, error::error};
 
 const FILLER: [char; 4] = ['\n', ' ', '\r', '\t']; // holds all chars that can be ignored
 
@@ -88,10 +88,7 @@ impl<'a> Lexer<'a> {
                         self.next();
                     },
                     // Invalid token
-                    _ => {
-                        println!("Invalid character {} at {}", character, self.current_pos);
-                        exit(1);
-                    },
+                    _ => error(&format!("Invalid character {} at {}", character, self.current_pos)),
                 }
             } else { // if no more tokens than return what has been found
                 let mut temp = Vec::new();
@@ -108,14 +105,12 @@ impl<'a> Lexer<'a> {
 
         if let Some(current_char) = self.next() {
             if current_char != '=' {
-                println!("Invalid character {} at {}", current_char, self.current_pos);
-                exit(1);
+                error(&format!("Invalid character {} at {}", current_char, self.current_pos));
             }
 
             self.tokens.push(Token::new_struct_token(Terminal::Assignment, token_pos));
         } else {
-            println!("End of file reached before token could be completed");
-            exit(1);
+            error(&format!("End of file reached before token could be completed"));
         }
     }
 
@@ -134,21 +129,18 @@ impl<'a> Lexer<'a> {
             }
 
             if length >= 15 {
-                println!("Max length of short string exceeded at {}", self.current_pos);
-                exit(1);
+                error(&format!("Max length of short string exceeded at {}", self.current_pos));
             }
 
             if valid_chars.contains(&current_char) {
                 length += 1;
                 self.current_token.push(current_char);
             } else {
-                println!("Invalid character {} at {}", current_char, self.current_pos);
-                exit(1);
+                error(&format!("Invalid character {} at {}", current_char, self.current_pos));
             }
         }
 
-        println!("Short string started here {} but never closed", token_pos);
-        exit(1);
+        error(&format!("Short string started here {} but never closed", token_pos));
     }
 
     // checking if number
@@ -160,9 +152,7 @@ impl<'a> Lexer<'a> {
             if let Some(next_char) = self.peek() {
                 let next_char = *next_char;
                 if !FILLER.contains(&next_char) && next_char != ',' && next_char != ')' && next_char != ';' && next_char != ']' {
-                    println!("{}", next_char);
-                    println!("Invalid token {} at {}", next_char, self.current_pos);
-                    exit(1);
+                    error(&format!("Invalid token {} at {}", next_char, self.current_pos));
                 }
             }
             self.tokens.push(Token::new_num_token(Terminal::Number, token_pos, self.current_token.parse().unwrap())); // can unwrap cause we know its just zero
@@ -173,16 +163,14 @@ impl<'a> Lexer<'a> {
             match self.next() {
                 Some(current_char) => {
                     if !('1'..':').contains(&current_char) {
-                        println!("Invalid symbol {} afer - at {}", current_char, token_pos);
-                        exit(1);
+                        error(&format!("Invalid symbol {} afer - at {}", current_char, token_pos));
                     }
 
                     
                     self.current_token.push(current_char);
                 },
                 None => {
-                    println!("Missing number afer - at {}", token_pos);
-                    exit(1);
+                    error(&format!("Missing number after - at {}", token_pos));
                 },
             }
         }
@@ -198,8 +186,7 @@ impl<'a> Lexer<'a> {
             if ('0'..':').contains(&current_char) {
                 self.current_token.push(current_char); // can unwrap cause we know its just zeros
             } else {
-                println!("Invalid symbol {} at {}", current_char, token_pos);
-                exit(1);
+                error(&format!("Invalid symbol {} at {}", current_char, token_pos));
             }
 
             self.next();

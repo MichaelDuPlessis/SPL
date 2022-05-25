@@ -127,4 +127,20 @@ impl Node {
             self.children.push(Rc::clone(c));
         }
     }
+
+    pub fn find(&self, id: usize, node: &LNode) -> Option<LNode> {
+        if node.borrow().id == id {
+            return Some(Rc::clone(node));
+        }
+
+        for c in &node.borrow().children {
+            if let Some(n) = self.find(id, c) {
+                if n.borrow().id == id {
+                    return Some(Rc::clone(&n));
+                }
+            }
+        }
+
+        None
+    }
 }

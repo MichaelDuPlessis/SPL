@@ -1,5 +1,5 @@
-use std::{cell::RefCell, rc::Rc, collections::{HashMap, LinkedList}, fmt::{Debug}};
-use crate::{token::{LNode}, grammer::{Terminal, Grammer, Type, Number, Boolean}};
+use std::{cell::RefCell, rc::Rc, collections::{HashMap, LinkedList}, fmt::{Debug}, fs::File, io::Write};
+use crate::{token::LNode, grammer::{Terminal, Grammer, Type, Number, Boolean}, error::error};
 
 pub struct ScopeAnalysis {
     head: LNode,
@@ -34,17 +34,16 @@ impl ScopeAnalysis {
     pub fn scope(&mut self) -> ScopeNode {
         // builds the scope tree
         self.analysis(Rc::clone(&self.head));
-        // println!("{:?}", self.scope);
-
+        
         self.return_found = false;
         self.proc_found = false;
-
+        
         // // checks the scope tree
         self.check_scope(Rc::clone(&self.head));
+        // println!("{:?}", self.scope);
 
         if !self.all_used() {
-            println!("Not all variables and procedures used");
-            std::process::exit(1);
+            error(&format!("Not all variables and procedures used"));
         }
 
         Rc::clone(&self.current_scope)
@@ -66,9 +65,8 @@ impl ScopeAnalysis {
                         }
 
                         if self.call_found {
-                            if self.exist_up(name).is_none() {
-                                println!("Error: proc call {} at {} is not defined.", name, pos);
-                                std::process::exit(1);
+                            if self.exist_proc(name).is_none() {
+                                error(&format!("proc call {} at {} is not defined.", name, pos));
                             }
 
                             self.used(name, true, false);
@@ -76,25 +74,32 @@ impl ScopeAnalysis {
                             continue;
                         }
 
-                        if let Some(si) = self.exist_up(name) {
-                            if si.is_proc {
-                                println!("Error: var {} at {} is not defined.", name, pos);
-                                std::process::exit(1); 
-                            }
-                            if !self.return_found && !self.halt_found {
-                                if node.borrow().children.len() > i + 1 &&
-                                node.borrow().children[i+1].borrow().children.is_empty() {
-                                    self.used(name, false, false);
+                        if !self.return_found && !self.halt_found {
+                            if node.borrow().children.len() > i + 1 {
+                                if node.borrow().children[i+1].borrow().children.is_empty() {
+                                    if let Some(_) = self.exist_up(name, false) {
+                                        self.used(name, false, false);
+                                        continue;
+                                    }  else {
+                                        error(&format!("var {} at {} is not defined.", name, pos));
+                                    }
                                 } else {
-                                    self.used(name, false, true);
+                                    if let Some(_) = self.exist_up(name, true) {
+                                        self.used(name, false, true);
+                                        continue;
+                                    } else {
+                                        error(&format!("var {} at {} is not defined.", name, pos));
+                                    }
+                                }
+                            } else {
+                                if let Some(_) = self.exist_up(name, false) {
+                                    self.used(name, false, false);
+                                    continue;
+                                } else {
+                                    error(&format!("var {} at {} is not defined.", name, pos));
                                 }
                             }
-
-                            continue;
                         }
-
-                        println!("Error: var {} at {} is not defined.", name, pos);
-                        std::process::exit(1); 
                     },
                     Terminal::Call => self.call_found = true,
                     Terminal::Proc => self.proc_found = true,
@@ -133,40 +138,38 @@ impl ScopeAnalysis {
                         let name = c.borrow().str_value.as_ref().unwrap().clone();
 
                         // adding data types
-                        let mut node: ScopeInfo = Default::default();
+                        let mut scope_info: ScopeInfo = Default::default();
 
                         if self.proc_found {
-                            if let Some(si) = self.exist_up(&name) {
+                            if let Some(si) = self.exist_proc(&name) {
                                 if si.is_proc {
-                                    println!("Error: proc {} at {} already defined.", name, c.borrow().pos.unwrap());
-                                    std::process::exit(1);
+                                    error(&format!("proc {} at {} already defined.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
                             if let Some(si) = self.exist_down(&name) {
                                 if si.is_proc {
-                                    println!("Error: proc {} at {} already defined in same scope.", name, c.borrow().pos.unwrap());
-                                    std::process::exit(1);
+                                    error(&format!("proc {} at {} already defined in same scope.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
-                            node.is_proc = true;
-                            self.bind(name.clone(), node);
+                            scope_info.node_id = node.borrow().id;
+                            scope_info.is_proc = true;
+                            self.bind(name.clone(), scope_info);
 
                             self.enter_new(name);
                         } else if let Some(typ) = self.type_found {
-                            if let Some(si) = self.find_in_scope(&name) {
+                            if let Some(si) = self.exist_up(&name, false) {
                                 if self.array_found == si.is_array {
-                                    println!("Error: var {} at {} already defined.", name, c.borrow().pos.unwrap());
-                                    std::process::exit(1);
+                                    error(&format!("var {} at {} already defined.", name, c.borrow().pos.unwrap()));
                                 }
                             }
 
-                            node.is_array = self.array_found;
+                            scope_info.is_array = self.array_found;
+                            scope_info.node_id = c.borrow().id;
+                            scope_info.data_type = typ;
 
-                            node.data_type = typ;
-
-                            self.bind(name, node);
+                            self.bind(name, scope_info);
                         }
 
                         self.array_found = false;
@@ -186,6 +189,56 @@ impl ScopeAnalysis {
                 Grammer::NonTerminal(_) => self.analysis(Rc::clone(c)),
             }
         }
+    }
+
+    pub fn create_table(node: ScopeNode) {
+        let mut file = File::create("./scope_type.txt").unwrap();
+
+        let node = node.borrow();
+        let scope_id = node.scope_id;
+        let mut this_scope = format!("Start of Scope {}\n\n", scope_id);
+        
+        this_scope = format!("{}{:8}\t{:8}\t{:8}\t{:8}\t{:8}\n", this_scope, "name", "node_id", "type", "is_array", "is_proc");
+        for (name, si) in &node.vtable {
+            if si.is_proc {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, "N/A", "N/A", true);
+            } else {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, si.data_type.to_string(), si.is_array, "N/A");
+            }
+        }
+
+        this_scope = format!("{}\nEnd of Scope {}\n\n", this_scope, scope_id);
+
+        for c in &node.children {
+            this_scope = format!("{}{}", this_scope, Self::_create_table(Rc::clone(c)));
+        }
+
+        file.write_all(this_scope.as_bytes()).unwrap();
+    }
+
+    fn _create_table(node: ScopeNode) -> String {
+        let node = node.borrow();
+        let scope_id = node.scope_id;
+        let mut this_scope = format!("Start of Scope {}\n\n", scope_id);
+
+        // printing current values
+        this_scope = format!("{}{:8}\t{:8}\t{:8}\t{:8}\t{:8}\n", this_scope, "name", "node_id", "type", "is_array", "is_proc");
+        for (name, si) in &node.vtable {
+            if si.is_proc {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, "N/A", "N/A", true);
+            } else {
+                this_scope = format!("{}{:8}\t{:<8}\t{:8}\t{:8}\t{:8}\n", this_scope, name, si.node_id, si.data_type.to_string(), si.is_array, "N/A");
+            }
+        }
+
+        this_scope = format!("{}\nEnd of Scope {}\n\n", this_scope, scope_id);
+
+        // printing children scopes
+        for c in &node.children {
+            this_scope = format!("{}{}", this_scope, Self::_create_table(Rc::clone(c)));
+        }
+
+        this_scope
     }
 
     fn enter(&mut self, name: &str) {
@@ -210,10 +263,6 @@ impl ScopeAnalysis {
         RefCell::borrow_mut(&self.current_scope).bind(name, node);
     }
 
-    // fn lookup(&self, name: &str) -> Option<ScopeInfo> {
-    //     self.scope.borrow().lookup(name)
-    // }
-
     fn next_id(&mut self) -> usize {
         self.current_id += 1;
         self.current_id
@@ -223,12 +272,12 @@ impl ScopeAnalysis {
         self.current_scope.borrow().exist_down(name)
     }
 
-    fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
-        self.current_scope.borrow().exist_up(name)
+    fn exist_up(&self, name: &str, arr: bool) -> Option<ScopeInfo> {
+        self.current_scope.borrow().exist_up(name, arr)
     }
 
-    fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
-        self.current_scope.borrow().find_in_scope(name)
+    fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
+        self.current_scope.borrow().exist_proc(name)
     }
 
     fn used(&self, name: &str, call: bool, arr: bool) {
@@ -243,11 +292,11 @@ impl ScopeAnalysis {
 pub type ScopeNode = Rc<RefCell<Scope>>;
 
 pub struct Scope {
-    scope_id: usize,
+    pub scope_id: usize,
     scope_map: HashMap<String, usize>,
-    vtable: LinkedList<(String, ScopeInfo)>,
+    pub vtable: LinkedList<(String, ScopeInfo)>,
     parent: Option<ScopeNode>,
-    children: Vec<ScopeNode>,
+    pub children: Vec<ScopeNode>,
 }
 
 impl Scope {
@@ -264,58 +313,63 @@ impl Scope {
         self.vtable.push_front((name, node));
     }
 
-    // fn lookup(&self, name: &str) -> Option<ScopeInfo> {
-    //     // let mut node = self.vtable.get(name).map(|opt| *opt);
-    //     let mut node = self.vtable.iter().find(|i| i.0 == name);
-
-    //     if node.is_none() {
-    //         node = if let Some(p) = &self.parent { p.borrow().lookup(name) } else { None }
-    //     }
-
-    //     node
-    // }
-
-    fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
-        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+    // only use for procs
+    pub fn exist_down(&self, name: &str) -> Option<ScopeInfo> {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name && i.1.is_proc == true) {
             return Some(si.1);
         }
 
         for c in &self.children {
-            if let Some(si) = c.borrow().exist_down(name) {
-                return Some(si);
+            if let Some(_) = c.borrow().exist_down(name) {
+                if let Some(si) = c.borrow().vtable.iter().find(|i| i.0 == name) {
+                    return Some(si.1);
+                }
             }
         }
 
         None
     }
 
-    pub fn exist_up(&self, name: &str) -> Option<ScopeInfo> {
-        if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
+    // used for vars
+    pub fn exist_up(&self, name: &str, arr: bool) -> Option<ScopeInfo> {
+        if let Some(si) = self.vtable.iter().find(|i| i.0 == name && i.1.is_array == arr && i.1.is_proc == false) {
             return Some(si.1);
         }
 
         if let Some(parent) = &self.parent {
-            return parent.borrow().exist_up(name);
+            return parent.borrow().exist_up(name, arr);
         }
 
         None
     }
 
-    fn find_in_scope(&self, name: &str) -> Option<ScopeInfo> {
+    // used for procs
+    pub fn exist_proc(&self, name: &str) -> Option<ScopeInfo> {
         if let Some(si) = self.vtable.iter().find(|i| i.0 == name) {
-            Some(si.1)
-        } else {
-            None
+            return Some(si.1);
         }
+
+        if let Some(parent) = &self.parent {
+            if let Some(si) = parent.borrow().vtable.iter().find(|i| i.0 == name) {
+                return Some(si.1);
+            }
+        }
+
+        None
     }
 
     fn scope_pos(&self, name: &str) -> usize {
         *self.scope_map.get(name).unwrap()
     }
 
-    pub fn child_scope(&self, name: &str) -> ScopeNode {
-        let pos = *self.scope_map.get(name).unwrap();
-        Rc::clone(&self.children[pos])
+    pub fn child_scope(&self, name: &str) -> Option<ScopeNode> {
+        match self.scope_map.get(name) {
+            Some(pos) => Some(Rc::clone(&self.children[*pos])),
+            None => None,
+        }
+
+        // let pos = *self.scope_map.get(name).unwrap();
+        // Rc::clone(&self.children[pos])
     }
 
     fn add_scope(&mut self, child: ScopeNode, name: String) {
@@ -367,8 +421,7 @@ impl Scope {
             }
 
             if si.data_type != t {
-                println!("Error: Cannot assign {} to {}", t, si.data_type);
-                std::process::exit(1);
+                error(&format!("Cannot assign {} to {}", t, si.data_type));
             }
 
             si.data_type = match t {
@@ -385,7 +438,14 @@ impl Scope {
         let mut curr = Rc::clone(self.parent.as_ref().unwrap());
         loop {
             if let Some((_, si)) = RefCell::borrow_mut(&curr).vtable.iter_mut().find(find) {
-                si.data_type = t;
+                si.data_type = match t {
+                    Type::Number(_) => Type::Number(Number::N),
+                    Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
+                    Type::String => Type::String,
+                    Type::Unknown => panic!("Should never get here add_type"),
+                    Type::Mixed => Type::Mixed,
+                };
+                
                 si.is_defined = true;
                 break;
             }
@@ -416,6 +476,7 @@ impl Debug for Scope {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ScopeInfo {
+    pub node_id: usize,
     pub data_type: Type,
     pub is_array: bool,
     pub is_proc: bool,
@@ -423,18 +484,10 @@ pub struct ScopeInfo {
     pub is_used: bool,
 }
 
-impl ScopeInfo {
-    fn new(data_type: Type) -> Self {
-        Self {
-            data_type,
-            ..Default::default()
-        }
-    }
-}
-
 impl Default for ScopeInfo {
     fn default() -> Self {
         Self {
+            node_id: 0,
             data_type: Type::Unknown,
             is_array: false,
             is_proc: false,
