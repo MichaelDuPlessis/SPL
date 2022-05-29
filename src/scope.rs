@@ -457,13 +457,18 @@ impl Scope {
         }
     }
 
-    pub fn get_gen_name(&self, name: &str) -> String {
-        let si = self.exist_up(name, false).unwrap();
+    pub fn get_gen_name(&self, name: &str, arr: bool) -> String {
+        let si = self.exist_up(name, arr); // fix later when arrays are added
 
-        if si.data_type == Type::String {
-            format!("{}{}$", name, self.scope_id)
+        if let Some(si) = si {
+            if si.data_type == Type::String {
+                format!("{}{}$", name, si.node_id)
+            } else {
+                format!("{}{}", name, si.node_id)
+            }
         } else {
-            format!("{}{}", name, self.scope_id)
+            let si = self.exist_proc(name).unwrap();
+            format!("{name}Proc{}", si.node_id)
         }
     }
 }

@@ -5,57 +5,46 @@
 	<LBrace id="3"/>
 	<Algorithm id="4">
 		<Instr id="9">
-			<Loop id="12">
-				<do id="13"/>
-				<LBrace id="14"/>
-				<Algorithm id="15">
-					<Instr id="21">
-						<Assign id="24">
-							<LHS id="25">
-								<userDefinedName id="28" value="x"/>
-								<VarField id="29">
-								</VarField>
-							</LHS>
-							<Assignment id="26"/>
-							<Expr id="27">
-								<Const id="30">
-									<num id="31" value="7"/>
-								</Const>
-							</Expr>
-						</Assign>
-					</Instr>
-					<Semicolon id="22"/>
-					<Algorithm id="23">
-						<Instr id="32">
-							<Assign id="35">
-								<LHS id="36">
-									<userDefinedName id="39" value="x"/>
-									<VarField id="40">
+			<Branch id="12">
+				<if id="13"/>
+				<LParentheses id="14"/>
+				<Expr id="15">
+					<Const id="22">
+						<false id="23"/>
+					</Const>
+				</Expr>
+				<RParentheses id="16"/>
+				<then id="17"/>
+				<LBrace id="18"/>
+				<Algorithm id="19">
+				</Algorithm>
+				<RBrace id="20"/>
+				<Alternat id="21">
+					<else id="24"/>
+					<LBrace id="25"/>
+					<Algorithm id="26">
+						<Instr id="28">
+							<Assign id="31">
+								<LHS id="32">
+									<userDefinedName id="35" value="x"/>
+									<VarField id="36">
 									</VarField>
 								</LHS>
-								<Assignment id="37"/>
-								<Expr id="38">
-									<Const id="41">
-										<num id="42" value="7"/>
+								<Assignment id="33"/>
+								<Expr id="34">
+									<Const id="37">
+										<num id="38" value="7"/>
 									</Const>
 								</Expr>
 							</Assign>
 						</Instr>
-						<Semicolon id="33"/>
-						<Algorithm id="34">
+						<Semicolon id="29"/>
+						<Algorithm id="30">
 						</Algorithm>
 					</Algorithm>
-				</Algorithm>
-				<RBrace id="16"/>
-				<until id="17"/>
-				<LParentheses id="18"/>
-				<Expr id="19">
-					<Const id="43">
-						<true id="44"/>
-					</Const>
-				</Expr>
-				<RParentheses id="20"/>
-			</Loop>
+					<RBrace id="27"/>
+				</Alternat>
+			</Branch>
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
@@ -64,16 +53,16 @@
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="45">
-			<TYP id="48">
-				<num id="50"/>
+		<Dec id="39">
+			<TYP id="42">
+				<num id="44"/>
 			</TYP>
-			<Var id="49">
-				<userDefinedName id="51" value="x"/>
+			<Var id="43">
+				<userDefinedName id="45" value="x"/>
 			</Var>
 		</Dec>
-		<Semicolon id="46"/>
-		<VarDecl id="47">
+		<Semicolon id="40"/>
+		<VarDecl id="41">
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>

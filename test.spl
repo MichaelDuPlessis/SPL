@@ -1,8 +1,9 @@
 main {
-    do {
-        x := 7;
-        x := 7;
-    } until (true);
+    if (false) then {
+
+    } else {
+      x := 7;
+    };
 
     halt;
     num x;

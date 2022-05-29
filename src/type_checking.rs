@@ -5,7 +5,6 @@ pub struct TypeChecker {
     scope: ScopeNode,
     ast: LNode,
     current_call: String,
-    input_found: bool,
 }
 
 impl TypeChecker {
@@ -14,7 +13,6 @@ impl TypeChecker {
             scope,
             ast,
             current_call: String::new(),
-            input_found: false,
         }
     }
 
@@ -382,7 +380,7 @@ impl TypeChecker {
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Larger => match (type1, type2) {
-                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
+                    (Type::Number(_), Type::Number(_)) => Type::Boolean(Boolean::Unknown),
                     _ => Self::incompatible(type1, type2),
                 },
                 _ => panic!("bin_op_type should not get here terminal"),
