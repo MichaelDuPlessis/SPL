@@ -30,7 +30,7 @@ impl TypeChecker {
         return Rc::clone(&self.scope);
     }
 
-    // if function completes tahn all vars defined
+    // if function completes than all vars defined
     fn check_defined(&self, node: ScopeNode) {
         let node = node.borrow();
         
@@ -109,6 +109,8 @@ impl TypeChecker {
                                 error(&format!("Call to {} not in scope", name));
                             }
                         }
+
+                        self.current_call = String::new();
 
                         self.exit();
                     }

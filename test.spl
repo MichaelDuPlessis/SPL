@@ -1,10 +1,16 @@
 main {
-    if (false) then {
+  x := not(true);
 
-    } else {
-      x := 7;
-    };
+  if (x) then {
+    output := "HELLO";
+  } else {
+    output := "BYE";
+  };
 
-    halt;
-    num x;
+  array[0] := "LORD HELP ME";
+
+  halt;
+
+  bool x;
+  arr string[10] array;
 }

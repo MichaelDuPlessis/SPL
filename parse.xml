@@ -5,64 +5,145 @@
 	<LBrace id="3"/>
 	<Algorithm id="4">
 		<Instr id="9">
-			<Branch id="12">
-				<if id="13"/>
-				<LParentheses id="14"/>
+			<Assign id="12">
+				<LHS id="13">
+					<userDefinedName id="16" value="x"/>
+					<VarField id="17">
+					</VarField>
+				</LHS>
+				<Assignment id="14"/>
 				<Expr id="15">
-					<Const id="22">
-						<false id="23"/>
-					</Const>
+					<UnOp id="18">
+						<not id="19"/>
+						<LParentheses id="20"/>
+						<Expr id="21">
+							<Const id="23">
+								<true id="24"/>
+							</Const>
+						</Expr>
+						<RParentheses id="22"/>
+					</UnOp>
 				</Expr>
-				<RParentheses id="16"/>
-				<then id="17"/>
-				<LBrace id="18"/>
-				<Algorithm id="19">
-				</Algorithm>
-				<RBrace id="20"/>
-				<Alternat id="21">
-					<else id="24"/>
-					<LBrace id="25"/>
-					<Algorithm id="26">
-						<Instr id="28">
-							<Assign id="31">
-								<LHS id="32">
-									<userDefinedName id="35" value="x"/>
-									<VarField id="36">
-									</VarField>
+			</Assign>
+		</Instr>
+		<Semicolon id="10"/>
+		<Algorithm id="11">
+			<Instr id="25">
+				<Branch id="28">
+					<if id="29"/>
+					<LParentheses id="30"/>
+					<Expr id="31">
+						<userDefinedName id="38" value="x"/>
+						<VarField id="39">
+						</VarField>
+					</Expr>
+					<RParentheses id="32"/>
+					<then id="33"/>
+					<LBrace id="34"/>
+					<Algorithm id="35">
+						<Instr id="40">
+							<Assign id="43">
+								<LHS id="44">
+									<output id="47"/>
 								</LHS>
-								<Assignment id="33"/>
-								<Expr id="34">
-									<Const id="37">
-										<num id="38" value="7"/>
+								<Assignment id="45"/>
+								<Expr id="46">
+									<Const id="48">
+										<ShortString id="49" value="HELLO"/>
 									</Const>
 								</Expr>
 							</Assign>
 						</Instr>
-						<Semicolon id="29"/>
-						<Algorithm id="30">
+						<Semicolon id="41"/>
+						<Algorithm id="42">
 						</Algorithm>
 					</Algorithm>
-					<RBrace id="27"/>
-				</Alternat>
-			</Branch>
-		</Instr>
-		<Semicolon id="10"/>
-		<Algorithm id="11">
+					<RBrace id="36"/>
+					<Alternat id="37">
+						<else id="50"/>
+						<LBrace id="51"/>
+						<Algorithm id="52">
+							<Instr id="54">
+								<Assign id="57">
+									<LHS id="58">
+										<output id="61"/>
+									</LHS>
+									<Assignment id="59"/>
+									<Expr id="60">
+										<Const id="62">
+											<ShortString id="63" value="BYE"/>
+										</Const>
+									</Expr>
+								</Assign>
+							</Instr>
+							<Semicolon id="55"/>
+							<Algorithm id="56">
+							</Algorithm>
+						</Algorithm>
+						<RBrace id="53"/>
+					</Alternat>
+				</Branch>
+			</Instr>
+			<Semicolon id="26"/>
+			<Algorithm id="27">
+				<Instr id="64">
+					<Assign id="67">
+						<LHS id="68">
+							<userDefinedName id="71" value="array"/>
+							<VarField id="72">
+								<LBracket id="73"/>
+								<FType id="74">
+									<Const id="75">
+										<num id="77" value="0"/>
+									</Const>
+									<RBracket id="76"/>
+								</FType>
+							</VarField>
+						</LHS>
+						<Assignment id="69"/>
+						<Expr id="70">
+							<Const id="78">
+								<ShortString id="79" value="LORD HELP ME"/>
+							</Const>
+						</Expr>
+					</Assign>
+				</Instr>
+				<Semicolon id="65"/>
+				<Algorithm id="66">
+				</Algorithm>
+			</Algorithm>
 		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="39">
-			<TYP id="42">
-				<num id="44"/>
+		<Dec id="80">
+			<TYP id="83">
+				<bool id="85"/>
 			</TYP>
-			<Var id="43">
-				<userDefinedName id="45" value="x"/>
+			<Var id="84">
+				<userDefinedName id="86" value="x"/>
 			</Var>
 		</Dec>
-		<Semicolon id="40"/>
-		<VarDecl id="41">
+		<Semicolon id="81"/>
+		<VarDecl id="82">
+			<Dec id="87">
+				<arr id="90"/>
+				<TYP id="91">
+					<string id="96"/>
+				</TYP>
+				<LBracket id="92"/>
+				<Const id="93">
+					<num id="97" value="10"/>
+				</Const>
+				<RBracket id="94"/>
+				<Var id="95">
+					<userDefinedName id="98" value="array"/>
+				</Var>
+			</Dec>
+			<Semicolon id="88"/>
+			<VarDecl id="89">
+			</VarDecl>
 		</VarDecl>
 	</VarDecl>
 	<RBrace id="8"/>

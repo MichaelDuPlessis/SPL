@@ -1,14 +1,15 @@
-use std::{rc::Rc, fs::{File, self}, io::{Write, Seek}, collections::HashMap};
-
-use crate::{token::LNode, grammer::{Grammer, Terminal, NonTerminal, Type, Boolean}, scope::ScopeNode};
+use std::{rc::Rc, fs::{File, self}, io::Write, collections::HashMap};
+use crate::{token::LNode, grammer::{Grammer, Terminal, NonTerminal, Boolean}, scope::ScopeNode};
 
 pub struct Generator {
     ast: LNode,
     scope: ScopeNode,
     file: File,
     line_no: usize,
-    var_no: usize,
-    proc_pos: HashMap<String, usize>
+    var_no: u8,
+    var_letter: u8,
+    proc_pos: HashMap<String, usize>,
+    vname: HashMap<String, String>
 }
 
 impl Generator {
@@ -21,12 +22,16 @@ impl Generator {
             file,
             line_no: 10,
             var_no: 0,
+            var_letter: 0,
             proc_pos: HashMap::new(),
+            vname: HashMap::new(),
         }
     }
 
     pub fn generate(&mut self) {
-        self.write_line("replace");
+        self.gen_vars();
+
+        self.write_line("main");
         
         self._generate(Rc::clone(&self.ast));
         
@@ -35,8 +40,8 @@ impl Generator {
         // self.file.rewind().unwrap();
         // self.file.write(format!("10 goto {}\n", 0).as_bytes()).unwrap();
 
-        let temp = &fs::read_to_string("./out.bas").unwrap()[11..];
-        fs::write("./out.bas", format!("10 goto {}\n{}", self.proc_pos.get("main").unwrap(), temp)).unwrap();
+        let temp = &fs::read_to_string("./out.bas").unwrap();
+        fs::write("./out.bas", temp.replace("main", &format!("goto {}", self.proc_pos.get("main").unwrap().to_string()))).unwrap();
     }
     
     fn _generate(&mut self, node: LNode) {
@@ -68,6 +73,32 @@ impl Generator {
         }
     }
 
+    fn gen_vars(&mut self) {
+        let mut vars = String::new();
+
+        for (name, si) in &Rc::clone(&self.scope).borrow().vtable {
+            // let var_name = self.scope.borrow().get_gen_name(name, si.is_array);
+            let var_name = self.gen_var_name(name, si.is_array);
+            if si.is_array {
+                vars.push_str(&format!("DIM {var_name}({})\n", si.array_size));
+            } else {
+                vars.push_str(&format!("LET {var_name}\n"));
+            }
+        }
+
+        for v in vars.trim().split('\n') {
+            self.write_line(v);
+        }
+
+        for (name, si) in &Rc::clone(&self.scope).borrow().vtable {
+            if si.is_proc {
+                self.enter(name);
+                self.gen_vars();
+                self.exit();
+            }
+        }
+    }
+
     fn write_line(&mut self, line: &str) {
         let line_num = self.next_line();
         self.file.write_all(format!("{} {}\n", line_num, line).as_bytes()).unwrap();
@@ -80,9 +111,23 @@ impl Generator {
     }
 
     fn next_var(&mut self) -> String {
-        let v = format!("T{}", self.var_no);
+        let var_name = format!("{}{}", (self.var_letter % 26 + 65) as char, self.var_no % 10);
         self.var_no += 1;
-        return v;
+        self.var_letter = self.var_no/10;
+
+        var_name
+    }
+
+    fn gen_var_name(&mut self, name: &str, arr: bool) -> String {
+        let key = self.scope.borrow().get_gen_name(name, arr);
+        if let Some(n) = self.vname.get(&key) {
+            n.clone()
+        } else {
+            let val = self.next_var();
+            self.vname.insert(key, val.clone());
+
+            val
+        }
     }
 
     fn pd(&mut self, node: &LNode) {
@@ -96,12 +141,16 @@ impl Generator {
             self.pd(&children[3].borrow().children[0]);
         }
 
-        let gen_name = self.scope.borrow().get_gen_name(name, false);
+        // let gen_name = self.scope.borrow().get_gen_name(name, false);
+        let gen_name = self.gen_var_name(name, false);
         self.proc_pos.insert(gen_name, self.line_no);
         
         let algo = &children[4];
         let code = self.algorithm(algo);
-        self.write_line(&format!("{}\nreturn", code));
+        
+        for c in format!("{}\nreturn", code).split('\n') {
+            self.write_line(c);
+        }
 
         self.exit();
     }
@@ -149,7 +198,8 @@ impl Generator {
 
         self.enter(name);
 
-        let gen_name = self.scope.borrow().get_gen_name(name, false);
+        // let gen_name = self.scope.borrow().get_gen_name(name, false);
+        let gen_name = self.gen_var_name(name, false);
 
         self.exit();
 
@@ -169,7 +219,9 @@ impl Generator {
                     }
 
                     let expr = self.expression(&children[2]);
+                    self.line_no += 20;
                     let algo = self.algorithm(&children[6]);
+                    self.line_no -= 20;
                     let end_while = self.line_no + self.size_of_algo(&algo) + 40;
 
                     format!("if {expr} then {}\ngoto {}\n{algo}\ngoto {}", self.line_no + 20, end_while, self.line_no)
@@ -214,7 +266,7 @@ impl Generator {
         }
     }
 
-    fn assign(&self, node: &LNode) -> String {
+    fn assign(&mut self, node: &LNode) -> String {
         let children = &node.borrow().children;
         let lhs = children[0].borrow();
 
@@ -236,7 +288,8 @@ impl Generator {
             true
         };
 
-        let var_name = self.scope.borrow().get_gen_name(name, is_arr);
+        // let var_name = self.scope.borrow().get_gen_name(name, is_arr);
+        let var_name = self.gen_var_name(name, is_arr);
         
         // cause input is special
         if children[2].borrow().children[0].borrow().symbol == Grammer::NonTerminal(NonTerminal::UnOp) {
@@ -255,7 +308,7 @@ impl Generator {
         }
     }
 
-    fn expression(&self, node: &LNode) -> String {
+    fn expression(&mut self, node: &LNode) -> String {
         let child_node = &node.borrow().children[0];
         let grammer = child_node.borrow().symbol;
 
@@ -274,8 +327,8 @@ impl Generator {
                         true
                     };
             
-                    let var_name = self.scope.borrow().get_gen_name(name, is_arr);
-
+                    // let var_name = self.scope.borrow().get_gen_name(name, is_arr);
+                    let var_name = self.gen_var_name(name, is_arr);
 
                     if is_arr {
                         let indexer = self.expression(&var_field.children[1]);
@@ -287,7 +340,7 @@ impl Generator {
                 _ => panic!("Should not get here")
             },
             Grammer::NonTerminal(nt) => match nt {
-                NonTerminal::Var => self.scope.borrow().get_gen_name(child_node.borrow().children[0].borrow().str_value.as_ref().unwrap(), false),
+                NonTerminal::Var => self.gen_var_name(child_node.borrow().children[0].borrow().str_value.as_ref().unwrap(), false),
                 NonTerminal::Const => self.cnst(child_node),
                 NonTerminal::UnOp => self.unop(child_node),
                 NonTerminal::BinOp => self.binop(child_node),
@@ -296,14 +349,14 @@ impl Generator {
         }
     }
 
-    fn unop(&self, node: &LNode) -> String {
+    fn unop(&mut self, node: &LNode) -> String {
         let children = &node.borrow().children;
         let opp = children[0].borrow().symbol;
         let expr = self.expression(&children[2]);
 
         match opp {
             Grammer::Terminal(t) => match t {
-                Terminal::Not => format!("({} + 1) mod 2", expr),
+                Terminal::Not => format!("MOD(({} + 1), 2)", expr),
                 Terminal::Input => todo!(),
                 _ => panic!("Should not get here"),
             },
@@ -311,7 +364,7 @@ impl Generator {
         }
     }
 
-    fn binop(&self, node: &LNode) -> String {
+    fn binop(&mut self, node: &LNode) -> String {
         let children = &node.borrow().children;
         let opp = children[0].borrow().symbol;
         let expr1 = self.expression(&children[2]);
@@ -357,14 +410,14 @@ impl Generator {
         let grammer = child_node.borrow().symbol;
 
         match grammer {
-            Grammer::Terminal(t) => todo!(),
+            Grammer::Terminal(t) => Boolean::Unknown,
             Grammer::NonTerminal(nt) => match nt {
                 NonTerminal::Var => Boolean::Unknown,
                 NonTerminal::Const => match child_node.borrow().children[0].borrow().symbol {
                     Grammer::Terminal(t) => match t {
                         Terminal::True => Boolean::True,
                         Terminal::False => Boolean::False,
-                        _ => todo!(),
+                        _ => Boolean::Unknown,
                     },
                     _ => todo!(),
                 },

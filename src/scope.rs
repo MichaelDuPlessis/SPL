@@ -12,6 +12,7 @@ pub struct ScopeAnalysis {
     type_found: Option<Type>,
     call_found: bool,
     halt_found: bool,
+    array_size: usize,
 }
 
 impl ScopeAnalysis {
@@ -28,6 +29,7 @@ impl ScopeAnalysis {
             type_found: None,
             call_found: false,
             halt_found: false,
+            array_size: 0,
         }
     }
 
@@ -119,7 +121,7 @@ impl ScopeAnalysis {
     }
 
     fn analysis(&mut self, node: LNode) {
-        for c in &node.borrow().children {
+        for (pos, c) in node.borrow().children.iter().enumerate() {
             let symbol = c.borrow().symbol;
             match symbol {
                 Grammer::Terminal(t) => match t {
@@ -132,7 +134,10 @@ impl ScopeAnalysis {
                             self.type_found = Some(Type::String);
                         }
                     },
-                    Terminal::Array => self.array_found = true,
+                    Terminal::Array => {
+                        self.array_found = true;
+                        self.array_size = node.borrow().children[pos + 3].borrow().children[0].borrow().num_value.unwrap() as usize;
+                    },
                     Terminal::UserDefined => {
                         // name/key
                         let name = c.borrow().str_value.as_ref().unwrap().clone();
@@ -147,11 +152,11 @@ impl ScopeAnalysis {
                                 }
                             }
 
-                            if let Some(si) = self.exist_down(&name) {
-                                if si.is_proc {
-                                    error(&format!("proc {} at {} already defined in same scope.", name, c.borrow().pos.unwrap()));
-                                }
-                            }
+                            // if let Some(si) = self.exist_down(&name) {
+                            //     if si.is_proc {
+                            //         error(&format!("proc {} at {} already defined in same scope.", name, c.borrow().pos.unwrap()));
+                            //     }
+                            // }
 
                             scope_info.node_id = node.borrow().id;
                             scope_info.is_proc = true;
@@ -168,6 +173,10 @@ impl ScopeAnalysis {
                             scope_info.is_array = self.array_found;
                             scope_info.node_id = c.borrow().id;
                             scope_info.data_type = typ;
+
+                            if self.array_found {
+                                scope_info.array_size = self.array_size;
+                            }
 
                             self.bind(name, scope_info);
                         }
@@ -378,7 +387,12 @@ impl Scope {
     }
 
     pub fn parent(&self) -> ScopeNode {
-        Rc::clone(self.parent.as_ref().unwrap())
+        if let Some(parent) = self.parent.as_ref() {
+            Rc::clone(parent)
+        } else {
+            error("Procedure not defined in scope.");
+            panic!("cant get here");
+        }
     }
 
     fn used(&mut self, name: &str, call: bool, arr: bool) {
@@ -496,6 +510,7 @@ pub struct ScopeInfo {
     pub node_id: usize,
     pub data_type: Type,
     pub is_array: bool,
+    pub array_size: usize,
     pub is_proc: bool,
     pub is_defined: bool,
     pub is_used: bool,
@@ -507,6 +522,7 @@ impl Default for ScopeInfo {
             node_id: 0,
             data_type: Type::Unknown,
             is_array: false,
+            array_size: 0,
             is_proc: false,
             is_defined: false,
             is_used: false,
