@@ -482,7 +482,6 @@ impl Scope {
                 format!("{}{}", name, si.node_id)
             }
         } else {
-            println!("{:?}", self.vtable);
             let si = self.exist_proc(name).unwrap();
             format!("{name}Proc{}", si.node_id)
         }
