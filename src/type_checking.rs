@@ -5,7 +5,6 @@ pub struct TypeChecker {
     scope: ScopeNode,
     ast: LNode,
     current_call: String,
-    input_found: bool,
 }
 
 impl TypeChecker {
@@ -14,7 +13,6 @@ impl TypeChecker {
             scope,
             ast,
             current_call: String::new(),
-            input_found: false,
         }
     }
 
@@ -27,12 +25,12 @@ impl TypeChecker {
         // after anaylsis check to make sure each variable is defined
         self.check_defined(Rc::clone(&self.scope));
         
-        println!("{:?}", self.scope);
+        // println!("{:?}", self.scope);
 
         return Rc::clone(&self.scope);
     }
 
-    // if function completes tahn all vars defined
+    // if function completes than all vars defined
     fn check_defined(&self, node: ScopeNode) {
         let node = node.borrow();
         
@@ -111,6 +109,8 @@ impl TypeChecker {
                                 error(&format!("Call to {} not in scope", name));
                             }
                         }
+
+                        self.current_call = String::new();
 
                         self.exit();
                     }
@@ -382,7 +382,7 @@ impl TypeChecker {
                     _ => Self::incompatible(type1, type2),
                 },
                 Terminal::Larger => match (type1, type2) {
-                    (Type::Number(_), Type::Number(_)) => Type::Number(Number::N),
+                    (Type::Number(_), Type::Number(_)) => Type::Boolean(Boolean::Unknown),
                     _ => Self::incompatible(type1, type2),
                 },
                 _ => panic!("bin_op_type should not get here terminal"),

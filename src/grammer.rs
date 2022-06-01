@@ -240,6 +240,16 @@ pub enum Type {
     Mixed,
 }
 
+impl Type {
+    pub fn inner(&self) -> Boolean {
+        if let Type::Boolean(b) = self {
+            return *b;
+        }
+
+        Boolean::Unknown
+    }
+}
+
 impl PartialEq for Type {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
