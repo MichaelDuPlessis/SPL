@@ -1,10 +1,14 @@
-10 LET A0$ = ""
-20 LET A1$ = ""
-30 goto 40
-40 INPUT A1$
-50 if (A1$ = "YES") then 70
-60 goto 90
-70 PRINT "HELLO"
-80 goto 100
-90 PRINT "BYE"
-100 END
+10 DIM A0(7)
+20 LET A1 = 0
+30 
+40 
+50 goto 120
+60 
+70 return
+80 gosub 80
+90 gosub 60
+100 A1 = 7
+110 return
+120 gosub 80
+130 A0(7) = A1
+140 END

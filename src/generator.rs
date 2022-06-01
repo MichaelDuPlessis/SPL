@@ -78,14 +78,16 @@ impl Generator {
 
         for (name, si) in &Rc::clone(&self.scope).borrow().vtable {
             // let var_name = self.scope.borrow().get_gen_name(name, si.is_array);
-            let var_name = self.gen_var_name(name, si.is_array);
-            if si.is_array {
-                vars.push_str(&format!("DIM {var_name}({})\n", si.array_size));
-            } else {
-                if var_name.contains('$') {
-                    vars.push_str(&format!("LET {var_name} = \"\"\n"));
+            if !si.is_proc {
+                let var_name = self.gen_var_name(name, si.is_array);
+                if si.is_array {
+                    vars.push_str(&format!("DIM {var_name}({})\n", si.array_size));
                 } else {
-                    vars.push_str(&format!("LET {var_name} = 0\n"));
+                    if var_name.contains('$') {
+                        vars.push_str(&format!("LET {var_name} = \"\"\n"));
+                    } else {
+                        vars.push_str(&format!("LET {var_name} = 0\n"));
+                    }
                 }
             }
         }
@@ -208,12 +210,12 @@ impl Generator {
         let name = name.borrow();
         let name = name.str_value.as_ref().unwrap();
 
-        self.enter(name);
+        // self.enter(name);
 
         // let gen_name = self.scope.borrow().get_gen_name(name, false);
         let gen_name = self.gen_var_name(name, false);
 
-        self.exit();
+        // self.exit();
 
 
         format!("gosub {}", self.proc_pos.get(&gen_name).unwrap())
@@ -368,7 +370,7 @@ impl Generator {
 
         match opp {
             Grammer::Terminal(t) => match t {
-                Terminal::Not => format!("(({} + 1) % 2)", expr),
+                Terminal::Not => format!("(({} - 1) % 2)", expr),
                 Terminal::Input => todo!(),
                 _ => panic!("Should not get here"),
             },
@@ -389,8 +391,8 @@ impl Generator {
                 Terminal::Sub => format!("({} - {})", expr1, expr2),
                 Terminal::Equal => format!("({} = {})", expr1, expr2),
                 Terminal::Larger => format!("({} > {})", expr1, expr2),
-                Terminal::And => format!("(({} + {}) = 2)", expr1, expr2),
-                Terminal::Or => format!("(({} + {}) > 0)", expr1, expr2),
+                Terminal::And => format!("(({} + {}) = -2)", expr1, expr2),
+                Terminal::Or => format!("(({} + {}) < 0)", expr1, expr2),
                 _ => panic!("Should not get here"),
             },
             Grammer::NonTerminal(_) => panic!("should not get here"),
@@ -407,7 +409,7 @@ impl Generator {
                     num.to_string()
                 },
                 Terminal::ShortString => format!("\"{}\"", con.borrow().str_value.as_ref().unwrap()),
-                Terminal::True => "1".to_string(),
+                Terminal::True => "-1".to_string(),
                 Terminal::False => "0".to_string(),
                 _ => panic!("Should not get here"),
             },

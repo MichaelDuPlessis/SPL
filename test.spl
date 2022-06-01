@@ -1,0 +1,18 @@
+proc test {
+    proc test2 {
+        return;
+    },
+
+    call test;
+    call test2;
+	test := 7;
+    return;
+},
+main {
+    call test;
+    test[7] := test;
+    
+    halt;
+    num test;
+    arr num[7] test;
+}
