@@ -356,7 +356,7 @@ impl Generator {
 
         match opp {
             Grammer::Terminal(t) => match t {
-                Terminal::Not => format!("MOD(({} + 1), 2)", expr),
+                Terminal::Not => format!("(({} + 1) % 2)", expr),
                 Terminal::Input => todo!(),
                 _ => panic!("Should not get here"),
             },

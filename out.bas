@@ -1,11 +1,10 @@
-10 DIM A0(10)
+10 LET A0
 20 LET A1
 30 goto 40
-40 A1 = MOD((1 + 1), 2)
-50 if A1 then 70
+40 INPUT A1
+50 if (A1 = "YES") then 70
 60 goto 90
 70 PRINT "HELLO"
 80 goto 100
 90 PRINT "BYE"
-100 A0(0) = "LORD HELP ME"
-110 END
+100 END

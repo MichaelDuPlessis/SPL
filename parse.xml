@@ -7,20 +7,18 @@
 		<Instr id="9">
 			<Assign id="12">
 				<LHS id="13">
-					<userDefinedName id="16" value="x"/>
+					<userDefinedName id="16" value="in"/>
 					<VarField id="17">
 					</VarField>
 				</LHS>
 				<Assignment id="14"/>
 				<Expr id="15">
 					<UnOp id="18">
-						<not id="19"/>
+						<input id="19"/>
 						<LParentheses id="20"/>
-						<Expr id="21">
-							<Const id="23">
-								<true id="24"/>
-							</Const>
-						</Expr>
+						<Var id="21">
+							<userDefinedName id="23" value="useless"/>
+						</Var>
 						<RParentheses id="22"/>
 					</UnOp>
 				</Expr>
@@ -28,121 +26,103 @@
 		</Instr>
 		<Semicolon id="10"/>
 		<Algorithm id="11">
-			<Instr id="25">
-				<Branch id="28">
-					<if id="29"/>
-					<LParentheses id="30"/>
-					<Expr id="31">
-						<userDefinedName id="38" value="x"/>
-						<VarField id="39">
-						</VarField>
+			<Instr id="24">
+				<Branch id="27">
+					<if id="28"/>
+					<LParentheses id="29"/>
+					<Expr id="30">
+						<BinOp id="37">
+							<equal id="38"/>
+							<LParentheses id="39"/>
+							<Expr id="40">
+								<userDefinedName id="44" value="in"/>
+								<VarField id="45">
+								</VarField>
+							</Expr>
+							<Comma id="41"/>
+							<Expr id="42">
+								<Const id="46">
+									<ShortString id="47" value="YES"/>
+								</Const>
+							</Expr>
+							<RParentheses id="43"/>
+						</BinOp>
 					</Expr>
-					<RParentheses id="32"/>
-					<then id="33"/>
-					<LBrace id="34"/>
-					<Algorithm id="35">
-						<Instr id="40">
-							<Assign id="43">
-								<LHS id="44">
-									<output id="47"/>
+					<RParentheses id="31"/>
+					<then id="32"/>
+					<LBrace id="33"/>
+					<Algorithm id="34">
+						<Instr id="48">
+							<Assign id="51">
+								<LHS id="52">
+									<output id="55"/>
 								</LHS>
-								<Assignment id="45"/>
-								<Expr id="46">
-									<Const id="48">
-										<ShortString id="49" value="HELLO"/>
+								<Assignment id="53"/>
+								<Expr id="54">
+									<Const id="56">
+										<ShortString id="57" value="HELLO"/>
 									</Const>
 								</Expr>
 							</Assign>
 						</Instr>
-						<Semicolon id="41"/>
-						<Algorithm id="42">
+						<Semicolon id="49"/>
+						<Algorithm id="50">
 						</Algorithm>
 					</Algorithm>
-					<RBrace id="36"/>
-					<Alternat id="37">
-						<else id="50"/>
-						<LBrace id="51"/>
-						<Algorithm id="52">
-							<Instr id="54">
-								<Assign id="57">
-									<LHS id="58">
-										<output id="61"/>
+					<RBrace id="35"/>
+					<Alternat id="36">
+						<else id="58"/>
+						<LBrace id="59"/>
+						<Algorithm id="60">
+							<Instr id="62">
+								<Assign id="65">
+									<LHS id="66">
+										<output id="69"/>
 									</LHS>
-									<Assignment id="59"/>
-									<Expr id="60">
-										<Const id="62">
-											<ShortString id="63" value="BYE"/>
+									<Assignment id="67"/>
+									<Expr id="68">
+										<Const id="70">
+											<ShortString id="71" value="BYE"/>
 										</Const>
 									</Expr>
 								</Assign>
 							</Instr>
-							<Semicolon id="55"/>
-							<Algorithm id="56">
+							<Semicolon id="63"/>
+							<Algorithm id="64">
 							</Algorithm>
 						</Algorithm>
-						<RBrace id="53"/>
+						<RBrace id="61"/>
 					</Alternat>
 				</Branch>
 			</Instr>
-			<Semicolon id="26"/>
-			<Algorithm id="27">
-				<Instr id="64">
-					<Assign id="67">
-						<LHS id="68">
-							<userDefinedName id="71" value="array"/>
-							<VarField id="72">
-								<LBracket id="73"/>
-								<FType id="74">
-									<Const id="75">
-										<num id="77" value="0"/>
-									</Const>
-									<RBracket id="76"/>
-								</FType>
-							</VarField>
-						</LHS>
-						<Assignment id="69"/>
-						<Expr id="70">
-							<Const id="78">
-								<ShortString id="79" value="LORD HELP ME"/>
-							</Const>
-						</Expr>
-					</Assign>
-				</Instr>
-				<Semicolon id="65"/>
-				<Algorithm id="66">
-				</Algorithm>
+			<Semicolon id="25"/>
+			<Algorithm id="26">
 			</Algorithm>
 		</Algorithm>
 	</Algorithm>
 	<halt id="5"/>
 	<Semicolon id="6"/>
 	<VarDecl id="7">
-		<Dec id="80">
-			<TYP id="83">
-				<bool id="85"/>
+		<Dec id="72">
+			<TYP id="75">
+				<string id="77"/>
 			</TYP>
-			<Var id="84">
-				<userDefinedName id="86" value="x"/>
+			<Var id="76">
+				<userDefinedName id="78" value="in"/>
 			</Var>
 		</Dec>
-		<Semicolon id="81"/>
-		<VarDecl id="82">
-			<Dec id="87">
-				<arr id="90"/>
-				<TYP id="91">
-					<string id="96"/>
+		<Semicolon id="73"/>
+		<VarDecl id="74">
+			<Dec id="79">
+				<TYP id="82">
+					<string id="84"/>
 				</TYP>
-				<LBracket id="92"/>
-				<Const id="93">
-					<num id="97" value="10"/>
-				</Const>
-				<RBracket id="94"/>
-				<Var id="95">
-					<userDefinedName id="98" value="array"/>
+				<Var id="83">
+					<userDefinedName id="85" value="useless"/>
 				</Var>
 			</Dec>
-			<Semicolon id="88"/>
-			<VarDecl id="89">
+			<Semicolon id="80"/>
+			<VarDecl id="81">
 			</VarDecl>
 		</VarDecl>
 	</VarDecl>

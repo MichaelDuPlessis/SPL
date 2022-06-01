@@ -1,16 +1,15 @@
 main {
-  x := not(true);
+  in := input(useless);
 
-  if (x) then {
+  if (eq(in, "YES")) then {
     output := "HELLO";
   } else {
     output := "BYE";
   };
 
-  array[0] := "LORD HELP ME";
 
   halt;
 
-  bool x;
-  arr string[10] array;
+  string in;
+  string useless;
 }
