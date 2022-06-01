@@ -438,13 +438,13 @@ impl Scope {
                 error(&format!("Cannot assign {} to {}", t, si.data_type));
             }
 
-            si.data_type = match t {
-                Type::Number(_) => Type::Number(Number::N),
-                Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
-                Type::String => Type::String,
-                Type::Unknown => panic!("Should never get here add_type"),
-                Type::Mixed => Type::Mixed,
-            };
+            // si.data_type = match t {
+            //     Type::Number(_) => Type::Number(Number::N),
+            //     Type::Boolean(_) => Type::Boolean(Boolean::Unknown),
+            //     Type::String => Type::String,
+            //     Type::Unknown => panic!("Should never get here add_type"),
+            //     Type::Mixed => Type::Mixed,
+            // };
 
             si.is_defined = true;
 
@@ -475,6 +475,7 @@ impl Scope {
         let si = self.exist_up(name, arr); // fix later when arrays are added
 
         if let Some(si) = si {
+            // println!("{:?}", si);
             if si.data_type == Type::String {
                 format!("{}{}$", name, si.node_id)
             } else {

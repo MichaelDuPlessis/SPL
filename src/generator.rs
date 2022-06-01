@@ -82,7 +82,11 @@ impl Generator {
             if si.is_array {
                 vars.push_str(&format!("DIM {var_name}({})\n", si.array_size));
             } else {
-                vars.push_str(&format!("LET {var_name}\n"));
+                if var_name.contains('$') {
+                    vars.push_str(&format!("LET {var_name} = \"\"\n"));
+                } else {
+                    vars.push_str(&format!("LET {var_name} = 0\n"));
+                }
             }
         }
 
@@ -110,8 +114,12 @@ impl Generator {
         old
     }
 
-    fn next_var(&mut self) -> String {
-        let var_name = format!("{}{}", (self.var_letter % 26 + 65) as char, self.var_no % 10);
+    fn next_var(&mut self, arr: bool) -> String {
+        let var_name = if arr {
+            format!("{}{}$", (self.var_letter % 26 + 65) as char, self.var_no % 10)
+        } else {
+            format!("{}{}", (self.var_letter % 26 + 65) as char, self.var_no % 10)
+        };
         self.var_no += 1;
         self.var_letter = self.var_no/10;
 
@@ -123,7 +131,11 @@ impl Generator {
         if let Some(n) = self.vname.get(&key) {
             n.clone()
         } else {
-            let val = self.next_var();
+            let val = if key.contains('$') {
+                self.next_var(true)
+            } else {
+                self.next_var(false)
+            };
             self.vname.insert(key, val.clone());
 
             val
